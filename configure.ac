@@ -148,9 +148,14 @@ AC_SUBST(LIBDRM_VERSION)
 dnl Check for VA-API
 PKG_CHECK_MODULES(CMRT_DEPS,     [libva >= va_api_version])
 
+pkgconfigdir=${libdir}/pkgconfig
+AC_SUBST(pkgconfigdir)
+
 AC_OUTPUT([
     Makefile
     src/Makefile
+    pkgconfig/Makefile
+    pkgconfig/cmrt.pc
     ])
 
 # Print a small summary

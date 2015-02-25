@@ -101,12 +101,13 @@ cmrt_headers = \
 
 cmrt_la_LTLIBRARIES     = cmrt.la
 cmrt_ladir              = $(libdir)
+cmrtincludedir          = $(includedir)
 cmrt_la_CFLAGS          = $(cmrt_cflags)
 cmrt_la_CXXFLAGS        = -fpermissive $(cmrt_cflags)
 cmrt_la_LDFLAGS         = $(cmrt_ldflags)
 cmrt_la_LIBADD          = $(cmrt_libs)
 cmrt_la_SOURCES         = $(cmrt_files)
-cmrt_la_HEADERS         = $(cmrt_headers)
+cmrtinclude_HEADERS     = $(cmrt_headers)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in config.h.in

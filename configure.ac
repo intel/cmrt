@@ -18,7 +18,7 @@ m4_define([libdrm_version], [2.4.23])
 
 AC_PREREQ([2.57])
 AC_INIT([cmrt], [cmrt_version], [libva@lists.freedesktop.org],
-        [libva-intel-driver])
+        [libcmrt])
 AC_CONFIG_SRCDIR([Makefile.am])
 AM_INIT_AUTOMAKE([1.9 tar-ustar])
 

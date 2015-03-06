@@ -9,8 +9,6 @@ Please read the COPYING file available in this package.
 
 Overview
 --------
-License: MIT
-
 Target:
 One solution to expose Intel’s Gen GPU’s high performance through high
 level language.
@@ -34,5 +32,6 @@ General purpose GPU computing developers.
 Components: CM runtime engine.
 
 Tool Dependencies: CM language/compiler, and debugger/profiler.
+(See https://software.intel.com/en-us/c-compilers)
 
 Supported OS: Linux.

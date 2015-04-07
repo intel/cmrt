@@ -487,6 +487,19 @@ CM_RT_API INT
 		goto finish;
 	}
 
+	for (UINT i = 0; i < count; ++i) {
+		CmKernel *pKernelTmp = NULL;
+		CmThreadSpace *pTSTmp = NULL;
+		pKernelTmp = pKernelArray->GetKernelPointer(i);
+		CMCHK_NULL(pKernelTmp);
+		pKernelTmp->GetThreadSpace(pTSTmp);
+		CMCHK_NULL(pTSTmp);
+		if (pTSTmp->GetNeedSetKernelPointer()
+		    && pTSTmp->KernelPointerIsNULL()) {
+			pTSTmp->SetKernelPointer(pKernelTmp);
+		}
+	}
+
 	numTasks =
 	    (hints & CM_HINTS_MASK_NUM_TASKS) >> CM_HINTS_NUM_BITS_TASK_POS;
 	if (numTasks > 1) {

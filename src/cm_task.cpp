@@ -206,10 +206,19 @@ BOOLEAN CmTask::IntegrityCheckKernelThreadspace(void)
 				    static_cast <
 				    CmKernel * >(pThreadSpaceUnit[j].pKernel);
 				if (pKernTmp == NULL) {
-					CM_ASSERT(0);
-					CmSafeDeleteArray(pTSMapping[i]);
-					hr = CM_FAILURE;
-					goto finish;
+					if (pKernelTS->GetNeedSetKernelPointer
+					    ()) {
+						pKernTmp =
+						    pKernelTS->GetKernelPointer
+						    ();
+					}
+					if (pKernTmp == NULL) {
+						CM_ASSERT(0);
+						CmSafeDeleteArray(pTSMapping
+								  [i]);
+						hr = CM_FAILURE;
+						goto finish;
+					}
 				}
 
 				kernelIndex = pKernTmp->GetIndexInTask();

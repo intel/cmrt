@@ -316,6 +316,44 @@ CM_RT_API INT
 		m_Wavefront26ZDispatchInfo.pNumThreadsInWave =
 		    (PUINT) GENOS_AllocAndZeroMemory(sizeof(UINT) * m_Width *
 						     m_Height);
+		if (m_pThreadSpaceUnit == NULL) {
+			m_pThreadSpaceUnit =
+			    new(std::nothrow) CM_THREAD_SPACE_UNIT[m_Height *
+								   m_Width];
+			if (m_pThreadSpaceUnit) {
+				CmSafeMemSet(m_pThreadSpaceUnit, 0,
+					     sizeof(CM_THREAD_SPACE_UNIT) *
+					     m_Height * m_Width);
+			} else {
+				return CM_OUT_OF_HOST_MEMORY;
+			}
+			UINT threadId = 0;
+			UINT linear_offset = 0;
+			for (UINT y = 0; y < m_Height; ++y) {
+				for (UINT x = 0; x < m_Width; ++x) {
+					linear_offset = y * m_Width + x;
+					m_pThreadSpaceUnit
+					    [linear_offset].threadId =
+					    threadId++;
+					m_pThreadSpaceUnit
+					    [linear_offset].scoreboardCoordinates.
+					    x = x;
+					m_pThreadSpaceUnit
+					    [linear_offset].scoreboardCoordinates.
+					    y = y;
+					m_pThreadSpaceUnit
+					    [linear_offset].dependencyMask =
+					    (1 << Wavefront26ZPattern.count) -
+					    1;
+					m_pThreadSpaceUnit[linear_offset].reset
+					    = CM_NO_BATCH_BUFFER_REUSE;
+				}
+			}
+
+			*m_pDirtyStatus = CM_THREAD_SPACE_DATA_DIRTY;
+			m_ThreadAssociated = TRUE;
+			m_NeedSetKernelPointer = TRUE;
+		}
 		break;
 
 	case CM_DEPENDENCY_WAVEFRONT26ZI:

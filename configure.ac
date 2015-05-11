@@ -146,7 +146,16 @@ PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
 AC_SUBST(LIBDRM_VERSION)
 
 dnl Check for VA-API
-PKG_CHECK_MODULES(CMRT_DEPS,     [libva >= va_api_version])
+PKG_CHECK_MODULES(LIBVA_DEPS,     [libva >= va_api_version])
+
+dnl Check for VA-API drivers path
+AC_MSG_CHECKING([for VA drivers path])
+LIBVA_DRIVERS_PATH=`$PKG_CONFIG libva --variable driverdir`
+if test -z "$LIBVA_DRIVERS_PATH"; then
+    LIBVA_DRIVERS_PATH="/usr/lib/xorg/modules/drivers"
+fi
+AC_MSG_RESULT([$LIBVA_DRIVERS_PATH])
+AC_SUBST(LIBVA_DRIVERS_PATH)
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)

@@ -291,6 +291,10 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 			CISAGenID = GENX_BDW;
 		}
 		break;
+	case IGFX_GEN9_CORE:
+		platform = "SKL";
+		CISAGenID = GENX_SKL;
+		break;
 	default:
 		m_IsJitterEnabled = false;
 	}
@@ -316,7 +320,7 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 			&& jitMinor < m_CISA_minorVersion))
 			return CM_JITDLL_OLDER_THAN_ISA;
 
-		if (genid == IGFX_GEN8_CORE) {
+		if (genid == IGFX_GEN8_CORE || genid == IGFX_GEN9_CORE) {
 			char *stepstr = NULL;
 			m_pCmDev->GetGenStepInfo(genid, stepstr);
 			if (stepstr != NULL) {

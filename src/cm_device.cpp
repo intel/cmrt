@@ -1196,7 +1196,12 @@ CM_RT_API INT
 					platform = PLATFORM_INTEL_BDW;
 				}
 				break;
+
+			case IGFX_GEN9_CORE:
+				platform = PLATFORM_INTEL_SKL;
+				break;
 			}
+
 			CmSafeMemCopy(pCapValue, &platform, capValueSize);
 			return CM_SUCCESS;
 		} else {
@@ -1744,22 +1749,51 @@ BOOL CmDevice::IsSurfaceReuseEnabled()
 
 UINT CmDevice::ValidSurfaceIndexStart()
 {
-	return (CM_NULL_SURFACE_BINDING_INDEX + 1);
+	UINT genid;
+	GetGenPlatform(genid);
+
+	if (genid >= IGFX_GEN9_CORE) {
+		return (CM_GLOBAL_SURFACE_INDEX_START_GEN9_PLUS +
+			CM_GLOBAL_SURFACE_NUMBER);
+	} else {
+		return (CM_NULL_SURFACE_BINDING_INDEX + 1);
+	}
 }
 
 UINT CmDevice::MaxIndirectSurfaceCount()
 {
-	return (GT_RESERVED_INDEX_START - CM_GLOBAL_SURFACE_NUMBER - 1);
+	UINT genid;
+	GetGenPlatform(genid);
+
+	if (genid >= IGFX_GEN9_CORE) {
+		return (GT_RESERVED_INDEX_START_GEN9_PLUS -
+			CM_GLOBAL_SURFACE_NUMBER - 1);
+	} else {
+		return (GT_RESERVED_INDEX_START - CM_GLOBAL_SURFACE_NUMBER - 1);
+	}
 }
 
 BOOL CmDevice::IsCmReservedSurfaceIndex(UINT surfBTI)
 {
-	if (surfBTI >= CM_GLOBAL_SURFACE_INDEX_START
-	    && surfBTI <
-	    (CM_GLOBAL_SURFACE_INDEX_START + CM_GLOBAL_SURFACE_NUMBER))
-		return TRUE;
-	else
-		return FALSE;
+	UINT genid;
+	GetGenPlatform(genid);
+
+	if (genid >= IGFX_GEN9_CORE) {
+		if (surfBTI >= CM_GLOBAL_SURFACE_INDEX_START_GEN9_PLUS
+		    && surfBTI <
+		    (CM_GLOBAL_SURFACE_INDEX_START_GEN9_PLUS +
+		     CM_GLOBAL_SURFACE_NUMBER))
+			return TRUE;
+		else
+			return FALSE;
+	} else {
+		if (surfBTI >= CM_GLOBAL_SURFACE_INDEX_START
+		    && surfBTI <
+		    (CM_GLOBAL_SURFACE_INDEX_START + CM_GLOBAL_SURFACE_NUMBER))
+			return TRUE;
+		else
+			return FALSE;
+	}
 }
 
 BOOL CmDevice::IsValidSurfaceIndex(UINT surfBTI)
@@ -1767,11 +1801,21 @@ BOOL CmDevice::IsValidSurfaceIndex(UINT surfBTI)
 	UINT genid;
 	GetGenPlatform(genid);
 
-	if (surfBTI > CM_NULL_SURFACE_BINDING_INDEX
-	    && surfBTI < CM_GLOBAL_SURFACE_INDEX_START)
-		return TRUE;
-	else
-		return FALSE;
+	if (genid >= IGFX_GEN9_CORE) {
+		if (surfBTI >=
+		    (CM_GLOBAL_SURFACE_INDEX_START_GEN9_PLUS +
+		     CM_GLOBAL_SURFACE_NUMBER)
+		    && surfBTI < GT_RESERVED_INDEX_START_GEN9_PLUS)
+			return TRUE;
+		else
+			return FALSE;
+	} else {
+		if (surfBTI > CM_NULL_SURFACE_BINDING_INDEX
+		    && surfBTI < CM_GLOBAL_SURFACE_INDEX_START)
+			return TRUE;
+		else
+			return FALSE;
+	}
 }
 
 EXTERN_C INT

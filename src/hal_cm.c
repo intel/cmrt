@@ -30,6 +30,7 @@
 #include "hal_cm.h"
 #include "hal_cm_g75.h"
 #include "hal_cm_g8.h"
+#include "hal_cm_g9.h"
 #include "cm_def.h"
 #include <math.h>
 
@@ -5217,6 +5218,9 @@ GENOS_STATUS HalCm_GetMaxValuesEx(PCM_HAL_STATE pState,
 	if (pState->Platform.eRenderCoreFamily <= IGFX_GEN8_CORE) {
 		pMaxValuesEx->iMaxUserThreadsPerMediaWalker =
 		    CM_MAX_USER_THREADS_PER_MEDIA_WALKER;
+	} else {
+		pMaxValuesEx->iMaxUserThreadsPerMediaWalker =
+		    CM_MAX_USER_THREADS_PER_MEDIA_WALKER_SKL_PLUS;
 	}
 
 	CM_CHK_GENOSSTATUS(pState->pfnGetUserDefinedThreadCountPerThreadGroup
@@ -5881,6 +5885,17 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 		    HalCm_GetUserDefinedThreadCountPerThreadGroup_g8;
 		pState->pfnSetSurfaceMemoryObjectControl =
 		    HalCm_HwSetSurfaceMemoryObjectControl_g8;
+		break;
+
+	case IGFX_GEN9_CORE:
+		pState->pfnSubmitCommands = HalCm_SubmitCommands_g9;
+		pState->pfnGetTaskSyncLocation = HalCm_GetTaskSyncLocation_g75;
+		pState->pfnSetSurfaceMemoryObjectControl =
+		    HalCm_HwSetSurfaceMemoryObjectControl_g9;
+		pState->pfnGetCurbeBlockAlignSize =
+		    HalCm_GetCurbeBlockAlignSize_g8;
+		pState->pfnGetUserDefinedThreadCountPerThreadGroup =
+		    HalCm_GetUserDefinedThreadCountPerThreadGroup_g9;
 		break;
 
 	default:

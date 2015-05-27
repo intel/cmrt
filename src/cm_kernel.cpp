@@ -1393,12 +1393,13 @@ INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 			CM_ASSERT((size % 32) == 0);
 
 			UINT nextIndex = 0;
-			bool bdw = platform == IGFX_GEN8_CORE;
+			bool bdw_skl = platform == IGFX_GEN8_CORE
+			    || platform == IGFX_GEN9_CORE;
 
 			nextIndex +=
 			    MovInst_RT::CreateMoves(R64_OFFSET, 32, size,
 						    movInsts, nextIndex,
-						    bdw, m_blhwDebugEnable);
+						    bdw_skl, m_blhwDebugEnable);
 
 			beforeFirstThreadArg = true;
 			for (UINT j = 0; j < NumArgs; j++) {
@@ -1414,7 +1415,8 @@ INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 						     32,
 						     ppArgSorted[j]->unitSize,
 						     movInsts, nextIndex,
-						     bdw, m_blhwDebugEnable);
+						     bdw_skl,
+						     m_blhwDebugEnable);
 					}
 
 				} else {
@@ -1428,7 +1430,8 @@ INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 					     ppArgSorted[j]->unitOffsetInPayload
 					     - CM_PAYLOAD_OFFSET,
 					     ppArgSorted[j]->unitSize, movInsts,
-					     nextIndex, bdw, m_blhwDebugEnable);
+					     nextIndex, bdw_skl,
+					     m_blhwDebugEnable);
 
 				}
 			}
@@ -1452,7 +1455,8 @@ INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 			addInstDW[1] = CM_IVB_HSW_ADJUST_Y_SCOREBOARD_DW1;
 			addInstDW[2] = CM_IVB_HSW_ADJUST_Y_SCOREBOARD_DW2;
 
-		} else if (platform == IGFX_GEN8_CORE) {
+		} else if (platform == IGFX_GEN8_CORE
+			   || platform == IGFX_GEN9_CORE) {
 			addInstDW[0] = CM_BDW_ADJUST_Y_SCOREBOARD_DW0;
 			addInstDW[1] = CM_BDW_ADJUST_Y_SCOREBOARD_DW1;
 			addInstDW[2] = CM_BDW_ADJUST_Y_SCOREBOARD_DW2;
@@ -2945,8 +2949,7 @@ INT CmKernel::UpdateKernelData(CmKernelData * pKernelData,
 					     pNumThreadsInWave);
 					pCmKernelThreadSpaceParam->
 					    dispatchInfo.pNumThreadsInWave =
-					    new(std::
-						nothrow)
+					    new(std::nothrow)
 					    UINT[dispatchInfo.numWaves];
 					CMCHK_NULL_RETURN
 					    (pCmKernelThreadSpaceParam->dispatchInfo.
@@ -3657,6 +3660,7 @@ UINT CmKernel::GetAlignedCurbeSize(UINT value)
 		break;
 
 	case IGFX_GEN8_CORE:
+	case IGFX_GEN9_CORE:
 		CurbeBlockAlignment = GENHW_CURBE_BLOCK_ALIGN_G8;
 		break;
 

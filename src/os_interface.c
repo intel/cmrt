@@ -1826,6 +1826,105 @@ static int updatePlatformInfo(PLATFORM * pPlatform)
 		pPlatform->GtType = GTTYPE_GT1;
 		break;
 
+	case ISKL_GT0_DESK_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT0;
+		break;
+	case ISKL_GT1_DESK_DEVICE_F0_ID:
+	case ISKL_GT1_DT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1;
+		break;
+	case ISKL_GT2_DESK_DEVICE_F0_ID:
+	case ISKL_GT2_DT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT2;
+		break;
+	case ISKL_GT3_DESK_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT3;
+		break;
+	case ISKL_GT4_DESK_DEVICE_F0_ID:
+	case ISKL_GT4_DT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT4;
+		break;
+	case ISKL_GT2_ULT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT2;
+		break;
+	case ISKL_GT2_ULX_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT2;
+		break;
+	case ISKL_GT1_ULT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1;
+		break;
+	case ISKL_GT1_ULX_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1;
+		break;
+	case ISKL_GT1_5_ULT_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1_5;
+		break;
+	case ISKL_GT1_5_ULX_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1_5;
+		break;
+	case ISKL_GT0_MOBL_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT0;
+		break;
+	case ISKL_GT1_HALO_MOBL_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1;
+		break;
+	case ISKL_GT2_HALO_MOBL_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT2;
+		break;
+	case ISKL_GT3_HALO_MOBL_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT3;
+		break;
+	case ISKL_GT4_HALO_MOBL_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT4;
+		break;
 	default:
 		GENOS_OS_ASSERTMESSAGE("Unrecognized device ID %04X",
 				       uDeviceID);

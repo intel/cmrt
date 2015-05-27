@@ -31,6 +31,7 @@
 
 #include "os_interface.h"
 #include "hw_cmd.h"
+#include "hw_cmd_g9.h"
 #include "gen_hw.h"
 
 #define GENHW_PAGE_SIZE         0x1000
@@ -165,6 +166,7 @@ typedef enum _GENHW_SURFACE_STATE_TYPE {
 	GENHW_SURFACE_TYPE_G6,
 	GENHW_SURFACE_TYPE_G7,
 	GENHW_SURFACE_TYPE_G8,
+	GENHW_SURFACE_TYPE_G9,
 } GENHW_SURFACE_STATE_TYPE, *PGENHW_SURFACE_STATE_TYPE;
 
 typedef enum _GENHW_MEDIA_WALKER_MODE {
@@ -558,6 +560,7 @@ typedef struct _GENHW_SURFACE_STATE_PARAMS {
 typedef union _GENHW_SURFACE_STATE {
 	PACKET_SURFACE_STATE_G75 PacketSurfaceState_g75;
 	PACKET_SURFACE_STATE_G8 PacketSurfaceState_g8;
+	PACKET_SURFACE_STATE_G9 PacketSurfaceState_g9;
 } GENHW_SURFACE_STATE, *PGENHW_SURFACE_STATE;
 
 typedef struct _GENHW_SURFACE_STATE_ENTRY {
@@ -634,6 +637,7 @@ typedef struct _GENHW_HW_COMMANDS {
 
 	CONST SURFACE_STATE_G7 *pSurfaceState_g75;
 	CONST SURFACE_STATE_G8 *pSurfaceState_g8;
+	CONST SURFACE_STATE_G9 *pSurfaceState_g9;
 
 	CONST BINDING_TABLE_STATE_G5 *pBindingTableState_g75;
 	CONST BINDING_TABLE_STATE_G8 *pBindingTableState_g8;
@@ -670,6 +674,10 @@ typedef struct _GENHW_HW_COMMANDS {
 	CONST MI_BATCH_BUFFER_START_CMD_G8 *pBatchBufferStart_g8;
 	CONST MEDIA_VFE_STATE_CMD_G8 *pVideoFrontEnd_g8;
 	CONST GPGPU_WALKER_CMD_G8 *pGpGpuWalker_g8;
+
+	CONST MEDIA_VFE_STATE_CMD_G9 *pVideoFrontEnd_g9;
+	CONST MEDIA_OBJECT_WALKER_CMD_G9 *pMediaWalker_g9;
+	CONST PIPELINE_SELECT_CMD_G9 *pPipelineSelectMedia_g9;
 
 	MEDIA_OBJECT_HEADER_G6 MediaObjectIStabGMC_g75;
 

@@ -465,12 +465,12 @@ VOID IntelGen_GetPixelsPerSample(GENOS_FORMAT format,
 {
 	*pdwPixelsPerSampleUV = 0;
 	switch (format) {
- CASE_PL3_FORMAT:
- CASE_PL3_RGB_FORMAT:
+	CASE_PL3_FORMAT:
+	CASE_PL3_RGB_FORMAT:
 		*pdwPixelsPerSampleUV = 4;
 		break;
 
- CASE_PL2_FORMAT:
+	CASE_PL2_FORMAT:
 	case Format_400P:
 		*pdwPixelsPerSampleUV = 2;
 		break;

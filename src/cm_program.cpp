@@ -166,6 +166,10 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 						return CM_FAILURE;
 					}
 
+					if (!strcmp(token, CM_RT_JITTER_DEBUG_FLAG)) {
+						m_IsHwDebugEnabled = true;
+					}
+
 					jitFlags[numJitFlags] = token;
 					numJitFlags++;
 					ptr = next_token;

@@ -145,6 +145,61 @@ __inline VOID HalCm_FreeTsResource(PCM_HAL_STATE pState)
 	}
 }
 
+static GENOS_STATUS HalCm_AllocateSipResource(PCM_HAL_STATE pState)
+{
+	PGENOS_INTERFACE		pOsInterface = pState->pHwInterface->pOsInterface;
+	GENOS_STATUS			hr = GENOS_STATUS_SUCCESS;
+	UINT				iSize;
+	GENOS_ALLOC_GFXRES_PARAMS	AllocParams;
+	GENOS_LOCK_PARAMS		LockFlags;
+
+	iSize = CM_DEBUG_SURFACE_SIZE;
+
+	GENOS_ZeroMemory(&AllocParams, sizeof(GENOS_ALLOC_GFXRES_PARAMS));
+	AllocParams.Type	= GENOS_GFXRES_BUFFER;
+	AllocParams.dwBytes	= iSize;
+	AllocParams.Format	= Format_Buffer;
+	AllocParams.TileType	= GENOS_TILE_LINEAR;
+	AllocParams.pBufName	= "SipResource";
+
+	CM_HRESULT2GENOSSTATUS_AND_CHECK(pOsInterface->pfnAllocateResource(
+		pOsInterface,
+		&AllocParams,
+		&pState->SipResource.OsResource));
+
+	GENOS_ZeroMemory(&LockFlags, sizeof(GENOS_LOCK_PARAMS));
+
+	LockFlags.ReadOnly = 1;
+
+	pState->SipResource.pData = (PBYTE)pOsInterface->pfnLockResource(
+						pOsInterface,
+						&pState->SipResource.OsResource,
+						&LockFlags);
+	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->SipResource.pData);
+
+	pState->SipResource.bLocked  = TRUE;
+
+finish:
+	return hr;
+}
+
+static void HalCm_FreeSipResource(PCM_HAL_STATE pState)
+{
+	PGENOS_INTERFACE pOsInterface = pState->pHwInterface->pOsInterface;
+
+	if (!IntelGen_OsResourceIsNull(&pState->SipResource.OsResource))
+	{
+		if (pState->SipResource.bLocked)
+			pOsInterface->pfnUnlockResource(
+				pOsInterface,
+				&pState->SipResource.OsResource);
+
+		pOsInterface->pfnFreeResource(
+			pOsInterface,
+			&pState->SipResource.OsResource);
+	}
+}
+
 __inline GENOS_STATUS HalCm_GetGfxMapFilter(GFX_DDITEXTUREFILTERTYPE GfxFilter,
 					    GFX3DSTATE_MAPFILTER * pGfxFilter)
 {
@@ -4627,6 +4682,12 @@ GENOS_STATUS HalCm_ExecuteTask(PCM_HAL_STATE pState,
 		    ("Number of Kernels per task exceeds the number can be hold by binding table");
 		goto finish;
 	}
+
+	if (pExecParam->bKernelDebugEnabled &&
+	    IntelGen_OsResourceIsNull(&pState->SipResource.OsResource)) {
+		HalCm_AllocateSipResource(pState);
+	}
+
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
@@ -4789,6 +4850,12 @@ GENOS_STATUS HalCm_ExecuteGroupTask(PCM_HAL_STATE pState,
 		    ("Number of Kernels per task exceeds the number can be hold by binding table");
 		goto finish;
 	}
+
+	if (pExecGroupParam->bKernelDebugEnabled &&
+	    IntelGen_OsResourceIsNull(&pState->SipResource.OsResource)) {
+		HalCm_AllocateSipResource(pState);
+	}
+
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
@@ -5949,6 +6016,7 @@ VOID HalCm_Destroy(PCM_HAL_STATE pState)
 			pState->pBatchBuffers = NULL;
 		}
 		HalCm_FreeTsResource(pState);
+		HalCm_FreeSipResource(pState);
 
 		if (pState->pHwInterface) {
 			pState->pHwInterface->pfnDestroy(pState->pHwInterface);

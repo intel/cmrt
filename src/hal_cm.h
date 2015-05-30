@@ -262,6 +262,7 @@ typedef struct _CM_HAL_STATE {
 	PCM_HAL_TASK_PARAM pTaskParam;
 	PCM_HAL_TASK_TIMESTAMP pTaskTimeStamp;
 	CM_HAL_TS_RESOURCE TsResource;
+	CM_HAL_TS_RESOURCE SipResource;
 	PVOID pTableMem;
 	CM_HAL_HINT_TASK_INDEXES HintIndexes;
 	BOOL bRequestSingleSlice;

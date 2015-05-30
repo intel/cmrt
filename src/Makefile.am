@@ -36,7 +36,8 @@ AM_CPPFLAGS = \
 
 cmrt_cflags = \
 	-Wall			\
-	-Wno-missing-braces \
+	-Werror			\
+	-Wno-missing-braces	\
 	-fvisibility=default 	\
 	-DLINUX			\
 	-msse                   \

@@ -25,6 +25,7 @@
  *     Wei Lin<wei.w.lin@intel.com>
  *     Yuting Yang<yuting.yang@intel.com>
  */
+
 #include "os_interface.h"
 #include "hw_interface.h"
 #include "hal_cm.h"

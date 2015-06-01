@@ -717,6 +717,7 @@ typedef struct _GENHW_HW_INTERFACE {
 	BOOL bMediaReset;
 	BOOL bUsesPatchList;
 	BOOL bRequestSingleSlice;
+	BOOL bSysRoutine;
 
 	GENHW_MEDIA_WALKER_MODE MediaWalkerMode;
 	DWORD dwIndirectHeapSize;
@@ -958,6 +959,10 @@ typedef struct _GENHW_HW_INTERFACE {
 					      PGENOS_COMMAND_BUFFER pCmdBuffer,
 					      PGENHW_LOAD_REGISTER_IMM_PARAM
 					      pParam);
+
+	 GENOS_STATUS(*pfnSendStateSip) (PGENHW_HW_INTERFACE pHwInterface,
+					 PGENOS_COMMAND_BUFFER pCmdBuffer);
+
 
 	 GENOS_STATUS(*pfnSetupBufferSurfaceState) (PGENHW_HW_INTERFACE
 						    pHwInterface,

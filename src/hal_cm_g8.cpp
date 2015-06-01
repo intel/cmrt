@@ -129,6 +129,12 @@ GENOS_STATUS HalCm_SubmitCommands_g8(PCM_HAL_STATE pState,
 	CM_CHK_GENOSSTATUS(pHwInterface->pfnSendSurfaces
 			   (pHwInterface, &CmdBuffer));
 
+	if (pHwInterface->bSysRoutine) {
+		// Send the STATE_SIP if we are using a system routine
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendStateSip(pHwInterface,
+								 &CmdBuffer));
+	}
+
 	iTmp = GENHW_USE_MEDIA_THREADS_MAX;
 	if (pState->MaxHWThreadValues.registryValue != 0) {
 		if (pState->MaxHWThreadValues.registryValue <

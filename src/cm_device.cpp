@@ -40,6 +40,7 @@
 #include "cm_def.h"
 #include "cm_group_space.h"
 #include "cm_surface_2d.h"
+#include "gen_debugger.h"
 #include "hal_cm.h"
 
 CSync CmDevice::GlobalCriticalSection_Surf2DUserDataLock = CSync();
@@ -68,6 +69,9 @@ INT CmDevice::Create(CmDriverContext * pDriverContext, CmDevice * &pDevice,
 		result = CM_OUT_OF_HOST_MEMORY;
 	}
 
+    if (result == CM_SUCCESS)
+        GenDbgNotifyNewDevice(pDevice);
+
 	return result;
 }
 
@@ -95,6 +99,7 @@ INT CmDevice::Destroy(CmDevice * &pDevice)
 	INT refCount = pDevice->Release();
 
 	if (refCount == 0) {
+        GenDbgNotifyDeviceDestruction(pDevice);
 		CmSafeDelete(pDevice);
 	}
 

@@ -62,6 +62,7 @@ cmrt_libs = \
 	$(NULL)
 
 cmrt_files = \
+	gen_debugger.cpp \
 	hal_cm.cpp  \
 	hal_cm_g75.cpp  \
 	hal_cm_g8.cpp  \

@@ -519,7 +519,8 @@ class CmKernel {
 
 	INT AssociateThreadSpace(CmThreadSpace * &pTS);
 	INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS);
-
+	INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex);
+	INT SetStaticBuffer(UINT index, const void *pValue);
 };
 
 class CmTask {

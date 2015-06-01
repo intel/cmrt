@@ -1125,3 +1125,20 @@ CONST MEDIA_STATE_FLUSH_CMD_G75 g_cInit_MEDIA_STATE_FLUSH_CMD_G75 = {
 	 0,
 	 }
 };
+
+const STATE_SIP_CMD_G8 g_cInit_STATE_SIP_CMD_G8 =
+{
+	{
+		OP_LENGTH(SIZE32(STATE_SIP_CMD_G8)),	// Length
+		GFXSUBOP_STATE_SIP,			// InstructionSubOpcode
+		GFXOP_NONPIPELINED,			// InstructionOpcode
+		PIPE_COMMON,				// InstructionPipeline
+		INSTRUCTION_GFX				// InstructionType
+	},
+	{
+		0					// SystemInstructionPointer
+	},
+	{
+		0					// SystemInstructionPointer64
+	}
+};

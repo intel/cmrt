@@ -1651,7 +1651,7 @@ VOID IntelGen_HwAddBatchBufferEndCmdBb(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MI_BATCH_BUFFER_END_CMD_G5));
+			(long)sizeof(MI_BATCH_BUFFER_END_CMD_G5));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PMI_BATCH_BUFFER_END_CMD_G5) pBuffer;
@@ -1666,7 +1666,7 @@ VOID IntelGen_HwSkipBatchBufferEndCmdBb(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MI_BATCH_BUFFER_END_CMD_G5));
+			(long)sizeof(MI_BATCH_BUFFER_END_CMD_G5));
 
 	pBatchBuffer->iCurrent += sizeof(MI_BATCH_BUFFER_END_CMD_G5);
 }

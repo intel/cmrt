@@ -220,7 +220,7 @@ typedef GFX_TEXTUREFILTERTYPE GFX_DDITEXTUREFILTERTYPE;
 
 #define GENOS_DIR_SEPERATOR                         '/'
 
-#define GENOS_INVALID_ALLOC_INDEX                         -1
+#define GENOS_INVALID_ALLOC_INDEX                   -1
 #define GENOS_MAX_REGS                              128
 #define GENOS_STATUS_REPORT_DEFAULT                 0
 

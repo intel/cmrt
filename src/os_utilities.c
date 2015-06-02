@@ -45,12 +45,12 @@
 #include <unistd.h>
 
 INT32 GenOsMemAllocCounter;
-#define GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size, functionName, filename, line)                   \
+#define GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size)                   \
    GENOS_OS_VERBOSEMESSAGE(                                                                     \
        "<MemNinjaSysAllocPtr memPtr = \"%d\" size = \"%d\" memType = \"Sys\"/>.", ptr, size); \
    GENOS_OS_VERBOSEMESSAGE(                                                                     \
-       "<MemNinjaSysLastFuncCall memPtr = \"%d\" functionName = \"%s\" filename = \"%s\" "    \
-       "memType = \"Sys\" line = \"%d\"/>.", ptr, functionName, filename, line);
+       "<MemNinjaSysLastFuncCall memPtr = \"%d\" functionName = \"%s\" file = \"%s\" "    \
+       "memType = \"Sys\" line = \"%d\"/>.", ptr, __func__, __FILE__, __LINE__);
 
 #define GENOS_MEMNINJA_FREE_MESSAGE(ptr)                                                        \
    GENOS_OS_VERBOSEMESSAGE("GenOsMemAllocCounter = %d, Addr = 0x%x.", GenOsMemAllocCounter, ptr);   \
@@ -68,8 +68,7 @@ PVOID GENOS_AlignedAllocMemory(SIZE_T size, SIZE_T alignment)
 	GENOS_OS_ASSERT(ptr != NULL);
 
 	if (ptr != NULL) {
-		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size, functionName, filename,
-					     line);
+		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size);
 		GenOsMemAllocCounter++;
 	}
 
@@ -98,8 +97,7 @@ PVOID GENOS_AllocMemory(SIZE_T size)
 	GENOS_OS_ASSERT(ptr != NULL);
 
 	if (ptr != NULL) {
-		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size, functionName, filename,
-					     line);
+		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size);
 		GenOsMemAllocCounter++;
 	}
 
@@ -117,8 +115,7 @@ PVOID GENOS_AllocAndZeroMemory(SIZE_T size)
 	if (ptr != NULL) {
 		GENOS_ZeroMemory(ptr, size);
 
-		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size, functionName, filename,
-					     line);
+		GENOS_MEMNINJA_ALLOC_MESSAGE(ptr, size);
 
 		GenOsMemAllocCounter++;
 	}

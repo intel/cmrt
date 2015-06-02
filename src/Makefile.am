@@ -25,6 +25,7 @@ CC = g++ -g
 SUBDIRS =
 
 AM_CPPFLAGS = \
+	-D_DEBUG		\
 	-DPTHREADS		\
 	$(DRM_CFLAGS)		\
 	$(LIBVA_DEPS_CFLAGS)	\

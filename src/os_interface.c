@@ -1135,8 +1135,8 @@ HRESULT IntelGen_OsSubmitCommandBuffer(PGENOS_INTERFACE pOsInterface,
 					     ResourceOffset, 0x2, write_domain);
 		if (hr != 0) {
 			GENOS_OS_ASSERTMESSAGE
-			    ("Error patching alloc_bo = 0x%x, cmd_bo = 0x%x.",
-			     (UINT32) alloc_bo, (UINT32) cmd_bo);
+			    ("Error patching alloc_bo = %p, cmd_bo = %p.",
+			     alloc_bo, cmd_bo);
 			goto finish;
 		}
 	}

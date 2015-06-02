@@ -888,7 +888,7 @@ VOID IntelGen_HwSkipPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBatchBuffer->iCurrent += sizeof(PIPE_CONTROL_CMD_G7);
 }
@@ -1135,7 +1135,7 @@ VOID IntelGen_HwAddMediaObjectCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pParam->dwMediaObjectSize >=
 			sizeof(MEDIA_OBJECT_HEADER_G6));
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MEDIA_OBJECT_HEADER_G6));
+			(long)sizeof(MEDIA_OBJECT_HEADER_G6));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PMEDIA_OBJECT_HEADER_G6) pBuffer;
@@ -1199,7 +1199,7 @@ VOID IntelGen_HwAddPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PPIPE_CONTROL_CMD_G7) pBuffer;

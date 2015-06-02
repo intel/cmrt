@@ -4954,7 +4954,7 @@ GENOS_STATUS HalCm_ExecuteHintsTask(PCM_HAL_STATE pState,
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
-	CM_ASSERT((pHwInterface->pGeneralStateHeap->iCurMediaStatei >= 0)
+	CM_ASSERT((pHwInterface->pGeneralStateHeap->iCurMediaState >= 0)
 		  && (pHwInterface->pGeneralStateHeap->iCurMediaState <
 		      pState->iNumBatchBuffers));
 

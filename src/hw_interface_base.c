@@ -535,8 +535,6 @@ GENOS_STATUS IntelGen_HwSendPipeControl_g75(PGENHW_HW_INTERFACE
 	GENHW_HW_ASSERT(pCmdBuffer);
 	GENHW_HW_ASSERT(pOsResource);
 	GENHW_HW_ASSERT(pHwInterface->pHwCommands);
-	GENHW_HW_ASSERT(pOsResource->iAllocationIndex !=
-			GENOS_INVALID_ALLOC_INDEX);
 
 	eStatus = GENOS_STATUS_SUCCESS;
 	pOsInterface = pHwInterface->pOsInterface;
@@ -608,8 +606,6 @@ GENOS_STATUS IntelGen_HwSendPipeControl_g8(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pCmdBuffer);
 	GENHW_HW_ASSERT(pOsResource);
 	GENHW_HW_ASSERT(pHwInterface->pHwCommands);
-	GENHW_HW_ASSERT(pOsResource->iAllocationIndex !=
-			GENOS_INVALID_ALLOC_INDEX);
 
 	eStatus = GENOS_STATUS_SUCCESS;
 	pOsInterface = pHwInterface->pOsInterface;

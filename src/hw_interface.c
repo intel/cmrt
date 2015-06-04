@@ -421,6 +421,8 @@ VOID IntelGen_HwInitInterface_g75(PGENHW_HW_INTERFACE pHwInterface);
 
 VOID IntelGen_HwInitInterface_g8(PGENHW_HW_INTERFACE pHwInterface);
 
+VOID IntelGen_HwInitInterface_g9(PGENHW_HW_INTERFACE pHwInterface);
+
 GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface);
 
 VOID IntelGen_HwGetAlignUnit(PWORD pwWidthAlignUnit,
@@ -550,6 +552,7 @@ VOID IntelGen_HwInitCommandsCommon(PGENHW_HW_INTERFACE pHwInterface)
 
 	pHwCommands->pSurfaceState_g75 = &g_cInit_SURFACE_STATE_G7;
 	pHwCommands->pSurfaceState_g8 = &g_cInit_SURFACE_STATE_G8;
+	pHwCommands->pSurfaceState_g9 = &g_cInit_SURFACE_STATE_G9;
 
 	pHwCommands->pBindingTableState_g75 = &g_cInit_BINDING_TABLE_STATE_G5;
 	pHwCommands->pBindingTableState_g8 = &g_cInit_BINDING_TABLE_STATE_G8;
@@ -585,6 +588,9 @@ VOID IntelGen_HwInitCommandsCommon(PGENHW_HW_INTERFACE pHwInterface)
 	    &g_cInit_MI_BATCH_BUFFER_START_CMD_G8;
 	pHwCommands->pVideoFrontEnd_g8 = &g_cInit_MEDIA_VFE_STATE_CMD_G8;
 	pHwCommands->pGpGpuWalker_g8 = &g_cInit_GPGPU_WALKER_CMD_G8;
+
+	pHwCommands->pVideoFrontEnd_g9 = &g_cInit_MEDIA_VFE_STATE_CMD_G9;
+	pHwCommands->pMediaWalker_g9 = &g_cInit_MEDIA_OBJECT_WALKER_CMD_G9;
 }
 
 VOID IntelGen_HwFreeCommands(PGENHW_HW_INTERFACE pHwInterface)
@@ -1738,6 +1744,8 @@ GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface,
 		IntelGen_HwInitInterface_g75(pHwInterface);
 	} else if (GFX_IS_RENDERCORE(pHwInterface->Platform, IGFX_GEN8_CORE)) {
 		IntelGen_HwInitInterface_g8(pHwInterface);
+	} else if (GFX_IS_RENDERCORE(pHwInterface->Platform, IGFX_GEN9_CORE)) {
+		IntelGen_HwInitInterface_g9(pHwInterface);
 	} else {
 		GENHW_HW_ASSERTMESSAGE("Platform not recognized.");
 		eStatus = GENOS_STATUS_UNKNOWN;

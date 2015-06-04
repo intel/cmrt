@@ -29,6 +29,7 @@
 #include "os_interface.h"
 #include "hw_interface.h"
 #include "hw_interface_g75.h"
+#include "hw_interface_g9.h"
 
 GENOS_STATUS IntelGen_HwSendCommandBufferHeader(PGENHW_HW_INTERFACE
 						pHwInterface,
@@ -973,6 +974,20 @@ GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface)
 		pHwInterface->pfnSendStateBaseAddr =
 		    IntelGen_HwSendStateBaseAddr_g8;
 		pHwInterface->pfnSendSurfaces = IntelGen_HwSendSurfaces_g8;
+		pHwInterface->pfnSendBatchBufferStart =
+		    IntelGen_HwSendBatchBufferStart_g8;
+		pHwInterface->pfnSendPipeControl =
+		    IntelGen_HwSendPipeControl_g8;
+		pHwInterface->pfnSendLoadRegImmCmd =
+		    IntelGen_HwSendLoadRegImmCmd_g75;
+		pHwInterface->pfnSetupSurfaceStateOs =
+		    IntelGen_HwSetupSurfaceState_g75;
+
+	} else if (GFX_IS_RENDERCORE(pHwInterface->Platform, IGFX_GEN9_CORE)) {
+		pHwInterface->pfnSendSyncTag = IntelGen_HwSendSyncTag_g75;
+		pHwInterface->pfnSendStateBaseAddr =
+		    IntelGen_HwSendStateBaseAddr_g8;
+		pHwInterface->pfnSendSurfaces = IntelGen_HwSendSurfaces_g9;
 		pHwInterface->pfnSendBatchBufferStart =
 		    IntelGen_HwSendBatchBufferStart_g8;
 		pHwInterface->pfnSendPipeControl =

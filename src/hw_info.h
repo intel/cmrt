@@ -37,8 +37,10 @@ typedef enum __GTTYPE {
 	GTTYPE_GTL,
 	GTTYPE_GTM,
 	GTTYPE_GTH,
+	GTTYPE_GT1_5,
 	GTTYPE_GT1_75,
 	GTTYPE_GT3,
+	GTTYPE_GT4,
 	GTTYPE_GT0,
 	GTTYPE_UNDEFINED,
 } GTTYPE, *PGTTYPE;
@@ -48,6 +50,7 @@ typedef enum {
 	IGFX_HASWELL,
 	IGFX_BROADWELL,
 	IGFX_CHERRYVIEW,
+	IGFX_SKYLAKE,
 
 	IGFX_GENNEXT = 0x7ffffffe,
 	PRODUCT_FAMILY_FORCE_ULONG = 0x7fffffff
@@ -70,6 +73,7 @@ typedef enum {
 	IGFX_GEN5_CORE = 5,
 	IGFX_GEN7_5_CORE = 10,
 	IGFX_GEN8_CORE = 11,
+	IGFX_GEN9_CORE = 12,
 
 	IGFX_GENNEXT_CORE = 0x7ffffffe,
 	GFXCORE_FAMILY_FORCE_ULONG = 0x7fffffff
@@ -179,6 +183,35 @@ typedef struct PLATFORM_STR {
 #define IBDW_RSVD_WRK_DEVICE_F0_ID              0x163D
 #define IBDW_RSVD_ULX_DEVICE_F0_ID              0x163E
 
+#define ISKL_GT0_DESK_DEVICE_F0_ID              0x0900
+#define ISKL_GT1_DESK_DEVICE_F0_ID              0x0901
+#define ISKL_GT2_DESK_DEVICE_F0_ID              0x0902
+#define ISKL_GT4_DT_DEVICE_F0_ID                0x1932
+#define ISKL_GT2_DT_DEVICE_F0_ID                0x1912
+#define ISKL_GT1_5_DT_DEVICE_F0_ID              0x1917
+#define ISKL_GT1_DT_DEVICE_F0_ID                0x1902
+#define ISKL_GT3_DESK_DEVICE_F0_ID              0x0903
+#define ISKL_GT4_DESK_DEVICE_F0_ID              0x0904
+#define ISKL_GT2_ULT_DEVICE_F0_ID               0x1916
+#define ISKL_GT2F_ULT_DEVICE_F0_ID              0x1921
+#define ISKL_GT2_ULX_DEVICE_F0_ID               0x191E
+#define ISKL_GT1_ULT_DEVICE_F0_ID               0x1906
+#define ISKL_GT1_ULX_DEVICE_F0_ID               0x190E
+#define ISKL_GT1_5_ULT_DEVICE_F0_ID             0x1913
+#define ISKL_GT1_5_ULX_DEVICE_F0_ID             0x1915
+#define ISKL_GT3_ULT_DEVICE_F0_ID               0x1926
+#define ISKL_GT1_HALO_MOBL_DEVICE_F0_ID         0x190B
+#define ISKL_GT2_HALO_MOBL_DEVICE_F0_ID         0x191B
+#define ISKL_GT3_HALO_MOBL_DEVICE_F0_ID         0x192B
+#define ISKL_GT4_HALO_MOBL_DEVICE_F0_ID         0x193B
+#define ISKL_GT0_MOBL_DEVICE_F0_ID              0xFFFF
+#define ISKL_GT1_SERV_DEVICE_F0_ID              0x190A
+#define ISKL_GT2_SERV_DEVICE_F0_ID              0x191A
+#define ISKL_GT3_SERV_DEVICE_F0_ID              0x192A
+#define ISKL_GT4_SERV_DEVICE_F0_ID              0x193A
+#define ISKL_GT2_WRK_DEVICE_F0_ID               0x191D
+#define ISKL_GT4_WRK_DEVICE_F0_ID               0x193D
+
 #define IS_GEN7_5(device_id) ( device_id == IHSW_GTH_DESK_DEVICE_F0_ID    || \
                                device_id == IHSW_GTM_DESK_DEVICE_F0_ID    || \
                                device_id == IHSW_GTL_DESK_DEVICE_F0_ID    || \
@@ -245,14 +278,48 @@ typedef struct PLATFORM_STR {
 
 #define IS_GEN8(device_id)       ( IS_BROADWELL(device_id) || IS_CHERRYVIEW(device_id) )
 
+#define IS_SKYLAKE(device_id)    ( device_id == ISKL_GT0_DESK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_DESK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_DESK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT4_DT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_DT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_5_DT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_DT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT3_DESK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT4_DESK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_ULT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2F_ULT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_ULX_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_ULT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_ULX_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_5_ULT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_5_ULX_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT3_ULT_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_HALO_MOBL_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_HALO_MOBL_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT3_HALO_MOBL_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT4_HALO_MOBL_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT0_MOBL_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT1_SERV_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_SERV_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT3_SERV_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT4_SERV_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT2_WRK_DEVICE_F0_ID || \
+                                   device_id == ISKL_GT4_WRK_DEVICE_F0_ID )
+
+#define IS_GEN9(device_id)       ( IS_SKYLAKE(device_id) )
+
 #define IS_SUPPORTED_GEN(device_id) ( \
                                       IS_GEN7_5(device_id)        || \
                                       IS_GEN8(device_id)          || \
-                                      IS_VALLEYVIEW_A0(device_id) )
+                                      IS_VALLEYVIEW_A0(device_id) || \
+                                      IS_GEN9(device_id) )
 
 #define IS_GEN7_5_PLUS(device_id)   ( IS_GEN7_5(device_id) || \
-                                      IS_GEN8(device_id) )
+                                      IS_GEN8(device_id) || \
+                                      IS_GEN9(device_id) )
 
-#define IS_GEN8_PLUS(device_id)     ( IS_GEN8(device_id) )
+#define IS_GEN8_PLUS(device_id)     ( IS_GEN8(device_id) || \
+                                      IS_GEN9(device_id) )
 
 #endif

@@ -131,6 +131,8 @@ typedef unsigned char byte;
 #define CM_MAX_DEPENDENCY_COUNT         8
 #define CM_MAX_THREADSPACE_WIDTH        511
 #define CM_MAX_THREADSPACE_HEIGHT       511
+#define CM_MAX_THREADSPACE_WIDTH_SKLUP  2047
+#define CM_MAX_THREADSPACE_HEIGHT_SKLUP 2047
 
 #define MAX_SLM_SIZE_PER_GROUP_IN_1K        64
 #define CM_MAX_THREAD_GROUP                 64
@@ -147,7 +149,9 @@ typedef unsigned char byte;
 #define CM_GLOBAL_SURFACE_NUMBER      4
 
 #define GT_RESERVED_INDEX_START                                 250
+#define GT_RESERVED_INDEX_START_GEN9_PLUS                       240
 #define CM_GLOBAL_SURFACE_INDEX_START                           243
+#define CM_GLOBAL_SURFACE_INDEX_START_GEN9_PLUS                 1
 #define CM_NULL_SURFACE_BINDING_INDEX                           0
 
 #define CM_NULL_SURFACE                     0xFFFF
@@ -197,6 +201,7 @@ typedef enum _GPU_PLATFORM {
 	PLATFORM_INTEL_HSW = 3,
 	PLATFORM_INTEL_BDW = 4,
 	PLATFORM_INTEL_CHV = 6,
+	PLATFORM_INTEL_SKL = 7,
 	PLATFORM_INTEL_TOTAL
 } GPU_PLATFORM;
 
@@ -205,6 +210,7 @@ typedef enum _GPU_GT_PLATFORM {
 	PLATFORM_INTEL_GT1 = 1,
 	PLATFORM_INTEL_GT2 = 2,
 	PLATFORM_INTEL_GT3 = 3,
+	PLATFORM_INTEL_GT4 = 4,
 	PLATFORM_INTEL_GTCHV = 7,
 	PLATFORM_INTEL_GTA = 8,
 	PLATFORM_INTEL_GTC = 9,
@@ -564,6 +570,9 @@ static const CM_HAL_POWER_OPTION_PARAM
 	 {1, 3, 23},
 	 {2, 6, 47}
 	 },
+
+	{
+	 0},
 
 	{
 	 0}

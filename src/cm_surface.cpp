@@ -153,6 +153,7 @@ BOOL CmSurface::MemoryObjectCtrlPolicyCheck(MEMORY_OBJECT_CONTROL mem_ctrl,
 		if (mem_ctrl > MEMORY_OBJECT_CONTROL_BDW_L3_LLC_ELLC_ALLOWED)
 			return FALSE;
 		break;
+	case IGFX_GEN9_CORE:
 	default:
 		return FALSE;
 	}

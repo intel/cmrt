@@ -64,15 +64,18 @@ cmrt_files = \
 	hal_cm.c  \
 	hal_cm_g75.c  \
 	hal_cm_g8.c  \
+	hal_cm_g9.c  \
 	hw_interface_base.c \
 	hw_interface.c \
 	hw_interface_g75.c \
 	hw_interface_g8.c \
+	hw_interface_g9.c \
 	os_utilities.c \
 	os_interface.c \
 	hw_cmd.c \
 	os_util_debug.c \
 	oscl_impl_linux.c \
+	hw_cmd_g9.c \
 	cm_device.cpp \
 	cm_buffer.cpp   \
 	cm_event.cpp \

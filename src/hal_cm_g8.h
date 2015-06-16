@@ -64,7 +64,8 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g8(PCM_HAL_STATE pState,
 						      pParams);
 
 VOID HalCm_HwSendL3CacheConfig_g8(PCM_HAL_STATE pState,
-				  PGENOS_COMMAND_BUFFER pCmdBuffer);
+				  PGENOS_COMMAND_BUFFER pCmdBuffer,
+				  PGENHW_L3_CACHE_CONFIG  pL3CacheConfig);
 
 INT HalCm_GetCurbeBlockAlignSize_g8();
 

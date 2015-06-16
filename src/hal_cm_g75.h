@@ -40,11 +40,15 @@
 #define GENHW_CM_EU_PER_SUBSLICE_HSW_GT2               CM_GEN7_5_GT2_EUS_PER_SUBSLICE
 #define GENHW_CM_EU_PER_SUBSLICE_HSW_GT3               CM_GEN7_5_GT3_EUS_PER_SUBSLICE
 
+#define CM_CONFIG_SQCREG1_VALUE_G75            0x00610000
+
 #define CM_CONFIG_CNTLREG2_VALUE_G75_SLM       0x010000a1
 #define CM_CONFIG_CNTLREG3_VALUE_G75_SLM       0x00040810
 
 #define CM_CONFIG_CNTLREG2_VALUE_G75_NONSLM    0x02000038
 #define CM_CONFIG_CNTLREG3_VALUE_G75_NONSLM    0x00040410
+
+#define CM_CONFIG_L3LRA1_VALUE_G75 0x27fd007f
 
 INT HalCm_GetCurbeBlockAlignSize_g75();
 
@@ -62,7 +66,8 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g75(PCM_HAL_STATE pState,
 						       pParams);
 
 VOID HalCm_HwSendL3CacheConfig_g75(PCM_HAL_STATE pState,
-				   PGENOS_COMMAND_BUFFER pCmdBuffer);
+				   PGENOS_COMMAND_BUFFER pCmdBuffer,
+				   PGENHW_L3_CACHE_CONFIG  pL3CacheConfig);
 
 UINT HalCm_GetPerThreadScratchSpaceSize_g75();
 

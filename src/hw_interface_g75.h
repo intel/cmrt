@@ -32,6 +32,7 @@
 #include "os_interface.h"
 #include "hw_interface.h"
 
+#define GENHW_REG_L3_CACHE_SQCREG1_G75           0xB010
 #define GENHW_REG_L3_CACHE_CNTLREG2_G75          0xB020
 #define GENHW_REG_L3_CACHE_CNTLREG3_G75          0xB024
 

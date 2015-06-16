@@ -71,6 +71,8 @@ typedef enum {
 typedef enum {
 	IGFX_UNKNOWN_CORE = 0,
 	IGFX_GEN5_CORE = 5,
+        IGFX_GEN6_CORE = 8,
+	IGFX_GEN7_CORE = 9,
 	IGFX_GEN7_5_CORE = 10,
 	IGFX_GEN8_CORE = 11,
 	IGFX_GEN9_CORE = 12,

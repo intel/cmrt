@@ -28,6 +28,7 @@
  */
 
 #include "hal_cm.h"
+#include "hal_cm_g8.h"
 #include "hal_cm_g9.h"
 #include "cm_common.h"
 #include "hw_interface_g9.h"
@@ -47,6 +48,7 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 	BOOL enableWalker = pState->WalkerParams.CmWalkerEnable;
 	BOOL enableGpGpu = pState->pTaskParam->blGpGpuWalkerEnabled;
 	PCM_HAL_TASK_PARAM pTaskParam = pState->pTaskParam;
+	GENHW_L3_CACHE_CONFIG L3CacheConfig;
 	GENOS_COMMAND_BUFFER CmdBuffer;
 	DWORD dwSyncTag;
 	PINT64 pTaskSyncLocation;
@@ -94,6 +96,14 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 
 	CM_CHK_GENOSSTATUS(pHwInterface->pfnSendSyncTag
 			   (pHwInterface, &CmdBuffer));
+
+	if (pState->L3Config.L3_CNTLREG){
+		L3CacheConfig.dwL3CntlReg = pState->L3Config.L3_CNTLREG;
+        } else {
+		L3CacheConfig.dwL3CntlReg = pState->bSLMMode ? CM_CONFIG_CNTLREG_VALUE_G8_BDW_SLM : CM_CONFIG_CNTLREG_VALUE_G8_BDW_NONSLM;
+        }
+
+	HalCm_HwSendL3CacheConfig_g8(pState, &CmdBuffer,&L3CacheConfig);
 
 	if (enableGpGpu) {
 		cmd_select.DW0.PipelineSelect = GFXPIPELINE_GPGPU;

@@ -1606,7 +1606,12 @@ CM_RT_API INT CmDevice::SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c)
             l3_c = BDW_L3_PLANE;
             break;
 
-         default:
+	case IGFX_GEN9_CORE:
+            upper_bound = SKL_L3_CONFIG_NUM;
+            l3_c = SKL_L3_PLANE;
+            break;
+
+	default:
             return CM_FAILURE;
     }
 

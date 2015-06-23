@@ -53,6 +53,7 @@ GENOS_STATUS HalCm_SubmitCommands_g8(PCM_HAL_STATE pState,
 	UINT i;
 	UINT uiPatchOffset;
 	PCM_HAL_TASK_PARAM pTaskParam = pState->pTaskParam;
+	GENHW_L3_CACHE_CONFIG L3CacheConfig;
 	MEDIA_STATE_FLUSH_CMD_G75 CmdMediaStateFlush;
 
 	GENOS_ZeroMemory(&CmdBuffer, sizeof(GENOS_COMMAND_BUFFER));
@@ -100,7 +101,19 @@ GENOS_STATUS HalCm_SubmitCommands_g8(PCM_HAL_STATE pState,
 	CM_CHK_GENOSSTATUS(pHwInterface->pfnSendSyncTag
 			   (pHwInterface, &CmdBuffer));
 
-	HalCm_HwSendL3CacheConfig_g8(pState, &CmdBuffer);
+        if (pState->L3Config.L3_CNTLREG){
+		L3CacheConfig.dwL3CntlReg = pState->L3Config.L3_CNTLREG;
+	}
+	else {
+		if (GFX_IS_PRODUCT(pState->Platform, IGFX_CHERRYVIEW)) {
+		L3CacheConfig.dwL3CntlReg = pState->bSLMMode ? CM_CONFIG_CNTLREG_VALUE_G8_CHV_SLM :CM_CONFIG_CNTLREG_VALUE_G8_CHV_SLM;
+		}
+		else {
+		L3CacheConfig.dwL3CntlReg = pState->bSLMMode ? CM_CONFIG_CNTLREG_VALUE_G8_BDW_SLM : CM_CONFIG_CNTLREG_VALUE_G8_BDW_NONSLM;
+		}
+	}
+
+	HalCm_HwSendL3CacheConfig_g8(pState, &CmdBuffer,&L3CacheConfig);
 
 	if (enableGpGpu) {
 		cmd_select.DW0.PipelineSelect = GFXPIPELINE_GPGPU;
@@ -332,7 +345,8 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g8(PCM_HAL_STATE pState,
 }
 
 VOID HalCm_HwSendL3CacheConfig_g8(PCM_HAL_STATE pState,
-				  PGENOS_COMMAND_BUFFER pCmdBuffer)
+				  PGENOS_COMMAND_BUFFER pCmdBuffer,
+				  PGENHW_L3_CACHE_CONFIG  pL3CacheConfig)
 {
 	GENHW_LOAD_REGISTER_IMM_PARAM LoadRegImm;
 	PGENHW_HW_INTERFACE pHwInterface = pState->pHwInterface;
@@ -341,15 +355,7 @@ VOID HalCm_HwSendL3CacheConfig_g8(PCM_HAL_STATE pState,
 
 	LoadRegImm.dwRegisterAddress = GENHW_REG_L3_CACHE_CNTLREG_G8;
 
-	if (GFX_IS_PRODUCT(pState->Platform, IGFX_CHERRYVIEW)) {
-		LoadRegImm.dwData =
-		    pState->bSLMMode ? CM_CONFIG_CNTLREG_VALUE_G8_CHV_SLM :
-		    CM_CONFIG_CNTLREG_VALUE_G8_CHV_SLM;
-	} else {
-		LoadRegImm.dwData =
-		    pState->bSLMMode ? CM_CONFIG_CNTLREG_VALUE_G8_BDW_SLM :
-		    CM_CONFIG_CNTLREG_VALUE_G8_BDW_NONSLM;
-	}
+	LoadRegImm.dwData =pL3CacheConfig->dwL3CntlReg;
 
 	pHwInterface->pfnSendLoadRegImmCmd(pHwInterface, pCmdBuffer,
 					   &LoadRegImm);

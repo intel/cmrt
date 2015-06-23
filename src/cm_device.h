@@ -104,6 +104,8 @@ class CmDevice {
 					     CmThreadGroupSpace * &pTGS);
 	CM_RT_API INT DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS);
 
+        CM_RT_API INT SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c);
+
 	void *GetAccelData(void) {
 		return m_pAccelData;
 	}
@@ -221,6 +223,8 @@ class CmDevice {
 	UINT m_DDIVersion;
 	UINT m_Platform;
 	UINT m_CmDeviceRefCount;
+
+        L3_CONFIG_REGISTER_VALUES m_l3_c;
 
 	CSync m_CriticalSection_Program_Kernel;
 	CSync m_CriticalSection_Surface;

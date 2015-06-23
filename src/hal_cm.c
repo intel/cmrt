@@ -5743,6 +5743,13 @@ GENOS_STATUS HalCm_SetCaps(PCM_HAL_STATE pState,
 
 		break;
 
+       case DXVA_CM_MAX_HW_L3_CONFIG:
+		pState->L3Config.L3_SQCREG1  = pSetCapsParam->L3_SQCREG1;
+		pState->L3Config.L3_CNTLREG2 = pSetCapsParam->L3_CNTLREG2;
+		pState->L3Config.L3_CNTLREG3 = pSetCapsParam->L3_CNTLREG3;
+		pState->L3Config.L3_CNTLREG  = pSetCapsParam->L3_CNTLREG;
+		break;
+
 	default:
 		hr = GENOS_STATUS_UNKNOWN;
 		goto finish;

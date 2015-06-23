@@ -123,8 +123,8 @@ m_CmDeviceRefCount(0),
 m_ThreadGroupSpaceArray(CM_INIT_THREADGROUPSPACE_COUNT),
 m_ThreadGroupSpaceCount(0), m_TaskArray(CM_INIT_TASK_COUNT), m_TaskCount(0)
 {
+        CmSafeMemSet(&m_l3_c, 0, sizeof(L3_CONFIG_REGISTER_VALUES));
 	InitDevCreateOption(m_DevCreateOption, DevCreateOption);
-
 }
 
 CmDevice::~CmDevice(void)
@@ -1581,6 +1581,51 @@ INT CmDevice::GetGenStepInfo(UINT platform, char *&stepinfostr)
 	return CM_SUCCESS;
 }
 
+CM_RT_API INT CmDevice::SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c)
+{
+    INT upper_bound;
+    const L3_CONFIG_REGISTER_VALUES *l3_c;
+
+    switch (m_Platform)
+    {
+        case IGFX_GEN6_CORE:
+            return CM_FAILURE;
+
+        case IGFX_GEN7_CORE:
+            upper_bound = HSW_L3_CONFIG_NUM;
+            l3_c = &IVB_L3_PLANE[0];
+            break;
+
+        case IGFX_GEN7_5_CORE:
+            upper_bound = HSW_L3_CONFIG_NUM;
+            l3_c = HSW_L3_PLANE;
+            break;
+
+        case IGFX_GEN8_CORE:
+            upper_bound = BDW_L3_CONFIG_NUM;
+            l3_c = BDW_L3_PLANE;
+            break;
+
+	case IGFX_GEN9_CORE:
+            upper_bound = SKL_L3_CONFIG_NUM;
+            l3_c = SKL_L3_PLANE;
+            break;
+
+	default:
+            return CM_FAILURE;
+    }
+
+    if (l3_s_c>=  upper_bound || l3_s_c< 0)
+        return CM_FAILURE;
+;
+    m_l3_c.SQCREG1_VALUE  = l3_c[l3_s_c].SQCREG1_VALUE;
+    m_l3_c.CNTLREG2_VALUE = l3_c[l3_s_c].CNTLREG2_VALUE;
+    m_l3_c.CNTLREG3_VALUE = l3_c[l3_s_c].CNTLREG3_VALUE;
+    m_l3_c.CNTLREG_VALUE = l3_c[ l3_s_c ].CNTLREG_VALUE;
+    SetCapsInternal(CAP_L3_CONFIG, sizeof(L3_CONFIG_REGISTER_VALUES), &m_l3_c);
+    return CM_SUCCESS;
+}
+
 INT CmDevice::SetCapsInternal(CM_DEVICE_CAP_NAME capName, size_t capValueSize,
 			      void *pCapValue)
 {
@@ -1612,6 +1657,21 @@ INT CmDevice::SetCapsInternal(CM_DEVICE_CAP_NAME capName, size_t capValueSize,
 		setCaps.Type = DXVA_CM_MAX_HW_THREADS;
 		setCaps.MaxValue = *(UINT *) pCapValue;
 		break;
+
+	case CAP_L3_CONFIG:
+            if (capValueSize != sizeof(L3_CONFIG_REGISTER_VALUES)){
+                CM_ASSERT(0);
+                return CM_INVALIDE_L3_CONFIGURATION;
+               }
+            else {
+                L3_CONFIG_REGISTER_VALUES *l3_c = (L3_CONFIG_REGISTER_VALUES *)pCapValue;
+                setCaps.L3_SQCREG1 = l3_c->SQCREG1_VALUE;
+                setCaps.L3_CNTLREG2 = l3_c->CNTLREG2_VALUE;
+                setCaps.L3_CNTLREG3 = l3_c->CNTLREG3_VALUE;
+                setCaps.L3_CNTLREG = l3_c->CNTLREG_VALUE;
+                setCaps.Type = DXVA_CM_MAX_HW_L3_CONFIG;
+              }
+        break;
 
 	default:
 		return CM_FAILURE;

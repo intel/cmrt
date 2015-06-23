@@ -44,6 +44,7 @@ GENOS_STATUS HalCm_SubmitCommands_g75(PCM_HAL_STATE pState,
 	BOOL enableWalker = pState->WalkerParams.CmWalkerEnable;
 	BOOL enableGpGpu = pState->pTaskParam->blGpGpuWalkerEnabled;
 	GENOS_COMMAND_BUFFER CmdBuffer;
+	GENHW_L3_CACHE_CONFIG L3CacheConfig;
 	DWORD dwSyncTag;
 	PINT64 pTaskSyncLocation;
 	INT iSyncOffset;
@@ -95,7 +96,19 @@ GENOS_STATUS HalCm_SubmitCommands_g75(PCM_HAL_STATE pState,
 	CM_CHK_GENOSSTATUS(pHwInterface->pfnSendSyncTag
 			   (pHwInterface, &CmdBuffer));
 
-	HalCm_HwSendL3CacheConfig_g75(pState, &CmdBuffer);
+	if (pState->L3Config.L3_SQCREG1 || pState->L3Config.L3_CNTLREG2 || pState->L3Config.L3_CNTLREG3){
+		L3CacheConfig.dwL3SQCReg1  = pState->L3Config.L3_SQCREG1;
+		L3CacheConfig.dwL3CntlReg2 = pState->L3Config.L3_CNTLREG2;
+		L3CacheConfig.dwL3CntlReg3 = pState->L3Config.L3_CNTLREG3;
+	}
+	else {
+		L3CacheConfig.dwL3SQCReg1  = CM_CONFIG_SQCREG1_VALUE_G75;
+		L3CacheConfig.dwL3CntlReg2 = pState->bSLMMode ? CM_CONFIG_CNTLREG2_VALUE_G75_SLM: CM_CONFIG_CNTLREG2_VALUE_G75_NONSLM;
+		L3CacheConfig.dwL3CntlReg3 = pState->bSLMMode ? CM_CONFIG_CNTLREG3_VALUE_G75_SLM : CM_CONFIG_CNTLREG3_VALUE_G75_NONSLM;
+	}
+	L3CacheConfig.dwL3LRA1Reg  = CM_CONFIG_L3LRA1_VALUE_G75;
+
+	HalCm_HwSendL3CacheConfig_g75(pState, &CmdBuffer,&L3CacheConfig);
 
 	if (enableGpGpu) {
 		cmd_select.DW0.PipelineSelect = GFXPIPELINE_GPGPU;
@@ -290,22 +303,35 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g75(PCM_HAL_STATE pState,
 }
 
 VOID HalCm_HwSendL3CacheConfig_g75(PCM_HAL_STATE pState,
-				   PGENOS_COMMAND_BUFFER pCmdBuffer)
+				   PGENOS_COMMAND_BUFFER pCmdBuffer,
+				   PGENHW_L3_CACHE_CONFIG  pL3CacheConfig)
 {
 	GENHW_LOAD_REGISTER_IMM_PARAM LoadRegImm;
 	PGENHW_HW_INTERFACE pHwInterface = pState->pHwInterface;
 
 	GENOS_ZeroMemory(&LoadRegImm, sizeof(GENHW_LOAD_REGISTER_IMM_PARAM));
 	LoadRegImm.dwRegisterAddress = GENHW_REG_L3_CACHE_CNTLREG2_G75;
-	LoadRegImm.dwData = pState->bSLMMode ? CM_CONFIG_CNTLREG2_VALUE_G75_SLM
-	    : CM_CONFIG_CNTLREG2_VALUE_G75_NONSLM;
+	LoadRegImm.dwData = pL3CacheConfig->dwL3CntlReg2;
 	pHwInterface->pfnSendLoadRegImmCmd
 	    (pHwInterface, pCmdBuffer, &LoadRegImm);
 
 	GENOS_ZeroMemory(&LoadRegImm, sizeof(GENHW_LOAD_REGISTER_IMM_PARAM));
 	LoadRegImm.dwRegisterAddress = GENHW_REG_L3_CACHE_CNTLREG3_G75;
-	LoadRegImm.dwData = pState->bSLMMode ? CM_CONFIG_CNTLREG3_VALUE_G75_SLM
-	    : CM_CONFIG_CNTLREG3_VALUE_G75_NONSLM;
+	LoadRegImm.dwData = pL3CacheConfig->dwL3CntlReg3;
+
+	pHwInterface->pfnSendLoadRegImmCmd
+	    (pHwInterface, pCmdBuffer, &LoadRegImm);
+
+	GENOS_ZeroMemory(&LoadRegImm, sizeof(GENHW_LOAD_REGISTER_IMM_PARAM));
+	LoadRegImm.dwRegisterAddress = GENHW_REG_L3_CACHE_SQCREG1_G75;
+	LoadRegImm.dwData = pL3CacheConfig->dwL3SQCReg1;
+
+	pHwInterface->pfnSendLoadRegImmCmd
+            (pHwInterface, pCmdBuffer, &LoadRegImm);
+
+	GENOS_ZeroMemory(&LoadRegImm, sizeof(GENHW_LOAD_REGISTER_IMM_PARAM));
+	LoadRegImm.dwRegisterAddress = GENHW_REG_L3_CACHE_L3LRA1_G75;
+	LoadRegImm.dwData = pL3CacheConfig->dwL3LRA1Reg;
 
 	pHwInterface->pfnSendLoadRegImmCmd
 	    (pHwInterface, pCmdBuffer, &LoadRegImm);

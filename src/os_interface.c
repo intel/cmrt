@@ -48,6 +48,7 @@
 
 static int OpenDevice();
 static int updatePlatformInfo(PLATFORM * pPlatform);
+static void getRevId(unsigned short *value);
 
 GENOS_STATUS IntelGen_OsAddCommand(PGENOS_COMMAND_BUFFER pCmdBuffer,
 				   PCVOID pCmd, DWORD dwCmdSize)
@@ -409,7 +410,7 @@ HRESULT Ctx_InitContext(GENOS_OS_CONTEXT * pContext,
 		pContext->wDeviceID = iDeviceId;
 		pContext->platform.pchDeviceID = iDeviceId;
 
-		pContext->platform.usRevId = 0;
+		getRevId(&pContext->platform.usRevId);
 	}
 
 	if (FALSE == IS_GEN7_5_PLUS(iDeviceId)) {
@@ -1936,4 +1937,25 @@ static int updatePlatformInfo(PLATFORM * pPlatform)
 	pPlatform->ePlatformType = pPlatform->ePlatformType;
 
 	return 0;
+}
+
+static void getRevId(unsigned short *value)
+{
+#define PCI_REVID       8
+	FILE *fp;
+	CHAR config_data[16];
+
+	fp = fopen("/sys/devices/pci0000:00/0000:00:02.0/config", "r");
+
+	if (fp) {
+		if (fread(config_data, 1, 16, fp))
+			*value = config_data[PCI_REVID];
+		else
+			*value = 2;	/* assume it is at least  B-steping */
+		fclose(fp);
+	} else {
+		*value = 2;	/* assume it is at least  B-steping */
+	}
+
+	return;
 }

@@ -387,6 +387,8 @@ typedef enum _CM_RETURN_CODE {
 #define SIWA_UNTIL_BDW_F0   SIWA_UNTIL_A6
 #define SIWA_UNTIL_BDW_G0   SIWA_UNTIL_A7
 
+#define MAX_STEPPING_NUM    10
+
 #define CM_26ZI_BLOCK_WIDTH              16
 #define CM_26ZI_BLOCK_HEIGHT             8
 

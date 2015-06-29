@@ -1538,6 +1538,20 @@ INT CmDevice::GetGenStepInfo(UINT platform, char *&stepinfostr)
 {
 	INT hr;
 
+	const char *CmSteppingInfo[MAX_STEPPING_NUM] =
+	{
+		"A",
+		"B",
+		"C",
+		"D",
+		"E",
+		"F",
+		"G",
+		"H",
+		"I",
+		"J"
+	};
+
 	DXVA_CM_QUERY_CAPS queryCaps;
 	CmSafeMemSet(&queryCaps, 0, sizeof(queryCaps));
 	queryCaps.Type = DXVA_CM_QUERY_STEP;
@@ -1557,24 +1571,35 @@ INT CmDevice::GetGenStepInfo(UINT platform, char *&stepinfostr)
 	UINT stepid = queryCaps.genStepId;
 	UINT ulStepId = (1 << stepid);
 
-	switch (ulStepId) {
-	case SIWA_ONLY_BDW_A0:
-		stepinfostr = (char *)HW_GT_STEPPING_A0;
-		break;
+	if (platform < IGFX_GEN9_CORE)
+	{
+		switch (ulStepId) {
+		case SIWA_ONLY_BDW_A0:
+			stepinfostr = (char *)HW_GT_STEPPING_A0;
+			break;
 
-	case SIWA_ONLY_HSW_A1:
-		stepinfostr = (char *)HW_GT_STEPPING_A1;
-		break;
+		case SIWA_ONLY_HSW_A1:
+			stepinfostr = (char *)HW_GT_STEPPING_A1;
+			break;
 
-	case SIWA_ONLY_HSW_B0:
-		stepinfostr = (char *)HW_GT_STEPPING_B0;
-		break;
+		case SIWA_ONLY_HSW_B0:
+			stepinfostr = (char *)HW_GT_STEPPING_B0;
+			break;
 
-	case SIWA_ONLY_HSW_C0:
-		stepinfostr = (char *)HW_GT_STEPPING_C0;
-		break;
+		case SIWA_ONLY_HSW_C0:
+			stepinfostr = (char *)HW_GT_STEPPING_C0;
+			break;
 
-	default:
+		default:
+			stepinfostr = NULL;
+		}
+	}
+	else if (stepid < MAX_STEPPING_NUM)
+	{
+		stepinfostr = (char*)CmSteppingInfo[stepid];
+	}
+	else
+	{
 		stepinfostr = NULL;
 	}
 

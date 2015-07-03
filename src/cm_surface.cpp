@@ -70,11 +70,11 @@ INT CmSurface::FlushDeviceQueue(CmEvent * pEvent)
 		return CM_FAILURE;
 	}
 
-	CmDevice *pCmDev = NULL;
+	CmDevice_RT *pCmDev = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDev);
 	CM_ASSERT(pCmDev);
 
-	CmQueue *pCmQueue = NULL;
+	CmQueue_RT *pCmQueue = NULL;
 	pCmDev->GetQueue(pCmQueue);
 	pCmQueue->AcquireQueueLock();
 
@@ -106,8 +106,8 @@ INT CmSurface::FlushDeviceQueue(CmEvent * pEvent)
 
 INT CmSurface::TouchDeviceQueue()
 {
-	CmDevice *pCmDev = NULL;
-	CmQueue *pCmQueue = NULL;
+	CmDevice_RT *pCmDev = NULL;
+	CmQueue_RT *pCmQueue = NULL;
 
 	m_SurfaceMgr->GetCmDevice(pCmDev);
 	CM_ASSERT(pCmDev);
@@ -133,7 +133,7 @@ INT CmSurface::WaitForReferenceFree()
 BOOL CmSurface::MemoryObjectCtrlPolicyCheck(MEMORY_OBJECT_CONTROL mem_ctrl,
 					    MEMORY_TYPE mem_type, UINT age)
 {
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	UINT platform = IGFX_UNKNOWN_CORE;
 
 	if (mem_ctrl == MEMORY_OBJECT_CONTROL_UNKNOW) {

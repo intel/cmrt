@@ -801,16 +801,13 @@ class SurfaceIndex {
 		this->index += _n;
 		return *this;
 	};
-	virtual unsigned int get_data(void) {
+	unsigned int get_data(void) {
 		return index;
 	};
 
-	virtual ~ SurfaceIndex() {
-	};
-
  private:
+	void *vtable_padding_for_libgfxoffload;
 	unsigned int index;
-
 	unsigned char extra_byte;
 
 	SurfaceIndex & operator=(const SurfaceIndex & other);

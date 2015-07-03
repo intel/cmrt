@@ -30,7 +30,7 @@
 #include "cm_group_space.h"
 #include "cm_device.h"
 
-INT CmThreadGroupSpace::Create(CmDevice * pDevice, UINT index,
+INT CmThreadGroupSpace_RT::Create(CmDevice_RT * pDevice, UINT index,
 			       UINT thrdSpaceWidth, UINT thrdSpaceHeight,
 			       UINT grpSpaceWidth, UINT grpSpaceHeight,
 			       CmThreadGroupSpace * &pTGS)
@@ -50,30 +50,33 @@ INT CmThreadGroupSpace::Create(CmDevice * pDevice, UINT index,
 	}
 
 	INT result = CM_SUCCESS;
-	pTGS =
-	    new(std::nothrow) CmThreadGroupSpace(pDevice, index, thrdSpaceWidth,
+	CmThreadGroupSpace_RT *pTGS_RT =
+	    new(std::nothrow) CmThreadGroupSpace_RT(pDevice, index, thrdSpaceWidth,
 						 thrdSpaceHeight, grpSpaceWidth,
 						 grpSpaceHeight);
-	if (pTGS) {
-		result = pTGS->Initialize();
-		if (result != CM_SUCCESS) {
-			CmThreadGroupSpace::Destroy(pTGS);
-		}
+	if (pTGS_RT) {
+            result = pTGS_RT->Initialize();
+            if (result != CM_SUCCESS) {
+                CmThreadGroupSpace_RT::Destroy(pTGS);
+            }
+            else {
+                pTGS = static_cast < CmThreadGroupSpace * >(pTGS_RT);
+            }
 	} else {
-		CM_ASSERT(0);
-		result = CM_OUT_OF_HOST_MEMORY;
+	    CM_ASSERT(0);
+            result = CM_OUT_OF_HOST_MEMORY;
 	}
 	return result;
 }
 
-INT CmThreadGroupSpace::Destroy(CmThreadGroupSpace * &pTGS)
+INT CmThreadGroupSpace_RT::Destroy(CmThreadGroupSpace * &pTGS)
 {
 	CmSafeDelete(pTGS);
 	pTGS = NULL;
 	return CM_SUCCESS;
 }
 
-INT CmThreadGroupSpace::GetThreadGroupSpaceSize(UINT & thrdSpaceWidth,
+INT CmThreadGroupSpace_RT::GetThreadGroupSpaceSize(UINT & thrdSpaceWidth,
 						UINT & thrdSpaceHeight,
 						UINT & grpSpaceWidth,
 						UINT & grpSpaceHeight)
@@ -87,7 +90,7 @@ INT CmThreadGroupSpace::GetThreadGroupSpaceSize(UINT & thrdSpaceWidth,
 	return CM_SUCCESS;
 }
 
- CmThreadGroupSpace::CmThreadGroupSpace(CmDevice * pCmDev, UINT index, UINT thrdSpaceWidth, UINT thrdSpaceHeight, UINT grpSpaceWidth, UINT grpSpaceHeight):
+CmThreadGroupSpace_RT::CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth, UINT thrdSpaceHeight, UINT grpSpaceWidth, UINT grpSpaceHeight):
 m_pCmDev(pCmDev),
 m_threadSpaceWidth(thrdSpaceWidth),
 m_threadSpaceHeight(thrdSpaceHeight),
@@ -96,16 +99,16 @@ m_groupSpaceHeight(grpSpaceHeight), m_IndexInTGSArray(index)
 {
 }
 
-CmThreadGroupSpace::~CmThreadGroupSpace(void)
+CmThreadGroupSpace_RT::~CmThreadGroupSpace_RT(void)
 {
 }
 
-INT CmThreadGroupSpace::Initialize(void)
+INT CmThreadGroupSpace_RT::Initialize(void)
 {
 	return CM_SUCCESS;
 }
 
-UINT CmThreadGroupSpace::GetIndexInTGsArray(void)
+UINT CmThreadGroupSpace_RT::GetIndexInTGsArray(void)
 {
 	return m_IndexInTGSArray;
 }

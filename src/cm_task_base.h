@@ -24,38 +24,18 @@
  * Authors:
  *     Wei Lin<wei.w.lin@intel.com>
  *     Yuting Yang<yuting.yang@intel.com>
+ *     Lina Sun<lina.sun@intel.com>
+ *     Zhao Yakui <yakui.zhao@intel.com>
  */
-#pragma once
 
-class CmDevice_RT;
+#ifndef _Cm_Task_Base_H_
+#define _Cm_Task_Base_H_
 
-#include "cm_group_space_base.h"
-
-class CmThreadGroupSpace_RT : public CmThreadGroupSpace {
+class CmTask {
  public:
-	static INT Create(CmDevice_RT * pDevice, UINT index, UINT thrdSpaceWidth,
-			  UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			  UINT grpSpaceHeight, CmThreadGroupSpace * &pTGS);
-	static INT Destroy(CmThreadGroupSpace * &pTGS);
-
-	INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
-				    UINT & threadSpaceHeight,
-				    UINT & groupSpaceWidth,
-				    UINT & groupSpaceHeight) const;
-	UINT GetIndexInTGsArray();
-
- protected:
-	CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth,
-			    UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			    UINT grpSpaceHeight);
-	virtual ~CmThreadGroupSpace_RT(void);
-	INT Initialize(void);
-
-	CmDevice_RT *m_pCmDev;
-	UINT m_threadSpaceWidth;
-	UINT m_threadSpaceHeight;
-	UINT m_groupSpaceWidth;
-	UINT m_groupSpaceHeight;
-
-	UINT m_IndexInTGSArray;
+	virtual INT AddKernel(CmKernel * pKernel) = 0;
+	virtual INT Reset(void) = 0;
+	virtual INT AddSync(void) = 0;
 };
+
+#endif /* _Cm_Task_Base_H_ */

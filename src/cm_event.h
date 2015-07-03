@@ -33,15 +33,17 @@
 
 class CmTaskInternal;
 
-class CmEvent:public CmDynamicArray {
+#include "cm_event_base.h"
+
+class CmEvent_RT : public CmEvent, CmDynamicArray {
  public:
 
 	static INT Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
-			  CmDevice * pCmDev, BOOL isVisible, CmEvent * &pEvent);
-	static INT Destroy(CmEvent * &pEvent);
+			  CmDevice_RT * pCmDev, BOOL isVisible, CmEvent_RT * &pEvent);
+	static INT Destroy(CmEvent_RT * &pEvent);
 
-	CM_RT_API INT GetStatus(CM_STATUS & status);
-	CM_RT_API INT GetExecutionTime(UINT64 & time);
+	virtual CM_RT_API INT GetStatus(CM_STATUS & status);
+	virtual CM_RT_API INT GetExecutionTime(UINT64 & time);
 	CM_RT_API INT GetSubmitTime(LARGE_INTEGER & time);
 	CM_RT_API INT GetHWStartTime(LARGE_INTEGER & time);
 	CM_RT_API INT GetHWEndTime(LARGE_INTEGER & time);
@@ -57,7 +59,7 @@ class CmEvent:public CmDynamicArray {
 	INT SetTaskDriverId(INT id);
 	INT GetTaskDriverId(INT & id);
 	INT SetTaskOsData(PVOID data);
-	CM_RT_API INT WaitForTaskFinished(DWORD dwTimeOutMs =
+	virtual CM_RT_API INT WaitForTaskFinished(DWORD dwTimeOutMs =
 					  CM_MAX_TIMEOUT_MS);
 
 	INT Acquire(void);
@@ -67,9 +69,9 @@ class CmEvent:public CmDynamicArray {
 			   CmThreadGroupSpace * pThreadGroupSpace);
 
  protected:
-	 CmEvent(UINT index, CmTaskInternal * pTask, INT taskDriverId,
-		 CmDevice * pCmDev, BOOL isVisible);
-	~CmEvent(void);
+	CmEvent_RT(UINT index, CmTaskInternal * pTask, INT taskDriverId,
+		 CmDevice_RT * pCmDev, BOOL isVisible);
+	virtual ~CmEvent_RT(void);
 	INT Initialize(void);
 	INT Query(void);
 
@@ -90,8 +92,8 @@ class CmEvent:public CmDynamicArray {
 	UINT *m_ThreadSpace;
 	UINT m_KernelCount;
 
-	CmDevice *m_pDevice;
-	CmQueue *m_pQueue;
+	CmDevice_RT *m_pDevice;
+	CmQueue_RT *m_pQueue;
 
 	INT m_RefCount;
 

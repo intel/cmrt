@@ -43,9 +43,9 @@
 #include "gen_debugger.h"
 #include "hal_cm.h"
 
-CSync CmDevice::GlobalCriticalSection_Surf2DUserDataLock = CSync();
+CSync CmDevice_RT::GlobalCriticalSection_Surf2DUserDataLock = CSync();
 
-INT CmDevice::Create(CmDriverContext * pDriverContext, CmDevice * &pDevice,
+INT CmDevice_RT::Create(CmDriverContext * pDriverContext, CmDevice_RT * &pDevice,
 		     UINT DevCreateOption)
 {
 	INT result = CM_FAILURE;
@@ -55,13 +55,13 @@ INT CmDevice::Create(CmDriverContext * pDriverContext, CmDevice * &pDevice,
 		return CM_SUCCESS;
 	}
 
-	pDevice = new(std::nothrow) CmDevice(DevCreateOption);
+	pDevice = new(std::nothrow) CmDevice_RT(DevCreateOption);
 	if (pDevice) {
 		pDevice->Acquire();
 		result = pDevice->Initialize(pDriverContext);
 		if (result != CM_SUCCESS) {
 			CM_ASSERT(0);
-			CmDevice::Destroy(pDevice);
+			CmDevice_RT::Destroy(pDevice);
 			pDevice = NULL;
 		}
 	} else {
@@ -75,7 +75,7 @@ INT CmDevice::Create(CmDriverContext * pDriverContext, CmDevice * &pDevice,
 	return result;
 }
 
-INT CmDevice::Acquire(void)
+INT CmDevice_RT::Acquire(void)
 {
 	CLock locker(m_CriticalSection_DeviceRefCount);
 
@@ -83,7 +83,7 @@ INT CmDevice::Acquire(void)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::Release(void)
+INT CmDevice_RT::Release(void)
 {
 	CLock locker(m_CriticalSection_DeviceRefCount);
 
@@ -92,7 +92,7 @@ INT CmDevice::Release(void)
 	return m_CmDeviceRefCount;
 }
 
-INT CmDevice::Destroy(CmDevice * &pDevice)
+INT CmDevice_RT::Destroy(CmDevice_RT * &pDevice)
 {
 	INT result = CM_SUCCESS;
 
@@ -106,7 +106,7 @@ INT CmDevice::Destroy(CmDevice * &pDevice)
 	return result;
 }
 
- CmDevice::CmDevice(UINT DevCreateOption):
+ CmDevice_RT::CmDevice_RT(UINT DevCreateOption):
 m_pUmdContext(NULL),
 m_pAccelData(NULL),
 m_AccelSize(0),
@@ -132,12 +132,12 @@ m_ThreadGroupSpaceCount(0), m_TaskArray(CM_INIT_TASK_COUNT), m_TaskCount(0)
 	InitDevCreateOption(m_DevCreateOption, DevCreateOption);
 }
 
-CmDevice::~CmDevice(void)
+CmDevice_RT::~CmDevice_RT(void)
 {
 	for (UINT i = 0; i < m_KernelCount; i++) {
-		CmKernel *pKernel = (CmKernel *) m_KernelArray.GetElement(i);
+		CmKernel_RT *pKernel = (CmKernel_RT *) m_KernelArray.GetElement(i);
 		if (pKernel) {
-			CmProgram *pProgram = NULL;
+			CmProgram_RT *pProgram = NULL;
 			pKernel->GetCmProgram(pProgram);
 			UINT indexInProgramArray;
 			for (indexInProgramArray = 0;
@@ -149,7 +149,7 @@ CmDevice::~CmDevice(void)
 					break;
 				}
 			}
-			CmKernel::Destroy(pKernel, pProgram);
+			CmKernel_RT::Destroy(pKernel, pProgram);
 			if ((pProgram == NULL)
 			    && (indexInProgramArray < m_ProgramCount)) {
 				m_ProgramArray.SetElement(indexInProgramArray,
@@ -160,15 +160,15 @@ CmDevice::~CmDevice(void)
 	m_KernelArray.Delete();
 
 	for (UINT i = 0; i < m_ProgramCount; i++) {
-		CmProgram *pProgram =
-		    (CmProgram *) m_ProgramArray.GetElement(i);
+		CmProgram_RT *pProgram =
+		    (CmProgram_RT *) m_ProgramArray.GetElement(i);
 		while (pProgram) {
-			CmProgram::Destroy(pProgram);
+			CmProgram_RT::Destroy(pProgram);
 		}
 	}
 	m_ProgramArray.Delete();
 
-	UINT ThreadSpaceArrayUsedSize = m_ThreadSpaceArray.GetMaxSize();
+	UINT ThreadSpaceArrayUsedSize = m_ThreadSpaceArray.GetSize();
 	for (UINT i = 0; i < ThreadSpaceArrayUsedSize; i++) {
 		CmThreadSpace *pTS_RT =
 		    (CmThreadSpace *) m_ThreadSpaceArray.GetElement(i);
@@ -182,16 +182,16 @@ CmDevice::~CmDevice(void)
 		CmThreadGroupSpace *pTGS = (CmThreadGroupSpace *)
 		    m_ThreadGroupSpaceArray.GetElement(i);
 		if (pTGS) {
-			CmThreadGroupSpace::Destroy(pTGS);
+			CmThreadGroupSpace_RT::Destroy(pTGS);
 		}
 	}
 	m_ThreadGroupSpaceArray.Delete();
 
-	UINT TaskArrayUsedSize = m_TaskArray.GetMaxSize();
+	UINT TaskArrayUsedSize = m_TaskArray.GetSize();
 	for (UINT i = 0; i < TaskArrayUsedSize; i++) {
-		CmTask *pTask = (CmTask *) m_TaskArray.GetElement(i);
+		CmTask_RT *pTask = (CmTask_RT *) m_TaskArray.GetElement(i);
 		if (pTask) {
-			CmTask::Destroy(pTask);
+			CmTask_RT::Destroy(pTask);
 		}
 	}
 	m_TaskArray.Delete();
@@ -206,7 +206,7 @@ CmDevice::~CmDevice(void)
 	DestroyAuxDevice();
 };
 
-INT CmDevice::Initialize(CmDriverContext * pDriverContext)
+INT CmDevice_RT::Initialize(CmDriverContext * pDriverContext)
 {
 	INT result = CreateAuxDevice(pDriverContext);
 
@@ -234,7 +234,7 @@ INT CmDevice::Initialize(CmDriverContext * pDriverContext)
 	return result;
 }
 
-INT CmDevice::CreateAuxDevice(CmDriverContext * pDriverContext)
+INT CmDevice_RT::CreateAuxDevice(CmDriverContext * pDriverContext)
 {
 	INT hr = CM_SUCCESS;
 	PCM_HAL_STATE pCmHalState;
@@ -276,7 +276,7 @@ INT CmDevice::CreateAuxDevice(CmDriverContext * pDriverContext)
 	return hr;
 }
 
-INT CmDevice::DestroyAuxDevice()
+INT CmDevice_RT::DestroyAuxDevice()
 {
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) m_pAccelData;
 
@@ -292,7 +292,7 @@ INT CmDevice::DestroyAuxDevice()
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmDevice::CreateBuffer(UINT size, CmBuffer * &pSurface)
+CM_RT_API INT CmDevice_RT::CreateBuffer(UINT size, CmBuffer * &pSurface)
 {
 	if ((size < CM_MIN_SURF_WIDTH) || (size > CM_MAX_1D_SURF_WIDTH)) {
 		CM_ASSERT(0);
@@ -311,7 +311,7 @@ CM_RT_API INT CmDevice::CreateBuffer(UINT size, CmBuffer * &pSurface)
 }
 
 CM_RT_API INT
-    CmDevice::CreateBuffer(CmOsResource * pCmOsResource, CmBuffer * &pSurface)
+    CmDevice_RT::CreateBuffer(CmOsResource * pCmOsResource, CmBuffer * &pSurface)
 {
 	INT result = CM_SUCCESS;
 	if (pCmOsResource == NULL) {
@@ -331,7 +331,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmDevice::CreateBufferUP(UINT size, void *pSysMem, CmBufferUP * &pSurface)
+    CmDevice_RT::CreateBufferUP(UINT size, void *pSysMem, CmBufferUP * &pSurface)
 {
 	if ((size < CM_MIN_SURF_WIDTH) || (size > CM_MAX_1D_SURF_WIDTH)) {
 		CM_ASSERT(0);
@@ -348,7 +348,7 @@ CM_RT_API INT
 	return result;
 }
 
-CM_RT_API INT CmDevice::DestroyBufferUP(CmBufferUP * &pSurface)
+CM_RT_API INT CmDevice_RT::DestroyBufferUP(CmBufferUP * &pSurface)
 {
 	CmBuffer_RT *temp = NULL;
 	if (pSurface && (pSurface->Type() == CM_ENUM_CLASS_TYPE_CMBUFFER_RT)) {
@@ -370,7 +370,7 @@ CM_RT_API INT CmDevice::DestroyBufferUP(CmBufferUP * &pSurface)
 	return status;
 }
 
-CM_RT_API INT CmDevice::ForceDestroyBufferUP(CmBufferUP * &pSurface)
+CM_RT_API INT CmDevice_RT::ForceDestroyBufferUP(CmBufferUP * &pSurface)
 {
 	CmBuffer_RT *temp = NULL;
 	if (pSurface && (pSurface->Type() == CM_ENUM_CLASS_TYPE_CMBUFFER_RT)) {
@@ -389,7 +389,7 @@ CM_RT_API INT CmDevice::ForceDestroyBufferUP(CmBufferUP * &pSurface)
 	return status;
 }
 
-INT CmDevice::DestroyBufferUP(CmBufferUP * &pSurface, INT iIndexInPool,
+INT CmDevice_RT::DestroyBufferUP(CmBufferUP * &pSurface, INT iIndexInPool,
 			      INT iSurfaceID, SURFACE_DESTROY_KIND kind)
 {
 	CmBuffer_RT *temp = NULL;
@@ -416,7 +416,7 @@ INT CmDevice::DestroyBufferUP(CmBufferUP * &pSurface, INT iIndexInPool,
 }
 
 CM_RT_API INT
-    CmDevice::CreateSurface2DUP(UINT width, UINT height,
+    CmDevice_RT::CreateSurface2DUP(UINT width, UINT height,
 				CM_SURFACE_FORMAT format, void *pSysMem,
 				CmSurface2DUP * &pSurface)
 {
@@ -427,12 +427,15 @@ CM_RT_API INT
 	}
 
 	CLock locker(m_CriticalSection_Surface);
-	return m_pSurfaceMgr->CreateSurface2DUP(width, height, format, pSysMem,
-						pSurface);
+	CmSurface2DUP_RT* ptmp = NULL;
+	int res = m_pSurfaceMgr->CreateSurface2DUP(width, height, format, pSysMem,
+						ptmp);
+	pSurface = ptmp;
+	return res;
 }
 
 CM_RT_API INT
-    CmDevice::CreateSurface2D(UINT width, UINT height, CM_SURFACE_FORMAT format,
+    CmDevice_RT::CreateSurface2D(UINT width, UINT height, CM_SURFACE_FORMAT format,
 			      CmSurface2D * &pSurface)
 {
 	CLock locker(m_CriticalSection_Surface);
@@ -442,7 +445,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmDevice::CreateSurface2D(CmOsResource * pCmOsResource,
+    CmDevice_RT::CreateSurface2D(CmOsResource * pCmOsResource,
 			      CmSurface2D * &pSurface)
 {
 	if (pCmOsResource == NULL) {
@@ -454,7 +457,7 @@ CM_RT_API INT
 	return m_pSurfaceMgr->CreateSurface2D(pCmOsResource, FALSE, pSurface);
 }
 
-INT CmDevice::DestroySurface(CmBuffer * &pSurface, INT iIndexInPool,
+INT CmDevice_RT::DestroySurface(CmBuffer * &pSurface, INT iIndexInPool,
 			     INT iSurfaceID, SURFACE_DESTROY_KIND kind)
 {
 	CLock locker(m_CriticalSection_Surface);
@@ -481,7 +484,7 @@ INT CmDevice::DestroySurface(CmBuffer * &pSurface, INT iIndexInPool,
 	return status;
 }
 
-CM_RT_API INT CmDevice::DestroySurface(CmBuffer * &pSurface)
+CM_RT_API INT CmDevice_RT::DestroySurface(CmBuffer * &pSurface)
 {
 	CmBuffer_RT *temp = NULL;
 	if (pSurface && (pSurface->Type() == CM_ENUM_CLASS_TYPE_CMBUFFER_RT)) {
@@ -502,11 +505,11 @@ CM_RT_API INT CmDevice::DestroySurface(CmBuffer * &pSurface)
 	}
 }
 
-CM_RT_API INT CmDevice::DestroySurface(CmSurface2DUP * &pSurface)
+CM_RT_API INT CmDevice_RT::DestroySurface(CmSurface2DUP * &pSurface)
 {
 	CLock locker(m_CriticalSection_Surface);
 
-	INT status = m_pSurfaceMgr->DestroySurface(pSurface, APP_DESTROY);
+	INT status = m_pSurfaceMgr->DestroySurface((CmSurface2DUP_RT * &)pSurface, APP_DESTROY);
 
 	if (status != CM_FAILURE) {
 		pSurface = NULL;
@@ -516,7 +519,25 @@ CM_RT_API INT CmDevice::DestroySurface(CmSurface2DUP * &pSurface)
 	}
 }
 
-INT CmDevice::DestroySurface(CmSurface2DUP * &pSurface, INT iIndexInPool,
+INT CmDevice_RT::DestroySurface(CmSurface2DUP * &pSurface, INT iIndexInPool,
+			     INT iSurfaceID, SURFACE_DESTROY_KIND kind)
+{
+	CLock locker(m_CriticalSection_Surface);
+
+	INT currentID = m_pSurfaceMgr->GetSurfaceIdInPool(iIndexInPool);
+	if (currentID > iSurfaceID) {
+		return CM_SUCCESS;
+	}
+
+	INT status = m_pSurfaceMgr->DestroySurface((CmSurface2DUP_RT * &)pSurface, kind);
+
+	if (status == CM_SUCCESS) {
+		pSurface = NULL;
+	}
+	return status;
+}
+
+INT CmDevice_RT::DestroySurface(CmSurface2D * &pSurface, INT iIndexInPool,
 			     INT iSurfaceID, SURFACE_DESTROY_KIND kind)
 {
 	CLock locker(m_CriticalSection_Surface);
@@ -531,29 +552,11 @@ INT CmDevice::DestroySurface(CmSurface2DUP * &pSurface, INT iIndexInPool,
 	if (status == CM_SUCCESS) {
 		pSurface = NULL;
 	}
-	return status;
-}
-
-INT CmDevice::DestroySurface(CmSurface2D * &pSurface, INT iIndexInPool,
-			     INT iSurfaceID, SURFACE_DESTROY_KIND kind)
-{
-	CLock locker(m_CriticalSection_Surface);
-
-	INT currentID = m_pSurfaceMgr->GetSurfaceIdInPool(iIndexInPool);
-	if (currentID > iSurfaceID) {
-		return CM_SUCCESS;
-	}
-
-	INT status = m_pSurfaceMgr->DestroySurface(pSurface, kind);
-
-	if (status == CM_SUCCESS) {
-		pSurface = NULL;
-	}
 
 	return status;
 }
 
-CM_RT_API INT CmDevice::DestroySurface(CmSurface2D * &pSurface)
+CM_RT_API INT CmDevice_RT::DestroySurface(CmSurface2D * &pSurface)
 {
 	CLock locker(m_CriticalSection_Surface);
 
@@ -569,7 +572,7 @@ CM_RT_API INT CmDevice::DestroySurface(CmSurface2D * &pSurface)
 	return status;
 }
 
-INT CmDevice::GetJITCompileFnt(pJITCompile & fJITCompile)
+INT CmDevice_RT::GetJITCompileFnt(pJITCompile & fJITCompile)
 {
 	if (m_fJITCompile) {
 		fJITCompile = m_fJITCompile;
@@ -599,7 +602,7 @@ INT CmDevice::GetJITCompileFnt(pJITCompile & fJITCompile)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::GetFreeBlockFnt(pFreeBlock & fFreeBlock)
+INT CmDevice_RT::GetFreeBlockFnt(pFreeBlock & fFreeBlock)
 {
 	if (m_fFreeBlock) {
 		fFreeBlock = m_fFreeBlock;
@@ -629,7 +632,7 @@ INT CmDevice::GetFreeBlockFnt(pFreeBlock & fFreeBlock)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::GetJITVersionFnt(pJITVersion & fJITVersion)
+INT CmDevice_RT::GetJITVersionFnt(pJITVersion & fJITVersion)
 {
 	if (m_fJITVersion) {
 		fJITVersion = m_fJITVersion;
@@ -659,7 +662,7 @@ INT CmDevice::GetJITVersionFnt(pJITVersion & fJITVersion)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::LoadJITDll(void)
+INT CmDevice_RT::LoadJITDll(void)
 {
 	int result = 0;
 
@@ -698,7 +701,7 @@ INT CmDevice::LoadJITDll(void)
 	return result;
 }
 
-CM_RT_API INT CmDevice::GetGenPlatform(UINT & platform)
+CM_RT_API INT CmDevice_RT::GetGenPlatform(UINT & platform)
 {
 	if (m_Platform != IGFX_UNKNOWN_CORE) {
 		platform = m_Platform;
@@ -727,7 +730,7 @@ CM_RT_API INT CmDevice::GetGenPlatform(UINT & platform)
 }
 
 CM_RT_API INT
-    CmDevice::GetSurface2DInfo(UINT width, UINT height,
+    CmDevice_RT::GetSurface2DInfo(UINT width, UINT height,
 			       CM_SURFACE_FORMAT format, UINT & pitch,
 			       UINT & physicalSize)
 {
@@ -755,14 +758,14 @@ CM_RT_API INT
 	return hr;
 }
 
-INT CmDevice::CreateQueue_Internel(void)
+INT CmDevice_RT::CreateQueue_Internel(void)
 {
 	if (m_pQueue) {
 		CM_ASSERTMESSAGE("Failed to create more than one queue.");
 		return CM_FAILURE;
 	}
 
-	INT result = CmQueue::Create(this, m_pQueue);
+	INT result = CmQueue_RT::Create(this, m_pQueue);
 	if (result != CM_SUCCESS) {
 		CM_ASSERTMESSAGE("Failed to create queue.");
 		return CM_FAILURE;
@@ -771,34 +774,34 @@ INT CmDevice::CreateQueue_Internel(void)
 	return result;
 }
 
-INT CmDevice::GetSurfaceManager(CmSurfaceManager * &pSurfaceMgr)
+INT CmDevice_RT::GetSurfaceManager(CmSurfaceManager * &pSurfaceMgr)
 {
 	pSurfaceMgr = m_pSurfaceMgr;
 	return CM_SUCCESS;
 }
 
-CSync *CmDevice::GetSurfaceLock()
+CSync *CmDevice_RT::GetSurfaceLock()
 {
 	return &m_CriticalSection_ReadWriteSurface2D;
 }
 
-CSync *CmDevice::GetSurfaceCreationLock()
+CSync *CmDevice_RT::GetSurfaceCreationLock()
 {
 	return &m_CriticalSection_Surface;
 }
 
-CSync *CmDevice::GetProgramKernelLock()
+CSync *CmDevice_RT::GetProgramKernelLock()
 {
 	return &m_CriticalSection_Program_Kernel;
 }
 
-INT CmDevice::GetQueue(CmQueue * &pQueue)
+INT CmDevice_RT::GetQueue(CmQueue_RT * &pQueue)
 {
 	pQueue = m_pQueue;
 	return CM_SUCCESS;
 }
 
-INT CmDevice::GetHalMaxValues(CM_HAL_MAX_VALUES * &pHalMaxValues,
+INT CmDevice_RT::GetHalMaxValues(CM_HAL_MAX_VALUES * &pHalMaxValues,
 			      CM_HAL_MAX_VALUES_EX * &pHalMaxValuesEx)
 {
 	pHalMaxValues = &m_HalMaxValues;
@@ -807,7 +810,7 @@ INT CmDevice::GetHalMaxValues(CM_HAL_MAX_VALUES * &pHalMaxValues,
 	return CM_SUCCESS;
 }
 
-INT CmDevice::GetMaxValueFromCaps(CM_HAL_MAX_VALUES & MaxValues,
+INT CmDevice_RT::GetMaxValueFromCaps(CM_HAL_MAX_VALUES & MaxValues,
 				  CM_HAL_MAX_VALUES_EX & MaxValuesEx)
 {
 	DXVA_CM_QUERY_CAPS queryCaps;
@@ -840,7 +843,7 @@ INT CmDevice::GetMaxValueFromCaps(CM_HAL_MAX_VALUES & MaxValues,
 	return CM_SUCCESS;
 }
 
-INT CmDevice::GetCapsInternal(PVOID pCaps, PUINT puSize)
+INT CmDevice_RT::GetCapsInternal(PVOID pCaps, PUINT puSize)
 {
 	PDXVA_CM_QUERY_CAPS pQueryCaps;
 	PCM_CONTEXT pCmData;
@@ -963,7 +966,7 @@ INT CmDevice::GetCapsInternal(PVOID pCaps, PUINT puSize)
 }
 
 CM_RT_API INT
-    CmDevice::GetCaps(CM_DEVICE_CAP_NAME capName, size_t & capValueSize,
+    CmDevice_RT::GetCaps(CM_DEVICE_CAP_NAME capName, size_t & capValueSize,
 		      void *pCapValue)
 {
 	PCM_CONTEXT pCmData;
@@ -1274,7 +1277,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmDevice::LoadProgram(void *pCommonISACode, const UINT size,
+    CmDevice_RT::LoadProgram(void *pCommonISACode, const UINT size,
 			  CmProgram * &pProgram, const char *options)
 {
 	INT result;
@@ -1288,17 +1291,19 @@ CM_RT_API INT
 
 	UINT firstfreeslot = m_ProgramArray.GetFirstFreeIndex();
 
+	CmProgram_RT *ptmp;
 	result =
-	    CmProgram::Create(this, pCommonISACode, size, NULL, 0, pProgram,
+	    CmProgram_RT::Create(this, pCommonISACode, size, NULL, 0, ptmp,
 			      options, firstfreeslot);
 	if (result == CM_SUCCESS) {
-		m_ProgramArray.SetElement(firstfreeslot, pProgram);
+		m_ProgramArray.SetElement(firstfreeslot, ptmp);
 		m_ProgramCount++;
+		pProgram = ptmp;
 	}
 	return result;
 }
 
-CM_RT_API INT CmDevice::DestroyProgram(CmProgram * &pProgram)
+CM_RT_API INT CmDevice_RT::DestroyProgram(CmProgram * &pProgram)
 {
 	if (pProgram == NULL) {
 		return CM_FAILURE;
@@ -1306,9 +1311,9 @@ CM_RT_API INT CmDevice::DestroyProgram(CmProgram * &pProgram)
 
 	CLock locker(m_CriticalSection_Program_Kernel);
 
-	UINT indexInProgramArrary = pProgram->GetProgramIndex();
+	UINT indexInProgramArrary = ((CmProgram_RT * &)pProgram)->GetProgramIndex();
 	if (pProgram == m_ProgramArray.GetElement(indexInProgramArrary)) {
-		CmProgram::Destroy(pProgram);
+		CmProgram_RT::Destroy((CmProgram_RT * &)pProgram);
 		if (pProgram == NULL) {
 			m_ProgramArray.SetElement(indexInProgramArrary, NULL);
 		}
@@ -1321,7 +1326,7 @@ CM_RT_API INT CmDevice::DestroyProgram(CmProgram * &pProgram)
 }
 
 CM_RT_API INT
-    CmDevice::CreateKernel(CmProgram * pProgram, const char *kernelName,
+    CmDevice_RT::CreateKernel(CmProgram * pProgram, const char *kernelName,
 			   CmKernel * &pKernel, const char *options)
 {
 	if (pProgram == NULL) {
@@ -1332,18 +1337,21 @@ CM_RT_API INT
 	CLock locker(m_CriticalSection_Program_Kernel);
 
 	UINT freeSlotInKernelArray = m_KernelArray.GetFirstFreeIndex();
+	CmKernel_RT *ptmp;
 	INT result =
-	    CmKernel::Create(this, pProgram, kernelName, freeSlotInKernelArray,
-			     m_KernelCount, pKernel, options);
+	    CmKernel_RT::Create(this, static_cast<CmProgram_RT *>(pProgram),
+				kernelName, freeSlotInKernelArray,
+				m_KernelCount, ptmp, options);
 	if (result == CM_SUCCESS) {
-		m_KernelArray.SetElement(freeSlotInKernelArray, pKernel);
+		m_KernelArray.SetElement(freeSlotInKernelArray, ptmp);
 		m_KernelCount++;
+		pKernel = static_cast< CmKernel * >(ptmp);
 	}
 
 	return result;
 }
 
-CM_RT_API INT CmDevice::DestroyKernel(CmKernel * &pKernel)
+CM_RT_API INT CmDevice_RT::DestroyKernel(CmKernel * &pKernel)
 {
 	if (pKernel == NULL) {
 		return CM_FAILURE;
@@ -1351,10 +1359,10 @@ CM_RT_API INT CmDevice::DestroyKernel(CmKernel * &pKernel)
 
 	CLock locker(m_CriticalSection_Program_Kernel);
 
-	UINT indexInKernelArrary = pKernel->GetKernelIndex();
+	UINT indexInKernelArrary = ((CmKernel_RT *)pKernel)->GetKernelIndex();
 	if (pKernel == m_KernelArray.GetElement(indexInKernelArrary)) {
-		CmProgram *pProgram = NULL;
-		pKernel->GetCmProgram(pProgram);
+		CmProgram_RT *pProgram = NULL;
+		((CmKernel_RT *)pKernel)->GetCmProgram(pProgram);
 		if (pProgram == NULL) {
 			CM_ASSERT(0);
 			return CM_FAILURE;
@@ -1363,7 +1371,7 @@ CM_RT_API INT CmDevice::DestroyKernel(CmKernel * &pKernel)
 		UINT indexInProgramArray = pProgram->GetProgramIndex();
 
 		if (pProgram == m_ProgramArray.GetElement(indexInProgramArray)) {
-			CmKernel::Destroy(pKernel, pProgram);
+			CmKernel_RT::Destroy((CmKernel_RT *&)pKernel, pProgram);
 
 			if (pKernel == NULL) {
 				m_KernelArray.SetElement(indexInKernelArrary,
@@ -1386,36 +1394,38 @@ CM_RT_API INT CmDevice::DestroyKernel(CmKernel * &pKernel)
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmDevice::CreateQueue(CmQueue * &pQueue)
+CM_RT_API INT CmDevice_RT::CreateQueue(CmQueue * &pQueue)
 {
 	pQueue = m_pQueue;
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmDevice::CreateTask(CmTask * &pTask)
+CM_RT_API INT CmDevice_RT::CreateTask(CmTask * &pTask)
 {
 	CLock locker(m_CriticalSection_Task);
 
+	CmTask_RT* ptmp = NULL;
 	UINT freeSlotInTaskArray = m_TaskArray.GetFirstFreeIndex();
-	INT result = CmTask::Create(this, freeSlotInTaskArray,
-				    m_HalMaxValues.iMaxKernelsPerTask, pTask);
+	INT result = CmTask_RT::Create(this, freeSlotInTaskArray,
+				    m_HalMaxValues.iMaxKernelsPerTask, ptmp);
 	if (result == CM_SUCCESS) {
-		m_TaskArray.SetElement(freeSlotInTaskArray, pTask);
-		m_TaskCount++;
+	    pTask = static_cast< CmTask* >(ptmp);
+	    m_TaskArray.SetElement(freeSlotInTaskArray, pTask);
+	    m_TaskCount++;
 	}
 	return result;
 }
 
-INT CmDevice::DestroyQueue(CmQueue * &pQueue)
+INT CmDevice_RT::DestroyQueue(CmQueue_RT * &pQueue)
 {
 	if (pQueue == NULL) {
-		return CM_FAILURE;
+	    return CM_FAILURE;
 	}
 
-	return CmQueue::Destroy(pQueue);
+	return CmQueue_RT::Destroy(pQueue);
 }
 
-CM_RT_API INT CmDevice::DestroyTask(CmTask * &pTask)
+CM_RT_API INT CmDevice_RT::DestroyTask(CmTask * &pTask)
 {
 
 	CLock locker(m_CriticalSection_Task);
@@ -1424,10 +1434,14 @@ CM_RT_API INT CmDevice::DestroyTask(CmTask * &pTask)
 		return CM_FAILURE;
 	}
 
-	UINT index = pTask->GetIndexInTaskArray();
+        CmTask_RT* temp = static_cast< CmTask_RT* >(pTask);
+        if ( temp == NULL ) {
+            return CM_FAILURE;
+        }
+	UINT index = temp->GetIndexInTaskArray();
 
-	if (pTask == (CmTask *) m_TaskArray.GetElement(index)) {
-		INT status = CmTask::Destroy(pTask);
+	if (pTask == (CmTask_RT *) m_TaskArray.GetElement(index)) {
+		INT status = CmTask_RT::Destroy(temp);
 		if (status == CM_SUCCESS) {
 			m_TaskArray.SetElement(index, NULL);
 			pTask = NULL;
@@ -1443,7 +1457,7 @@ CM_RT_API INT CmDevice::DestroyTask(CmTask * &pTask)
 }
 
 CM_RT_API INT
-    CmDevice::CreateThreadSpace(UINT width, UINT height, CmThreadSpace * &pTS)
+    CmDevice_RT::CreateThreadSpace(UINT width, UINT height, CmThreadSpace * &pTS)
 {
 	CLock locker(m_CriticalSection_ThreadSpace);
 
@@ -1461,7 +1475,7 @@ CM_RT_API INT
 	return result;
 }
 
-CM_RT_API INT CmDevice::DestroyThreadSpace(CmThreadSpace * &pTS)
+CM_RT_API INT CmDevice_RT::DestroyThreadSpace(CmThreadSpace * &pTS)
 {
 	if (pTS == NULL) {
 		return CM_FAILURE;
@@ -1487,14 +1501,14 @@ CM_RT_API INT CmDevice::DestroyThreadSpace(CmThreadSpace * &pTS)
 
 }
 
-INT CmDevice::GetDDIVersion(UINT & DDIVersion)
+INT CmDevice_RT::GetDDIVersion(UINT & DDIVersion)
 {
 	DDIVersion = m_DDIVersion;
 	return CM_SUCCESS;
 }
 
 CM_RT_API INT
-    CmDevice::CreateThreadGroupSpace(UINT thrdSpaceWidth, UINT thrdSpaceHeight,
+    CmDevice_RT::CreateThreadGroupSpace(UINT thrdSpaceWidth, UINT thrdSpaceHeight,
 				     UINT grpSpaceWidth, UINT grpSpaceHeight,
 				     CmThreadGroupSpace * &pTGS)
 {
@@ -1502,7 +1516,7 @@ CM_RT_API INT
 
 	UINT firstfreeslot = m_ThreadGroupSpaceArray.GetFirstFreeIndex();
 	INT result =
-	    CmThreadGroupSpace::Create(this, firstfreeslot, thrdSpaceWidth,
+	    CmThreadGroupSpace_RT::Create(this, firstfreeslot, thrdSpaceWidth,
 				       thrdSpaceHeight, grpSpaceWidth,
 				       grpSpaceHeight, pTGS);
 	if (result == CM_SUCCESS) {
@@ -1512,20 +1526,20 @@ CM_RT_API INT
 	return result;
 }
 
-CM_RT_API INT CmDevice::DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS)
+CM_RT_API INT CmDevice_RT::DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS)
 {
 	if (pTGS == NULL) {
 		return CM_FAILURE;
 	}
 
-	UINT indexTGs = pTGS->GetIndexInTGsArray();
+	UINT indexTGs = static_cast<CmThreadGroupSpace_RT*>(pTGS)->GetIndexInTGsArray();
 
 	CLock locker(m_CriticalSection_ThreadGroupSpace);
 
 	if (pTGS == static_cast <
 	    CmThreadGroupSpace *
 	    >(m_ThreadGroupSpaceArray.GetElement(indexTGs))) {
-		INT status = CmThreadGroupSpace::Destroy(pTGS);
+		INT status = CmThreadGroupSpace_RT::Destroy(pTGS);
 		if (status == CM_SUCCESS) {
 			m_ThreadGroupSpaceArray.SetElement(indexTGs, NULL);
 			pTGS = NULL;
@@ -1539,7 +1553,7 @@ CM_RT_API INT CmDevice::DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS)
 	return CM_FAILURE;
 }
 
-INT CmDevice::GetGenStepInfo(UINT platform, char *&stepinfostr)
+INT CmDevice_RT::GetGenStepInfo(UINT platform, char *&stepinfostr)
 {
 	INT hr;
 
@@ -1611,7 +1625,7 @@ INT CmDevice::GetGenStepInfo(UINT platform, char *&stepinfostr)
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmDevice::SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c)
+CM_RT_API INT CmDevice_RT::SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c)
 {
     INT upper_bound;
     const L3_CONFIG_REGISTER_VALUES *l3_c;
@@ -1656,7 +1670,7 @@ CM_RT_API INT CmDevice::SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c)
     return CM_SUCCESS;
 }
 
-INT CmDevice::SetCapsInternal(CM_DEVICE_CAP_NAME capName, size_t capValueSize,
+INT CmDevice_RT::SetCapsInternal(CM_DEVICE_CAP_NAME capName, size_t capValueSize,
 			      void *pCapValue)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
@@ -1717,7 +1731,7 @@ INT CmDevice::SetCapsInternal(CM_DEVICE_CAP_NAME capName, size_t capValueSize,
 	return hr;
 }
 
-INT CmDevice::GetSurf2DLookUpEntry(UINT index, PCMLOOKUP_ENTRY & pLookupEntry)
+INT CmDevice_RT::GetSurf2DLookUpEntry(UINT index, PCMLOOKUP_ENTRY & pLookupEntry)
 {
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) GetAccelData();
 	if (pCmData) {
@@ -1729,16 +1743,16 @@ INT CmDevice::GetSurf2DLookUpEntry(UINT index, PCMLOOKUP_ENTRY & pLookupEntry)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::LoadProgramWithGenCode(void *pCISACode, const UINT uiCISACodeSize,
+INT CmDevice_RT::LoadProgramWithGenCode(void *pCISACode, const UINT uiCISACodeSize,
 				     void *pGenCode, const UINT uiGenCodeSize,
-				     CmProgram * &pProgram, const char *options)
+				     CmProgram_RT * &pProgram, const char *options)
 {
 	INT result;
 	CLock locker(m_CriticalSection_Program_Kernel);
 
 	UINT firstfreeslot = m_ProgramArray.GetFirstFreeIndex();
 	result =
-	    CmProgram::Create(this, pCISACode, uiCISACodeSize, pGenCode,
+	    CmProgram_RT::Create(this, pCISACode, uiCISACodeSize, pGenCode,
 			      uiGenCodeSize, pProgram, options, firstfreeslot);
 	if (result == CM_SUCCESS) {
 		m_ProgramArray.SetElement(firstfreeslot, pProgram);
@@ -1747,7 +1761,7 @@ INT CmDevice::LoadProgramWithGenCode(void *pCISACode, const UINT uiCISACodeSize,
 	return result;
 }
 
-INT CmDevice::GetSurface2DInPool(UINT width, UINT height,
+INT CmDevice_RT::GetSurface2DInPool(UINT width, UINT height,
 				 CM_SURFACE_FORMAT format,
 				 CmSurface2D * &pSurface)
 {
@@ -1758,14 +1772,14 @@ INT CmDevice::GetSurface2DInPool(UINT width, UINT height,
 	return result;
 }
 
-INT CmDevice::GetSurfaceIDInPool(INT iIndex)
+INT CmDevice_RT::GetSurfaceIDInPool(INT iIndex)
 {
 	CLock locker(m_CriticalSection_Surface);
 	INT result = m_pSurfaceMgr->GetSurfaceIdInPool(iIndex);
 	return result;
 }
 
-INT CmDevice::DestroySurfaceInPool(UINT & freeSurfNum)
+INT CmDevice_RT::DestroySurfaceInPool(UINT & freeSurfNum)
 {
 	CLock locker(m_CriticalSection_Surface);
 
@@ -1778,7 +1792,7 @@ INT CmDevice::DestroySurfaceInPool(UINT & freeSurfNum)
 	return CM_SUCCESS;
 }
 
-INT CmDevice::InitDevCreateOption(CM_HAL_CREATE_PARAM & DevCreateParam,
+INT CmDevice_RT::InitDevCreateOption(CM_HAL_CREATE_PARAM & DevCreateParam,
 				  UINT DevCreateOption)
 {
 	UINT MaxTaskNumber = 0;
@@ -1827,17 +1841,17 @@ INT CmDevice::InitDevCreateOption(CM_HAL_CREATE_PARAM & DevCreateParam,
 	return CM_SUCCESS;
 }
 
-BOOL CmDevice::IsScratchSpaceDisabled()
+BOOL CmDevice_RT::IsScratchSpaceDisabled()
 {
 	return m_DevCreateOption.DisableScratchSpace ? TRUE : FALSE;
 }
 
-BOOL CmDevice::IsSurfaceReuseEnabled()
+BOOL CmDevice_RT::IsSurfaceReuseEnabled()
 {
 	return m_DevCreateOption.EnableSurfaceReuse ? TRUE : FALSE;
 }
 
-UINT CmDevice::ValidSurfaceIndexStart()
+UINT CmDevice_RT::ValidSurfaceIndexStart()
 {
 	UINT genid;
 	GetGenPlatform(genid);
@@ -1850,7 +1864,7 @@ UINT CmDevice::ValidSurfaceIndexStart()
 	}
 }
 
-UINT CmDevice::MaxIndirectSurfaceCount()
+UINT CmDevice_RT::MaxIndirectSurfaceCount()
 {
 	UINT genid;
 	GetGenPlatform(genid);
@@ -1863,7 +1877,7 @@ UINT CmDevice::MaxIndirectSurfaceCount()
 	}
 }
 
-BOOL CmDevice::IsCmReservedSurfaceIndex(UINT surfBTI)
+BOOL CmDevice_RT::IsCmReservedSurfaceIndex(UINT surfBTI)
 {
 	UINT genid;
 	GetGenPlatform(genid);
@@ -1886,7 +1900,7 @@ BOOL CmDevice::IsCmReservedSurfaceIndex(UINT surfBTI)
 	}
 }
 
-BOOL CmDevice::IsValidSurfaceIndex(UINT surfBTI)
+BOOL CmDevice_RT::IsValidSurfaceIndex(UINT surfBTI)
 {
 	UINT genid;
 	GetGenPlatform(genid);
@@ -1909,13 +1923,13 @@ BOOL CmDevice::IsValidSurfaceIndex(UINT surfBTI)
 }
 
 EXTERN_C INT
-CreateCmDevice(CmDevice * &pDevice, UINT & version,
+CreateCmDevice(CmDevice_RT * &pDevice, UINT & version,
 	       CmDriverContext * pDriverContext, UINT DevCreateOption)
 {
 	INT result = CM_SUCCESS;
 	pDevice = NULL;
 
-	result = CmDevice::Create(pDriverContext, pDevice, DevCreateOption);
+	result = CmDevice_RT::Create(pDriverContext, pDevice, DevCreateOption);
 	if (result == CM_SUCCESS) {
 		version = CURRENT_CM_VERSION;
 	} else {
@@ -1925,11 +1939,11 @@ CreateCmDevice(CmDevice * &pDevice, UINT & version,
 	return result;
 }
 
-EXTERN_C INT DestroyCmDevice(CmDevice * &pDevice)
+EXTERN_C INT DestroyCmDevice(CmDevice_RT * &pDevice)
 {
 	INT result = CM_SUCCESS;
 
-	result = CmDevice::Destroy(pDevice);
+	result = CmDevice_RT::Destroy(pDevice);
 	if (result == CM_SUCCESS) {
 		pDevice = NULL;
 	}

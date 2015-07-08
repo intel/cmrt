@@ -1671,7 +1671,7 @@ VOID IntelGen_HwSkipBatchBufferEndCmdBb(PGENHW_HW_INTERFACE pHwInterface,
 	pBatchBuffer->iCurrent += sizeof(MI_BATCH_BUFFER_END_CMD_G5);
 }
 
-GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface,
+GENOS_STATUS IntelGen_HwInitInterfaceOS(PGENHW_HW_INTERFACE pHwInterface,
 				      PGENOS_INTERFACE pOsInterface)
 {
 	GENOS_STATUS eStatus;

@@ -20,8 +20,6 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-CC = g++ -g
-
 SUBDIRS =
 
 AM_CPPFLAGS = \
@@ -34,6 +32,7 @@ AM_CPPFLAGS = \
 
 
 cmrt_cflags = \
+	-g			\
 	-Wall			\
 	-Werror			\
 	-Wno-missing-braces	\
@@ -63,10 +62,10 @@ cmrt_libs = \
 	$(NULL)
 
 cmrt_files = \
-	hal_cm.c  \
-	hal_cm_g75.c  \
-	hal_cm_g8.c  \
-	hal_cm_g9.c  \
+	hal_cm.cpp  \
+	hal_cm_g75.cpp  \
+	hal_cm_g8.cpp  \
+	hal_cm_g9.cpp  \
 	hw_interface_base.c \
 	hw_interface.c \
 	hw_interface_g75.c \

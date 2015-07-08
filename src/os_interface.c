@@ -1454,6 +1454,19 @@ HRESULT IntelGen_OsResetCommandBuffer(PGENOS_INTERFACE pOsInterface,
 	return S_OK;
 }
 
+static void* IntelGen_OsAllocUserptr(PGENOS_CONTEXT pOsContext,
+				     const char *name,
+				     void *addr,
+				     uint32_t tilingMode,
+				     uint32_t stride,
+				     unsigned long size,
+				     unsigned long flags)
+{
+	return drm_intel_bo_alloc_userptr(pOsContext->bufmgr,
+					  name, addr, tilingMode,
+					  stride, size, flags);
+}
+
 HRESULT IntelGen_OsInitInterface(PGENOS_INTERFACE pOsInterface,
 				 PGENOS_CONTEXT pOsDriverContext)
 {
@@ -1524,6 +1537,7 @@ HRESULT IntelGen_OsInitInterface(PGENOS_INTERFACE pOsInterface,
 	pOsInterface->pfnGetIndirectStatePointer =
 	    IntelGen_OsGetIndirectStatePointer;
 	pOsInterface->pfnSetPatchEntry = IntelGen_OsSetPatchEntry;
+	pOsInterface->pfnAllocUserptr = IntelGen_OsAllocUserptr;
 
 	pOsInterface->pfnSleepMs = IntelGen_OsSleepMs;
 

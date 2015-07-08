@@ -684,9 +684,9 @@ typedef struct _GENOS_INTERFACE {
 extern "C" {
 #endif
 
-	HRESULT IntelGen_OsInitInterface(PGENOS_INTERFACE pOsInterface,
-					 PGENOS_CONTEXT pOsDriverContext,
-					 GENOS_COMPONENT component);
+	HRESULT IntelGen_OsInitInterfaceComp(PGENOS_INTERFACE pOsInterface,
+					     PGENOS_CONTEXT pOsDriverContext,
+					     GENOS_COMPONENT component);
 
 	GENOS_STATUS IntelGen_OsAddCommand(PGENOS_COMMAND_BUFFER pCmdBuffer,
 					   PCVOID pCmd, DWORD dwCmdSize);

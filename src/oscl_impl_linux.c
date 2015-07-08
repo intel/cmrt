@@ -109,7 +109,7 @@ static VOID TranslateLinuxErrno(INT iErr)
 	return;
 }
 
-extern "C" BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency)
+BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency)
 {
 	struct timespec Res;
 	INT iRet;
@@ -126,7 +126,7 @@ extern "C" BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency)
 	return SUCCESS;
 }
 
-extern "C" BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount)
+BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount)
 {
 	struct timespec Res;
 	struct timespec t;

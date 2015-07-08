@@ -163,12 +163,12 @@ GENOS_STATUS IntelGen_HwAssignSshInstance(PGENHW_HW_INTERFACE pHwInterface)
 	return eStatus;
 }
 
-GENOS_STATUS IntelGen_HwSetupSurfaceState_g75(PGENHW_HW_INTERFACE pHwInterface,
-					      PGENHW_SURFACE pSurface,
-					      PGENHW_SURFACE_STATE_PARAMS
-					      pParams,
-					      PGENHW_SURFACE_STATE_ENTRY
-					      pSurfaceEntry)
+GENOS_STATUS IntelGen_HwSetupSurfaceState_g75_base(PGENHW_HW_INTERFACE pHwInterface,
+						   PGENHW_SURFACE pSurface,
+						   PGENHW_SURFACE_STATE_PARAMS
+						   pParams,
+						   PGENHW_SURFACE_STATE_ENTRY
+						   pSurfaceEntry)
 {
 	PGENHW_HW_COMMANDS pHwCommands;
 	PPACKET_SURFACE_STATE_G75 pPacketSurfaceState;
@@ -963,7 +963,7 @@ GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface)
 		pHwInterface->pfnSendLoadRegImmCmd =
 		    IntelGen_HwSendLoadRegImmCmd_g75;
 		pHwInterface->pfnSetupSurfaceStateOs =
-		    IntelGen_HwSetupSurfaceState_g75;
+		    IntelGen_HwSetupSurfaceState_g75_base;
 
 	} else if (GFX_IS_RENDERCORE(pHwInterface->Platform, IGFX_GEN8_CORE)) {
 		pHwInterface->pfnSendSyncTag = IntelGen_HwSendSyncTag_g75;
@@ -977,7 +977,7 @@ GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface)
 		pHwInterface->pfnSendLoadRegImmCmd =
 		    IntelGen_HwSendLoadRegImmCmd_g75;
 		pHwInterface->pfnSetupSurfaceStateOs =
-		    IntelGen_HwSetupSurfaceState_g75;
+		    IntelGen_HwSetupSurfaceState_g75_base;
 
 	} else if (GFX_IS_RENDERCORE(pHwInterface->Platform, IGFX_GEN9_CORE)) {
 		pHwInterface->pfnSendSyncTag = IntelGen_HwSendSyncTag_g75;
@@ -991,7 +991,7 @@ GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface)
 		pHwInterface->pfnSendLoadRegImmCmd =
 		    IntelGen_HwSendLoadRegImmCmd_g75;
 		pHwInterface->pfnSetupSurfaceStateOs =
-		    IntelGen_HwSetupSurfaceState_g75;
+		    IntelGen_HwSetupSurfaceState_g75_base;
 
 	} else {
 		eStatus = GENOS_STATUS_UNKNOWN;

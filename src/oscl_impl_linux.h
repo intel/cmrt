@@ -35,16 +35,26 @@
 
 #define ALIGN(i,m)    (((i) + (m) - 1) & ~((m) - 1))
 
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
+
+#define GetCurrentProcessID() getpid()
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 HMODULE LoadLibrary(LPCSTR lpLibFileName);
 BOOL FreeLibrary(HMODULE hLibModule);
 FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
 
-#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
+BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency);
+BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount);
 
-extern "C" BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency);
-extern "C" BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount);
-
-#define GetCurrentProcessID() getpid()
 INT strcpy_s(CHAR * pDestination, SIZE_T DstLength, CONST CHAR * pSource);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

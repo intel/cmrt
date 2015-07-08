@@ -173,13 +173,13 @@ BOOL Ctx_GetCommandBuffer(PGENOS_CONTEXT pOsContext,
 	pCmdBuffer->OsResource.iHeight = 1;
 	pCmdBuffer->OsResource.iPitch = cmd_bo->size;
 	pCmdBuffer->OsResource.iCount = 1;
-	pCmdBuffer->OsResource.pData = (PBYTE) cmd_bo->virt;
+	pCmdBuffer->OsResource.pData = (PBYTE) cmd_bo->virtual;
 	pCmdBuffer->OsResource.TileType = GENOS_TILE_LINEAR;
 	pCmdBuffer->OsResource.bo = cmd_bo;
 	pCmdBuffer->OsResource.bMapped = TRUE;
 
-	pCmdBuffer->pCmdBase = (PDWORD) cmd_bo->virt;
-	pCmdBuffer->pCmdPtr = (PDWORD) cmd_bo->virt;
+	pCmdBuffer->pCmdBase = (PDWORD) cmd_bo->virtual;
+	pCmdBuffer->pCmdPtr = (PDWORD) cmd_bo->virtual;
 	pCmdBuffer->iOffset = 0;
 	pCmdBuffer->iRemaining = cmd_bo->size;
 
@@ -690,7 +690,7 @@ HRESULT IntelGen_OsAllocateResource(PGENOS_INTERFACE pOsInterface,
 		pOsResource->bufname = bufname;
 		pOsResource->bo = bo;
 		pOsResource->TileType = tileformat;
-		pOsResource->pData = (PBYTE) bo->virt;
+		pOsResource->pData = (PBYTE) bo->virtual;
 		GENOS_OS_VERBOSEMESSAGE("Alloc %7d bytes (%d x %d resource).",
 					iSize, pParams->dwWidth, iHeight);
 	} else {
@@ -747,7 +747,7 @@ PVOID IntelGen_OsLockResource(PGENOS_INTERFACE pOsInterface,
 				}
 			}
 
-			pOsResource->pData = (PBYTE) bo->virt;
+			pOsResource->pData = (PBYTE) bo->virtual;
 			pOsResource->bMapped = TRUE;
 		}
 		pData = pOsResource->pData;
@@ -784,7 +784,7 @@ HRESULT IntelGen_OsUnlockResource(PGENOS_INTERFACE pOsInterface,
 				}
 			}
 
-			pOsResource->bo->virt = NULL;
+			pOsResource->bo->virtual = NULL;
 			pOsResource->bMapped = FALSE;
 		}
 		pOsResource->pData = NULL;
@@ -1121,7 +1121,7 @@ HRESULT IntelGen_OsSubmitCommandBuffer(PGENOS_INTERFACE pOsInterface,
 
 		alloc_bo = (pResource->bo) ? pResource->bo : cmd_bo;
 
-		*((DWORD *) ((BYTE *) cmd_bo->virt + PatchOffset)) =
+		*((DWORD *) ((BYTE *) cmd_bo->virtual + PatchOffset)) =
 		    alloc_bo->offset + ResourceOffset;
 
 		if (alloc_bo == cmd_bo) {
@@ -1602,9 +1602,9 @@ HRESULT IntelGen_OsWaitOnResource(PGENOS_INTERFACE pOsInterface,
 	return hr;
 }
 
-HRESULT IntelGen_OsInitInterface(PGENOS_INTERFACE pOsInterface,
-				 PGENOS_CONTEXT pOsDriverContext,
-				 GENOS_COMPONENT component)
+HRESULT IntelGen_OsInitInterfaceComp(PGENOS_INTERFACE pOsInterface,
+				     PGENOS_CONTEXT pOsDriverContext,
+				     GENOS_COMPONENT component)
 {
 	HRESULT hr = E_FAIL;
 

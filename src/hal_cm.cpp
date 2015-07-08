@@ -5786,7 +5786,7 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 	    GENOS_AllocAndZeroMemory(sizeof(GENOS_INTERFACE));
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->pOsInterface);
 	pState->pOsInterface->bDeallocateOnExit = TRUE;
-	CM_HRESULT2GENOSSTATUS_AND_CHECK(IntelGen_OsInitInterface
+	CM_HRESULT2GENOSSTATUS_AND_CHECK(IntelGen_OsInitInterfaceComp
 					 (pState->pOsInterface,
 					  pOsDriverContext, COMPONENT_CM));
 
@@ -5796,7 +5796,7 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 	pState->pHwInterface = (PGENHW_HW_INTERFACE)
 	    GENOS_AllocAndZeroMemory(sizeof(GENHW_HW_INTERFACE));
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->pHwInterface);
-	CM_CHK_GENOSSTATUS(IntelGen_HwInitInterface
+	CM_CHK_GENOSSTATUS(IntelGen_HwInitInterfaceOS
 			   (pState->pHwInterface, pState->pOsInterface));
 
 	pState->CmDeviceParam.iMaxKernelBinarySize =

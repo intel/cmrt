@@ -678,6 +678,14 @@ typedef struct _GENOS_INTERFACE {
 	 HRESULT(*pfnResetCommandBuffer) (PGENOS_INTERFACE pOsInterface,
 					  PGENOS_COMMAND_BUFFER pCmdBuffer);
 
+	 PVOID (*pfnAllocUserptr) (PGENOS_CONTEXT pOsContext,
+				   const char *name,
+				   void *addr,
+				   uint32_t tilingMode,
+				   uint32_t stride,
+				   unsigned long size,
+				   unsigned long flags);
+
 } GENOS_INTERFACE;
 
 #ifdef __cplusplus

@@ -5950,10 +5950,6 @@ VOID HalCm_Destroy(PCM_HAL_STATE pState)
 		}
 		HalCm_FreeTsResource(pState);
 
-		if (pState->hLibModule) {
-			FreeLibrary(pState->hLibModule);
-			pState->hLibModule = NULL;
-		}
 		if (pState->pHwInterface) {
 			pState->pHwInterface->pfnDestroy(pState->pHwInterface);
 			GENOS_FreeMemory(pState->pHwInterface);
@@ -6763,18 +6759,17 @@ GENOS_STATUS HalCm_AllocateBuffer(PCM_HAL_STATE pState,
 			    (pOsInterface->pfnAllocateResource
 			     (pOsInterface, &AllocParams, &pEntry->OsResource));
 		} else {
-			if (pState->hLibModule && pState->pDrmVMap) {
-				bo = pState->pDrmVMap(pOsInterface->
-						      pOsContext->bufmgr,
-						      "CM Buffer UP",
-						      (void *)(pParam->pData),
-						      tileformat,
-						      ROUND_UP_TO(iSize,
-								  GENOS_PAGE_SIZE),
-						      ROUND_UP_TO(iSize,
-								  GENOS_PAGE_SIZE),
-						      0);
-			}
+			void *bop;
+			bop = pOsInterface->pfnAllocUserptr(
+					      pOsInterface->pOsContext,
+					      "CM Buffer UP",
+					      (void *)(pParam->pData),
+					      tileformat,
+					      ROUND_UP_TO(iSize, GENOS_PAGE_SIZE),
+					      ROUND_UP_TO(iSize, GENOS_PAGE_SIZE),
+					      0);
+
+			bo = (drm_intel_bo *)bop;
 
 			pOsResource->bMapped = FALSE;
 			if (bo) {
@@ -6867,12 +6862,13 @@ GENOS_STATUS HalCm_AllocateSurface2DUP(PCM_HAL_STATE pState,
 	IntelGen_OsResetResource(pOsResource);
 	HalCm_GetSurfPitchSize(iWidth, iHeight, Format, &align_x, &iSize);
 
-	if (pState->hLibModule && pState->pDrmVMap) {
-		bo = pState->pDrmVMap(pOsInterface->pOsContext->bufmgr,
-				      "CM Surface2D UP",
-				      (void *)(pSysMem),
-				      tileformat, align_x, iSize, 0);
-	}
+	void *bop;
+	bop = pOsInterface->pfnAllocUserptr(pOsInterface->pOsContext,
+					    "CM Surface2D UP",
+					    (void *)(pSysMem),
+					    tileformat, align_x,
+					    iSize, 0);
+	bo = (drm_intel_bo *)bop;
 
 	pOsResource->bMapped = FALSE;
 	if (bo) {
@@ -6935,23 +6931,6 @@ GENOS_STATUS HalCm_GetGpuTime(PCM_HAL_STATE pState, PUINT64 pGpuTime)
 	return hr;
 }
 
-VOID HalCm_GetLibDrmVMapFnt(PCM_HAL_STATE pCmState)
-{
-	if (!pCmState->hLibModule) {
-		pCmState->hLibModule = LoadLibrary("libdrm_intel.so");
-	}
-
-	if (pCmState->hLibModule) {
-		pCmState->pDrmVMap =
-		    (pDrmVMapFnc) GetProcAddress(pCmState->hLibModule,
-						 DRMVMAP_FUNCTION_STR);
-		CM_ASSERT(pCmState->pDrmVMap);
-	} else {
-		pCmState->pDrmVMap = NULL;
-	}
-	return;
-}
-
 VOID HalCm_OsInitInterface(PCM_HAL_STATE pCmState)
 {
 	CM_ASSERT(pCmState);
@@ -6964,6 +6943,5 @@ VOID HalCm_OsInitInterface(PCM_HAL_STATE pCmState)
 	pCmState->pfnGetGpuTime = HalCm_GetGpuTime;
 	pCmState->pfnConvertToQPCTime = HalCm_ConvertToQPCTime;
 
-	HalCm_GetLibDrmVMapFnt(pCmState);
 	return;
 }

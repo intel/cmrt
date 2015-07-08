@@ -38,14 +38,6 @@
 #define EXTERN_C
 #endif
 
-#define DRMVMAP_FUNCTION_STR        "drm_intel_bo_alloc_userptr"
-typedef drm_intel_bo *(*pDrmVMapFnc) (drm_intel_bufmgr * bufmgr,
-				      const char *name,
-				      void *addr,
-				      uint32_t tiling_mode,
-				      uint32_t stride,
-				      unsigned long size, unsigned long flags);
-
 typedef void *DXVAUMD_RESOURCE;
 
 typedef struct cm_tagLOOKUP_ENTRY {

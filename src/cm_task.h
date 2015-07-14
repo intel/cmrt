@@ -29,17 +29,19 @@
 #include "cm_def.h"
 
 class CmKernel;
-class CmDevice;
+class CmDevice_RT;
 
-class CmTask {
+#include "cm_task_base.h"
+
+class CmTask_RT : public CmTask {
  public:
-	static INT Create(CmDevice * pCmDevice, UINT index,
-			  UINT max_kernel_count, CmTask * &pKernelArray);
-	static INT Destroy(CmTask * &pKernelArray);
+	static INT Create(CmDevice_RT * pCmDevice, UINT index,
+			  UINT max_kernel_count, CmTask_RT * &pKernelArray);
+	static INT Destroy(CmTask_RT * &pKernelArray);
 
-	CM_RT_API INT AddKernel(CmKernel * pKernel);
-	CM_RT_API INT Reset(void);
-	CM_RT_API INT AddSync(void);
+	virtual CM_RT_API INT AddKernel(CmKernel * pKernel);
+	virtual CM_RT_API INT Reset(void);
+	virtual CM_RT_API INT AddSync(void);
 	CM_RT_API INT SetPowerOption(PCM_HAL_POWER_OPTION_PARAM pPowerOption);
 	CM_RT_API INT SetPreemptionMode(CM_HAL_PREEMPTION_MODE mode);
 	CM_RT_API CM_HAL_PREEMPTION_MODE GetPreemptionMode();
@@ -52,8 +54,8 @@ class CmTask {
 	PCM_HAL_POWER_OPTION_PARAM GetPowerOption();
 
  protected:
-	 CmTask(CmDevice * pCmDevice, UINT index, UINT max_kernel_count);
-	~CmTask(void);
+	 CmTask_RT(CmDevice_RT * pCmDevice, UINT index, UINT max_kernel_count);
+	virtual ~CmTask_RT(void);
 
 	INT Initialize();
 
@@ -65,12 +67,12 @@ class CmTask {
 	UINT m_IndexTaskArray;
 
 	UINT64 m_ui64SyncBitmap;
-	CmDevice *m_pCmDev;
+	CmDevice_RT *m_pCmDev;
 
 	CM_HAL_POWER_OPTION_PARAM m_PowerOption;
 	CM_HAL_PREEMPTION_MODE m_PreemptionMode;
 
  private:
-	 CmTask(const CmTask & other);
-	 CmTask & operator=(const CmTask & other);
+	 CmTask_RT(const CmTask_RT & other);
+	 CmTask_RT & operator=(const CmTask_RT & other);
 };

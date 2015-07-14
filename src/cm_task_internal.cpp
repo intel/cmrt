@@ -38,7 +38,7 @@
 
 INT CmTaskInternal::Create(const UINT kernelCount, const UINT totalThreadCount,
 			   CmKernel * pKernelArray[], const CmThreadSpace * pTS,
-			   CmDevice * pCmDevice, const UINT64 uiSyncBitmap,
+			   CmDevice_RT * pCmDevice, const UINT64 uiSyncBitmap,
 			   CmTaskInternal * &pTask)
 {
 	INT result = CM_SUCCESS;
@@ -61,7 +61,7 @@ INT CmTaskInternal::Create(const UINT kernelCount, const UINT totalThreadCount,
 INT CmTaskInternal::Create(const UINT kernelCount, const UINT totalThreadCount,
 			   CmKernel * pKernelArray[],
 			   const CmThreadGroupSpace * pTGS,
-			   CmDevice * pCmDevice, const UINT64 uiSyncBitmap,
+			   CmDevice_RT * pCmDevice, const UINT64 uiSyncBitmap,
 			   CmTaskInternal * &pTask)
 {
 	INT result = CM_SUCCESS;
@@ -85,7 +85,7 @@ INT CmTaskInternal::Create(const UINT kernelCount, const UINT totalThreadCount,
 INT CmTaskInternal::Create(const UINT kernelCount, const UINT totalThreadCount,
 			   CmKernel * pKernelArray[], CmTaskInternal * &pTask,
 			   UINT numTasksGenerated, BOOLEAN isLastTask,
-			   UINT hints, CmDevice * pCmDevice)
+			   UINT hints, CmDevice_RT * pCmDevice)
 {
 	INT result = CM_SUCCESS;
 	pTask =
@@ -111,7 +111,7 @@ INT CmTaskInternal::Destroy(CmTaskInternal * &pTask)
 	return CM_SUCCESS;
 }
 
- CmTaskInternal::CmTaskInternal(const UINT kernelCount, const UINT totalThreadCount, CmKernel * pKernelArray[], CmDevice * pCmDevice, const UINT64 uiSyncBitmap):
+ CmTaskInternal::CmTaskInternal(const UINT kernelCount, const UINT totalThreadCount, CmKernel * pKernelArray[], CmDevice_RT * pCmDevice, const UINT64 uiSyncBitmap):
 m_Kernels(kernelCount),
 m_KernelData(kernelCount),
 m_KernelCount(kernelCount),
@@ -167,7 +167,7 @@ CmTaskInternal::~CmTaskInternal(void)
 	CmSafeDeleteArray(m_pKernelCurbeOffsetArray);
 
 	if (m_pTaskEvent) {
-		CmQueue *pCmQueue;
+		CmQueue_RT *pCmQueue;
 		m_pCmDevice->GetQueue(pCmQueue);
 		pCmQueue->DestroyEvent(m_pTaskEvent);
 	}
@@ -217,7 +217,7 @@ INT CmTaskInternal::Initialize(const CmThreadSpace * pTS, BOOL isWithHints)
 
 	for (UINT i = 0; i < m_KernelCount; i++) {
 
-		CmKernel *pKernel = (CmKernel *) m_Kernels.GetElement(i);
+		CmKernel_RT *pKernel = (CmKernel_RT *) m_Kernels.GetElement(i);
 		if (pKernel == NULL) {
 			CM_ASSERT(0);
 			return CM_FAILURE;
@@ -246,8 +246,8 @@ INT CmTaskInternal::Initialize(const CmThreadSpace * pTS, BOOL isWithHints)
 			if (pKTS) {
 				for (UINT j = i; j > 0; --j) {
 					UINT width, height, myAdjY;
-					CmKernel *pTmpKern =
-					    (CmKernel *) m_Kernels.GetElement(j
+					CmKernel_RT *pTmpKern =
+					    (CmKernel_RT *) m_Kernels.GetElement(j
 									      -
 									      1);
 					if (!pTmpKern) {
@@ -328,7 +328,7 @@ INT CmTaskInternal::Initialize(const CmThreadGroupSpace * pTGS)
 	CmSafeMemSet(m_SurfaceArray, 0, surfacePoolSize * sizeof(BOOL));
 
 	for (UINT i = 0; i < m_KernelCount; i++) {
-		CmKernel *pKernel = (CmKernel *) m_Kernels.GetElement(i);
+	    CmKernel_RT *pKernel = (CmKernel_RT *) m_Kernels.GetElement(i);
 		if (pKernel == NULL) {
 			CM_ASSERT(0);
 			return CM_FAILURE;
@@ -472,16 +472,16 @@ UINT CmTaskInternal::GetKernelCurbeOffset(const UINT index)
 	return (UINT) m_pKernelCurbeOffsetArray[index];
 }
 
-INT CmTaskInternal::SetTaskEvent(CmEvent * pEvent)
+INT CmTaskInternal::SetTaskEvent(CmEvent_RT * pEvent)
 {
 	m_pTaskEvent = pEvent;
-	m_pTaskEvent->Acquire();
+	pEvent->Acquire();
 	return CM_SUCCESS;
 }
 
-INT CmTaskInternal::GetTaskEvent(CmEvent * &pEvent)
+INT CmTaskInternal::GetTaskEvent(CmEvent_RT * &pEvent)
 {
-	pEvent = m_pTaskEvent;
+	pEvent = static_cast<CmEvent_RT *>(m_pTaskEvent);
 	return CM_SUCCESS;
 }
 
@@ -519,8 +519,8 @@ INT CmTaskInternal::CreateThreadSpaceData(const CmThreadSpace * pTS)
 	int hr = CM_SUCCESS;
 	CmThreadSpace *pTS_RT = const_cast < CmThreadSpace * >(pTS);
 
-	CmKernel *pKernel_inTS = NULL;
-	CmKernel *pKernel_inTask = NULL;
+	CmKernel_RT *pKernel_inTS = NULL;
+	CmKernel_RT *pKernel_inTask = NULL;
 
 	if (pTS_RT->IsThreadAssociated()) {
 		m_pThreadCoordinates =
@@ -543,7 +543,7 @@ INT CmTaskInternal::CreateThreadSpaceData(const CmThreadSpace * pTS)
 			for (i = 0; i < m_KernelCount; i++) {
 				pKernelCoordinateIndex[i] = 0;
 				UINT threadCount;
-				this->GetKernel(i, pKernel_inTask);
+				this->GetKernel(i, (CmKernel * &)pKernel_inTask);
 
 				if (pKernel_inTask == NULL) {
 					CM_ASSERT(0);
@@ -587,13 +587,13 @@ INT CmTaskInternal::CreateThreadSpaceData(const CmThreadSpace * pTS)
 			for (UINT tIndex = 0; tIndex < height * width; tIndex++) {
 				pKernel_inTS =
 				    static_cast <
-				    CmKernel *
+				    CmKernel_RT *
 				    >(pThreadSpaceUnit
 				      [pBoardOrder[tIndex]].pKernel);
 				if (pKernel_inTS == NULL) {
 					if (pTS_RT->GetNeedSetKernelPointer()) {
-						pKernel_inTS =
-						    pTS_RT->GetKernelPointer();
+						pKernel_inTS = static_cast<CmKernel_RT *>
+						    (pTS_RT->GetKernelPointer());
 					}
 					if (pKernel_inTS == NULL) {
 						CM_ASSERT(0);

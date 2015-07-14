@@ -174,7 +174,7 @@ INT CmSurfaceManager::UPDATE_PROFILE_FOR_1D_SURFACE(UINT index, UINT size,
 	return CM_SUCCESS;
 }
 
-INT CmSurfaceManager::Create(CmDevice * pCmDevice,
+INT CmSurfaceManager::Create(CmDevice_RT * pCmDevice,
 			     CM_HAL_MAX_VALUES HalMaxValues,
 			     CM_HAL_MAX_VALUES_EX HalMaxValuesEx,
 			     CmSurfaceManager * &pManager)
@@ -205,7 +205,7 @@ INT CmSurfaceManager::Destroy(CmSurfaceManager * &pManager)
 	return CM_SUCCESS;
 }
 
- CmSurfaceManager::CmSurfaceManager(CmDevice * pCmDevice):
+ CmSurfaceManager::CmSurfaceManager(CmDevice_RT * pCmDevice):
 m_pCmDevice(pCmDevice),
 m_SurfaceArraySize(0),
 m_SurfaceArray(NULL),
@@ -278,7 +278,7 @@ INT CmSurfaceManager::DestroySurfaceArrayElement(UINT index)
 	if (pSurface) {
 		CmSurface2D *pSurf2D = NULL;
 		CmBuffer_RT *pSurf1D = NULL;
-		CmSurface2DUP *pSurf2DUP = NULL;
+		CmSurface2DUP_RT *pSurf2DUP = NULL;
 
 		switch (pSurface->Type()) {
 		case CM_ENUM_CLASS_TYPE_CMSURFACE2D:
@@ -296,7 +296,7 @@ INT CmSurfaceManager::DestroySurfaceArrayElement(UINT index)
 			break;
 
 		case CM_ENUM_CLASS_TYPE_CMSURFACE2DUP:
-			pSurf2DUP = static_cast < CmSurface2DUP * >(pSurface);
+			pSurf2DUP = static_cast < CmSurface2DUP_RT * >(pSurface);
 			if (pSurf2DUP) {
 				DestroySurface(pSurf2DUP, FORCE_DESTROY);
 			}
@@ -362,7 +362,7 @@ INT CmSurfaceManager::DestroySurfaceInPool(UINT & freeSurfNum,
 	CmSurface *pSurface = NULL;
 	CmBuffer_RT *pSurf1D = NULL;
 	CmSurface2D *pSurf2D = NULL;
-	CmSurface2DUP *pSurf2DUP = NULL;
+	CmSurface2DUP_RT *pSurf2DUP = NULL;
 	INT status = CM_FAILURE;
 	UINT index = m_pCmDevice->ValidSurfaceIndexStart();
 
@@ -393,7 +393,7 @@ INT CmSurfaceManager::DestroySurfaceInPool(UINT & freeSurfNum,
 			break;
 
 		case CM_ENUM_CLASS_TYPE_CMSURFACE2DUP:
-			pSurf2DUP = static_cast < CmSurface2DUP * >(pSurface);
+			pSurf2DUP = static_cast < CmSurface2DUP_RT * >(pSurface);
 			if (pSurf2DUP) {
 				status = DestroySurface(pSurf2DUP, destroyKind);
 			}
@@ -416,7 +416,7 @@ INT CmSurfaceManager::DestroySurfaceInPool(UINT & freeSurfNum,
 INT CmSurfaceManager::TouchSurfaceInPoolForDestroy()
 {
 	UINT freeNum = 0;
-	CmQueue *pCmQueue = NULL;
+	CmQueue_RT *pCmQueue = NULL;
 
 	m_pCmDevice->GetQueue(pCmQueue);
 
@@ -874,7 +874,7 @@ INT CmSurfaceManager::UpdateSurface2D(CmSurface2D * pSurface2D, UINT width,
 
 INT CmSurfaceManager::CreateSurface2DUP(UINT width, UINT height,
 					CM_SURFACE_FORMAT format, void *pSysMem,
-					CmSurface2DUP * &pSurface2D)
+					CmSurface2DUP_RT * &pSurface2D)
 {
 	pSurface2D = NULL;
 	UINT index = m_pCmDevice->ValidSurfaceIndexStart();
@@ -897,7 +897,7 @@ INT CmSurfaceManager::CreateSurface2DUP(UINT width, UINT height,
 	}
 
 	result =
-	    CmSurface2DUP::Create(index, handle, width, height, format, this,
+	    CmSurface2DUP_RT::Create(index, handle, width, height, format, this,
 				  pSurface2D);
 	if (result != CM_SUCCESS) {
 		FreeSurface2DUP(handle);
@@ -1249,7 +1249,7 @@ INT CmSurfaceManager::DestroySurface(CmBuffer_RT * &pSurface1D,
 	return CM_SUCCESS;
 }
 
-INT CmSurfaceManager::DestroySurface(CmSurface2DUP * &pSurface2D,
+INT CmSurfaceManager::DestroySurface(CmSurface2DUP_RT * &pSurface2D,
 				     SURFACE_DESTROY_KIND destroyKind)
 {
 	UINT handle = 0;
@@ -1352,7 +1352,7 @@ INT CmSurfaceManager::GetSurface(const UINT index, CmSurface * &pSurface)
 	}
 }
 
-INT CmSurfaceManager::GetCmDevice(CmDevice * &pCmDevice)
+INT CmSurfaceManager::GetCmDevice(CmDevice_RT * &pCmDevice)
 {
 	pCmDevice = m_pCmDevice;
 	return CM_SUCCESS;

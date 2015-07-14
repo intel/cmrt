@@ -31,6 +31,19 @@
 
 #define GENHW_NS_PER_TICK_RENDER_G75        80
 
+static const STATE_SIP_CMD_G75 g_cInit_STATE_SIP_CMD_G75 = {
+	{
+	        OP_LENGTH(SIZE32(STATE_SIP_CMD_G75)),   // Length
+	        GFXSUBOP_STATE_SIP,			// InstructionSubOpcode
+	        GFXOP_NONPIPELINED,			// InstructionOpcode
+	        PIPE_COMMON,				// InstructionPipeline
+	        INSTRUCTION_GFX				// InstructionType
+	},
+	{
+		0
+	}
+};
+
 CONST GENHW_SSH_SETTINGS g_SSH_Settings_g75 = {
 	GENHW_SSH_INSTANCES,
 	GENHW_SSH_BINDING_TABLES,
@@ -61,7 +74,7 @@ CONST GENHW_INDIRECT_PATCH_PARAM g_IndirectPatchParam_g75 = {
 	0
 };
 
-extern CONST GENHW_SURFACE_PLANES
+CONST GENHW_SURFACE_PLANES
     g_cInitSurfacePlanes_g75[GENHW_PLANES_DEFINITION_COUNT] = {
 	// GENHW_PLANES_PL3
 	{3,
@@ -449,7 +462,7 @@ CONST GENHW_HW_CAPS g_IntelGen_HwCaps_g75_gt3 = {
 	GENHW_SIZE_REGISTERS_PER_THREAD_G75
 };
 
-extern CONST GENHW_GSH_SETTINGS g_GSH_Settings_g75 = {
+CONST GENHW_GSH_SETTINGS g_GSH_Settings_g75 = {
 	GENHW_SYNC_SIZE_G75,
 	GENHW_MEDIA_STATES_G75,
 	GENHW_MEDIA_IDS_G75,
@@ -888,7 +901,7 @@ VOID IntelGen_HwSkipPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBatchBuffer->iCurrent += sizeof(PIPE_CONTROL_CMD_G7);
 }
@@ -1135,7 +1148,7 @@ VOID IntelGen_HwAddMediaObjectCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pParam->dwMediaObjectSize >=
 			sizeof(MEDIA_OBJECT_HEADER_G6));
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MEDIA_OBJECT_HEADER_G6));
+			(long)sizeof(MEDIA_OBJECT_HEADER_G6));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PMEDIA_OBJECT_HEADER_G6) pBuffer;
@@ -1199,7 +1212,7 @@ VOID IntelGen_HwAddPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PPIPE_CONTROL_CMD_G7) pBuffer;
@@ -1604,6 +1617,28 @@ GENOS_STATUS IntelGen_HwSendMediaStateFlush_g75(PGENHW_HW_INTERFACE
 	return eStatus;
 }
 
+static GENOS_STATUS IntelGen_HwSendStateSip_g75(PGENHW_HW_INTERFACE pHw,
+						PGENOS_COMMAND_BUFFER pCmd)
+{
+	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
+	PGENHW_GSH pGsh = pHw->pGeneralStateHeap;
+	STATE_SIP_CMD_G75 *pStateSipCmd;
+
+	pStateSipCmd = (PSTATE_SIP_CMD_G75)IntelGen_OsGetCmdBufferSpace(pCmd,
+						sizeof(*pStateSipCmd));
+	GENHW_HW_CHK_NULL(pStateSipCmd);
+
+	*pStateSipCmd = g_cInit_STATE_SIP_CMD_G75;
+
+	// We use a bitfield so bits [3:0] of DWord1 will be zero
+	pStateSipCmd->DW1.SystemInstructionPointer = pGsh->dwSipBase >> 4;
+
+	IntelGen_OsAdjustCmdBufferFreeSpace(pCmd, sizeof(*pStateSipCmd));
+
+finish:
+	return eStatus;
+}
+
 VOID IntelGen_HwInitInterface_g75(PGENHW_HW_INTERFACE pHwInterface)
 {
 	if (pHwInterface->Platform.GtType == GTTYPE_GT1) {
@@ -1671,6 +1706,7 @@ VOID IntelGen_HwInitInterface_g75(PGENHW_HW_INTERFACE pHwInterface)
 	pHwInterface->pfnSendMediaStateFlush =
 	    IntelGen_HwSendMediaStateFlush_g75;
 	pHwInterface->pfnSendMIArbCheckCmd = IntelGen_HwSendMIArbCheck_g75;
+	pHwInterface->pfnSendStateSip = IntelGen_HwSendStateSip_g75;
 
 	pHwInterface->pfnIs2PlaneNV12Needed = IntelGen_HwIs2PlaneNV12Needed_g75;
 }

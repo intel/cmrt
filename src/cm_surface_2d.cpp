@@ -106,7 +106,7 @@ CM_RT_API INT
 	}
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -178,7 +178,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -258,7 +258,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -336,7 +336,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -428,7 +428,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -540,7 +540,7 @@ CM_RT_API INT
 CM_RT_API INT CmSurface2D::InitSurface(const DWORD pInitValue, CmEvent * pEvent)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	PCM_CONTEXT pCmData = NULL;
 	CM_HAL_SURFACE2D_LOCK_UNLOCK_PARAM inParam;
 	UINT pitch = 0;
@@ -630,7 +630,7 @@ CM_RT_API INT
 		return CM_NOT_IMPLEMENTED;
 	}
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 
@@ -653,7 +653,7 @@ INT CmSurface2D::SetReadSyncFlag()
 {
 	HRESULT hr = CM_SUCCESS;
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 

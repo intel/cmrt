@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Intel Corporation
+ * Copyright Â© 2014 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -24,37 +24,18 @@
  * Authors:
  *     Wei Lin<wei.w.lin@intel.com>
  *     Yuting Yang<yuting.yang@intel.com>
+ *     Lina Sun<lina.sun@intel.com>
+ *     Zhao Yakui <yakui.zhao@intel.com>
  */
 
-#ifndef __OSCL_IMPL_LINUX_H__
-#define __OSCL_IMPL_LINUX_H__
+#ifndef _Cm_Task_Base_H_
+#define _Cm_Task_Base_H_
 
-#include "stdio.h"
-#include <time.h>
-#include "oscl_platform_def.h"
+class CmTask {
+ public:
+	virtual INT AddKernel(CmKernel * pKernel) = 0;
+	virtual INT Reset(void) = 0;
+	virtual INT AddSync(void) = 0;
+};
 
-#define ALIGN(i,m)    (((i) + (m) - 1) & ~((m) - 1))
-
-#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
-
-#define GetCurrentProcessID() getpid()
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-HMODULE LoadLibrary(LPCSTR lpLibFileName);
-BOOL FreeLibrary(HMODULE hLibModule);
-FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
-
-BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency);
-BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount);
-
-INT strcpy_s(CHAR * pDestination, SIZE_T DstLength, CONST CHAR * pSource);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* _Cm_Task_Base_H_ */

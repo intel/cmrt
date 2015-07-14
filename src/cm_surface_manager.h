@@ -34,12 +34,12 @@
 
 typedef enum _GENOS_FORMAT GENOS_FORMAT;
 
-class CmDevice;
+class CmDevice_RT;
 class CmSurface;
 
 class CmSurfaceManager {
  public:
-	static INT Create(CmDevice * pCmDevice,
+	static INT Create(CmDevice_RT * pCmDevice,
 			  CM_HAL_MAX_VALUES HalMaxValues,
 			  CM_HAL_MAX_VALUES_EX HalMaxValuesEx,
 			  CmSurfaceManager * &pManager);
@@ -53,8 +53,8 @@ class CmSurfaceManager {
 			   SURFACE_DESTROY_KIND destroyKind);
 
 	INT CreateSurface2DUP(UINT width, UINT height, CM_SURFACE_FORMAT format,
-			      void *pSysMem, CmSurface2DUP * &pSurface2D);
-	INT DestroySurface(CmSurface2DUP * &pSurface,
+			      void *pSysMem, CmSurface2DUP_RT * &pSurface2D);
+	INT DestroySurface(CmSurface2DUP_RT * &pSurface,
 			   SURFACE_DESTROY_KIND destroyKind);
 
 	INT CreateSurface2D(UINT width, UINT height, UINT pitch,
@@ -67,7 +67,7 @@ class CmSurfaceManager {
 			   SURFACE_DESTROY_KIND destroyKind);
 
 	INT GetSurface(const UINT index, CmSurface * &pSurface);
-	INT GetCmDevice(CmDevice * &pCmDevice);
+	INT GetCmDevice(CmDevice_RT * &pCmDevice);
 
 	INT GetPixelBytesAndHeight(UINT width, UINT height,
 				   CM_SURFACE_FORMAT format,
@@ -112,7 +112,7 @@ class CmSurfaceManager {
 	INT UPDATE_PROFILE_FOR_1D_SURFACE(UINT index, UINT size, BOOL reuse);
 
  protected:
-	 CmSurfaceManager(CmDevice * pCmDevice);
+	 CmSurfaceManager(CmDevice_RT * pCmDevice);
 	 CmSurfaceManager();
 
 	~CmSurfaceManager(void);
@@ -147,7 +147,7 @@ class CmSurfaceManager {
 	static const UINT MAX_DEVICE_FOR_SAME_SURF = 4;
 
  protected:
-	 CmDevice * m_pCmDevice;
+	 CmDevice_RT * m_pCmDevice;
 
 	UINT m_SurfaceArraySize;
 

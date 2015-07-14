@@ -27,11 +27,13 @@
  */
 #pragma once
 
-class CmDevice;
+class CmDevice_RT;
 
-class CmThreadGroupSpace {
+#include "cm_group_space_base.h"
+
+class CmThreadGroupSpace_RT : public CmThreadGroupSpace {
  public:
-	static INT Create(CmDevice * pDevice, UINT index, UINT thrdSpaceWidth,
+	static INT Create(CmDevice_RT * pDevice, UINT index, UINT thrdSpaceWidth,
 			  UINT thrdSpaceHeight, UINT grpSpaceWidth,
 			  UINT grpSpaceHeight, CmThreadGroupSpace * &pTGS);
 	static INT Destroy(CmThreadGroupSpace * &pTGS);
@@ -43,13 +45,13 @@ class CmThreadGroupSpace {
 	UINT GetIndexInTGsArray();
 
  protected:
-	 CmThreadGroupSpace(CmDevice * pCmDev, UINT index, UINT thrdSpaceWidth,
+	CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth,
 			    UINT thrdSpaceHeight, UINT grpSpaceWidth,
 			    UINT grpSpaceHeight);
-	~CmThreadGroupSpace(void);
+	virtual ~CmThreadGroupSpace_RT(void);
 	INT Initialize(void);
 
-	CmDevice *m_pCmDev;
+	CmDevice_RT *m_pCmDev;
 	UINT m_threadSpaceWidth;
 	UINT m_threadSpaceHeight;
 	UINT m_groupSpaceWidth;

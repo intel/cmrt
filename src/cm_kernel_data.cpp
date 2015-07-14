@@ -65,8 +65,8 @@ INT CmKernelData::Destroy(CmKernelData * &pKernelData)
 }
 
  CmKernelData::CmKernelData(CmKernel * pCmKernel):
-m_kerneldatasize(0),
-m_pCmKernel(pCmKernel), m_RefCount(0), m_KernelRef(0), m_IsInUse(TRUE)
+m_kerneldatasize(0), m_pCmKernel(static_cast<CmKernel_RT *>(pCmKernel)),
+m_RefCount(0), m_KernelRef(0), m_IsInUse(TRUE)
 {
 	CmSafeMemSet(&m_HalKernelParam, 0, sizeof(CM_HAL_KERNEL_PARAM));
 }
@@ -124,14 +124,14 @@ UINT CmKernelData::Acquire(void)
 
 UINT CmKernelData::AcquireKernel(void)
 {
-	CmDevice *pDevice = NULL;
+	CmDevice_RT *pDevice = NULL;
 	m_pCmKernel->GetCmDevice(pDevice);
 
 	CSync *pKernelLock = pDevice->GetProgramKernelLock();
 	CLock locker(*pKernelLock);
 
 	m_pCmKernel->Acquire();
-	CmProgram *pCmProgram = NULL;
+	CmProgram_RT *pCmProgram = NULL;
 	m_pCmKernel->GetCmProgram(pCmProgram);
 	pCmProgram->Acquire();
 
@@ -160,10 +160,10 @@ PCM_HAL_KERNEL_PARAM CmKernelData::GetHalCmKernelData()
 INT CmKernelData::ReleaseKernel()
 {
 	if (m_pCmKernel && m_KernelRef > 0) {
-		CmDevice *pDevice = NULL;
+		CmDevice_RT *pDevice = NULL;
 		m_pCmKernel->GetCmDevice(pDevice);
 
-		pDevice->DestroyKernel(m_pCmKernel);
+		pDevice->DestroyKernel((CmKernel * &)m_pCmKernel);
 
 		m_KernelRef--;
 		m_IsInUse = FALSE;

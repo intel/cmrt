@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Intel Corporation
+ * Copyright (c) 2015 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -22,39 +22,34 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Authors:
- *     Wei Lin<wei.w.lin@intel.com>
- *     Yuting Yang<yuting.yang@intel.com>
+ *	Mircea Gherzan <mircea.gherzan@intel.com>
  */
 
-#ifndef __OSCL_IMPL_LINUX_H__
-#define __OSCL_IMPL_LINUX_H__
+#ifndef GEN_DEBUGGER_H
+#define GEN_DEBUGGER_H
 
-#include "stdio.h"
-#include <time.h>
-#include "oscl_platform_def.h"
-
-#define ALIGN(i,m)    (((i) + (m) - 1) & ~((m) - 1))
-
-#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
-
-#define GetCurrentProcessID() getpid()
+#include "hw_info.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-HMODULE LoadLibrary(LPCSTR lpLibFileName);
-BOOL FreeLibrary(HMODULE hLibModule);
-FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
+int GenDbgNotifyNewDevice(void *cmDevHandle);
 
-BOOL QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency);
-BOOL QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount);
+int GenDbgNotifyDeviceDestruction(void *cmDevHandle);
 
-INT strcpy_s(CHAR * pDestination, SIZE_T DstLength, CONST CHAR * pSource);
+int GenDbgNotifyKernelBinary(void *devHandle, void *programHandle,
+			     const char *kernelName, void *genBinary,
+			     unsigned genBinarySize, void *genDebugInfo,
+			     unsigned genDebugInfoSize,
+			     const char *debugInfoFile);
+
+int GenDbgGetSysRoutineBinary(PLATFORM p, unsigned bti,
+			      const unsigned char **pSip,
+			      unsigned *sipSize, unsigned *resSize);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // GEN_DEBUGGER_H

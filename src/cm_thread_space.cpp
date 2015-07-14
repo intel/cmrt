@@ -66,7 +66,7 @@ static CM_DEPENDENCY VerticalPattern = {
 	{0}
 };
 
-INT CmThreadSpace::Create(CmDevice * pDevice, UINT indexTsArray, UINT width,
+INT CmThreadSpace::Create(CmDevice_RT * pDevice, UINT indexTsArray, UINT width,
 			  UINT height, CmThreadSpace * &pTS)
 {
 	if ((0 == width) || (0 == height) || (width > CM_MAX_THREADSPACE_WIDTH)
@@ -100,7 +100,7 @@ INT CmThreadSpace::Destroy(CmThreadSpace * &pTS)
 	return CM_SUCCESS;
 }
 
- CmThreadSpace::CmThreadSpace(CmDevice * pDevice, UINT indexTsArray, UINT width, UINT height):
+ CmThreadSpace::CmThreadSpace(CmDevice_RT * pDevice, UINT indexTsArray, UINT width, UINT height):
 m_pDevice(pDevice),
 m_Width(width),
 m_Height(height),
@@ -217,7 +217,7 @@ CM_RT_API INT
 		m_ThreadAssociated = TRUE;
 	}
 
-	pKernel->SetAssociatedToTSFlag(TRUE);
+	((CmKernel_RT *)pKernel)->SetAssociatedToTSFlag(TRUE);
 
 	return CM_SUCCESS;
 }
@@ -630,9 +630,9 @@ INT CmThreadSpace::GetWavefront26ZDispatchInfo(CM_HAL_WAVEFRONT26Z_DISPATCH_INFO
 	return CM_SUCCESS;
 }
 
-BOOLEAN CmThreadSpace::IntegrityCheck(CmTask * pTask)
+BOOLEAN CmThreadSpace::IntegrityCheck(CmTask_RT * pTask)
 {
-	CmKernel *pKernel_RT = NULL;
+	CmKernel_RT *pKernel_RT = NULL;
 	UINT i;
 	UINT KernelCount = 0;
 	UINT ThreadNumber = 0;
@@ -650,7 +650,7 @@ BOOLEAN CmThreadSpace::IntegrityCheck(CmTask * pTask)
 		return FALSE;
 	}
 
-	pKernel_RT = pTask->GetKernelPointer(0);
+	pKernel_RT = static_cast<CmKernel_RT *>(pTask->GetKernelPointer(0));
 	CMCHK_NULL(pKernel_RT);
 
 	pKernel_RT->GetThreadCount(ThreadNumber);
@@ -674,7 +674,7 @@ BOOLEAN CmThreadSpace::IntegrityCheck(CmTask * pTask)
 			     KernelCount * sizeof(BOOLEAN));
 
 		for (i = 0; i < KernelCount; i++) {
-			pKernel_RT = pTask->GetKernelPointer(i);
+			pKernel_RT = static_cast<CmKernel_RT *>(pTask->GetKernelPointer(i));
 			CMCHK_NULL(pKernel_RT);
 			pKernel_RT->GetThreadCount(ThreadNumber);
 
@@ -688,10 +688,10 @@ BOOLEAN CmThreadSpace::IntegrityCheck(CmTask * pTask)
 		for (i = 0; i < m_Width * m_Height; i++) {
 			pKernel_RT =
 			    static_cast <
-			    CmKernel * >(m_pThreadSpaceUnit[i].pKernel);
+			    CmKernel_RT * >(m_pThreadSpaceUnit[i].pKernel);
 			if (pKernel_RT == NULL) {
 				if (m_NeedSetKernelPointer) {
-					pKernel_RT = *m_ppKernel;
+					pKernel_RT = static_cast<CmKernel_RT *>(*m_ppKernel);
 				}
 			}
 			CMCHK_NULL(pKernel_RT);
@@ -704,7 +704,7 @@ BOOLEAN CmThreadSpace::IntegrityCheck(CmTask * pTask)
 
 		for (i = 0; i < KernelCount; i++) {
 			if (pKernelInScoreboard[i] == TRUE) {
-				pKernel_RT = pTask->GetKernelPointer(i);
+				pKernel_RT = static_cast<CmKernel_RT *>(pTask->GetKernelPointer(i));
 				CMCHK_NULL(pKernel_RT);
 
 				pKernel_RT->GetThreadCount(ThreadNumber);

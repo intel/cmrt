@@ -717,6 +717,7 @@ typedef struct _GENHW_HW_INTERFACE {
 	BOOL bMediaReset;
 	BOOL bUsesPatchList;
 	BOOL bRequestSingleSlice;
+	BOOL bSysRoutine;
 
 	GENHW_MEDIA_WALKER_MODE MediaWalkerMode;
 	DWORD dwIndirectHeapSize;
@@ -959,6 +960,10 @@ typedef struct _GENHW_HW_INTERFACE {
 					      PGENHW_LOAD_REGISTER_IMM_PARAM
 					      pParam);
 
+	 GENOS_STATUS(*pfnSendStateSip) (PGENHW_HW_INTERFACE pHwInterface,
+					 PGENOS_COMMAND_BUFFER pCmdBuffer);
+
+
 	 GENOS_STATUS(*pfnSetupBufferSurfaceState) (PGENHW_HW_INTERFACE
 						    pHwInterface,
 						    PGENHW_SURFACE pSurface,
@@ -1015,7 +1020,11 @@ typedef struct _GENHW_HW_INTERFACE {
 
 } GENHW_HW_INTERFACE;
 
-GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface,
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+GENOS_STATUS IntelGen_HwInitInterfaceOS(PGENHW_HW_INTERFACE pHwInterface,
 				      PGENOS_INTERFACE pOsInterface);
 
 DWORD IntelGen_HwGetCurBindingTableBase(PGENHW_SSH pSSH);
@@ -1024,5 +1033,9 @@ DWORD IntelGen_HwGetCurSurfaceStateBase(PGENHW_SSH pSSH);
 
 VOID IntelGen_GetPixelsPerSample(GENOS_FORMAT format,
 				 PDWORD pdwPixelsPerSampleUV);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

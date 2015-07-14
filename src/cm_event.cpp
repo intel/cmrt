@@ -38,12 +38,12 @@
 #include "hal_cm.h"
 #include "cm_surface_manager.h"
 
-INT CmEvent::Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
-		    CmDevice * pCmDev, BOOL isVisible, CmEvent * &pEvent)
+INT CmEvent_RT::Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
+		    CmDevice_RT * pCmDev, BOOL isVisible, CmEvent_RT * &pEvent)
 {
 	INT result = CM_SUCCESS;
 	pEvent =
-	    new(std::nothrow) CmEvent(index, pTask, taskDriverId, pCmDev,
+	    new(std::nothrow) CmEvent_RT(index, pTask, taskDriverId, pCmDev,
 				      isVisible);
 	if (pEvent) {
 		if (isVisible) {
@@ -51,7 +51,7 @@ INT CmEvent::Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
 		}
 		result = pEvent->Initialize();
 		if (result != CM_SUCCESS) {
-			CmEvent::Destroy(pEvent);
+		    CmEvent_RT::Destroy(pEvent);
 		}
 	} else {
 		CM_ASSERT(0);
@@ -60,7 +60,7 @@ INT CmEvent::Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
 	return result;
 }
 
-INT CmEvent::Destroy(CmEvent * &pEvent)
+INT CmEvent_RT::Destroy(CmEvent_RT * &pEvent)
 {
 	long refCount = pEvent->SafeRelease();
 	if (refCount == 0) {
@@ -70,7 +70,7 @@ INT CmEvent::Destroy(CmEvent * &pEvent)
 	return CM_SUCCESS;
 }
 
- CmEvent::CmEvent(UINT index, CmTaskInternal * pTask, INT taskDriverId, CmDevice * pCmDev, BOOL isVisible):
+CmEvent_RT::CmEvent_RT(UINT index, CmTaskInternal * pTask, INT taskDriverId, CmDevice_RT * pCmDev, BOOL isVisible):
 m_Index(index),
 m_TaskDriverId(taskDriverId),
 m_OsData(NULL),
@@ -81,14 +81,15 @@ m_pQueue(NULL), m_RefCount(0), isVisible(isVisible), m_pTask(pTask)
 {
 }
 
-INT CmEvent::Acquire(void)
+INT CmEvent_RT::Acquire(void)
 {
 	++m_RefCount;
 	return m_RefCount;
 }
 
-INT CmEvent::SafeRelease(void)
+INT CmEvent_RT::SafeRelease(void)
 {
+	CM_ASSERT(m_RefCount > 0);
 	--m_RefCount;
 	if (m_RefCount == 0) {
 		delete this;
@@ -98,7 +99,7 @@ INT CmEvent::SafeRelease(void)
 	}
 }
 
-CmEvent::~CmEvent(void)
+CmEvent_RT::~CmEvent_RT(void)
 {
 	if (m_SurEntryInfoArrays.pSurfEntryInfosArray != NULL) {
 
@@ -128,7 +129,7 @@ CmEvent::~CmEvent(void)
 	}
 }
 
-INT CmEvent::Initialize(void)
+INT CmEvent_RT::Initialize(void)
 {
 	CmSafeMemSet(&m_SurEntryInfoArrays, 0,
 		     sizeof(CM_HAL_SURFACE_ENTRY_INFO_ARRAYS));
@@ -147,7 +148,7 @@ INT CmEvent::Initialize(void)
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmEvent::GetStatus(CM_STATUS & status)
+CM_RT_API INT CmEvent_RT::GetStatus(CM_STATUS & status)
 {
 
 	if ((m_Status == CM_STATUS_FLUSHED) || (m_Status == CM_STATUS_STARTED)) {
@@ -164,7 +165,7 @@ CM_RT_API INT CmEvent::GetStatus(CM_STATUS & status)
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmEvent::GetExecutionTime(UINT64 & time)
+CM_RT_API INT CmEvent_RT::GetExecutionTime(UINT64 & time)
 {
 	CM_STATUS EventStatus = CM_STATUS_QUEUED;
 	m_pQueue->AcquireQueueLock();
@@ -179,7 +180,7 @@ CM_RT_API INT CmEvent::GetExecutionTime(UINT64 & time)
 	}
 }
 
-CM_RT_API INT CmEvent::GetSubmitTime(LARGE_INTEGER & time)
+CM_RT_API INT CmEvent_RT::GetSubmitTime(LARGE_INTEGER & time)
 {
 
 	CM_STATUS EventStatus = CM_STATUS_QUEUED;
@@ -197,7 +198,7 @@ CM_RT_API INT CmEvent::GetSubmitTime(LARGE_INTEGER & time)
 	}
 }
 
-CM_RT_API INT CmEvent::GetHWStartTime(LARGE_INTEGER & time)
+CM_RT_API INT CmEvent_RT::GetHWStartTime(LARGE_INTEGER & time)
 {
 	CM_STATUS EventStatus = CM_STATUS_QUEUED;
 
@@ -216,7 +217,7 @@ CM_RT_API INT CmEvent::GetHWStartTime(LARGE_INTEGER & time)
 
 }
 
-CM_RT_API INT CmEvent::GetHWEndTime(LARGE_INTEGER & time)
+CM_RT_API INT CmEvent_RT::GetHWEndTime(LARGE_INTEGER & time)
 {
 
 	CM_STATUS EventStatus = CM_STATUS_QUEUED;
@@ -235,7 +236,7 @@ CM_RT_API INT CmEvent::GetHWEndTime(LARGE_INTEGER & time)
 	}
 }
 
-CM_RT_API INT CmEvent::GetCompleteTime(LARGE_INTEGER & time)
+CM_RT_API INT CmEvent_RT::GetCompleteTime(LARGE_INTEGER & time)
 {
 
 	CM_STATUS EventStatus = CM_STATUS_QUEUED;
@@ -253,12 +254,12 @@ CM_RT_API INT CmEvent::GetCompleteTime(LARGE_INTEGER & time)
 
 }
 
-CM_RT_API UINT CmEvent::GetKernelCount()
+CM_RT_API UINT CmEvent_RT::GetKernelCount()
 {
 	return m_KernelCount;
 }
 
-CM_RT_API INT CmEvent::GetKernelName(UINT index, char *&KernelName)
+CM_RT_API INT CmEvent_RT::GetKernelName(UINT index, char *&KernelName)
 {
 	if (index < m_KernelCount) {
 		KernelName = m_KernelNames[index];
@@ -268,7 +269,7 @@ CM_RT_API INT CmEvent::GetKernelName(UINT index, char *&KernelName)
 }
 
 CM_RT_API INT
-    CmEvent::GetKernelThreadSpace(UINT index, UINT & localWidth,
+CmEvent_RT::GetKernelThreadSpace(UINT index, UINT & localWidth,
 				  UINT & localHeight, UINT & globalWidth,
 				  UINT & globalHeight)
 {
@@ -282,7 +283,7 @@ CM_RT_API INT
 	return CM_FAILURE;
 }
 
-INT CmEvent::SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
+INT CmEvent_RT::SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
 			    CmThreadGroupSpace * pThreadGroupSpace)
 {
 	UINT i = 0;
@@ -290,7 +291,8 @@ INT CmEvent::SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
 	CmThreadSpace *pThreadSpace_RT =
 	    dynamic_cast < CmThreadSpace * >(pThreadSpace);
 	UINT ThreadCount;
-	m_KernelCount = pTask->GetKernelCount();
+	CmTask_RT* temp = static_cast< CmTask_RT* >(pTask);
+	m_KernelCount = temp->GetKernelCount();
 
 	m_KernelNames = new(std::nothrow) char *[m_KernelCount];
 	m_ThreadSpace = new(std::nothrow) UINT[4 * m_KernelCount];
@@ -302,7 +304,7 @@ INT CmEvent::SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
 		m_KernelNames[i] =
 		    new(std::nothrow) char[CM_MAX_KERNEL_NAME_SIZE_IN_BYTE];
 		CMCHK_NULL_RETURN(m_KernelNames[i], CM_OUT_OF_HOST_MEMORY);
-		CmKernel *pKernel = pTask->GetKernelPointer(i);
+		CmKernel_RT *pKernel = static_cast<CmKernel_RT *>(temp->GetKernelPointer(i));
 		strcpy_s(m_KernelNames[i], CM_MAX_KERNEL_NAME_SIZE_IN_BYTE,
 			 pKernel->GetName());
 
@@ -345,13 +347,13 @@ INT CmEvent::SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
 	return hr;
 }
 
-INT CmEvent::GetIndex(UINT & index)
+INT CmEvent_RT::GetIndex(UINT & index)
 {
 	index = m_Index;
 	return CM_SUCCESS;
 }
 
-INT CmEvent::SetTaskDriverId(INT id)
+INT CmEvent_RT::SetTaskDriverId(INT id)
 {
 	m_TaskDriverId = id;
 	if (m_TaskDriverId > -1) {
@@ -366,19 +368,19 @@ INT CmEvent::SetTaskDriverId(INT id)
 	return CM_SUCCESS;
 }
 
-INT CmEvent::SetTaskOsData(PVOID data)
+INT CmEvent_RT::SetTaskOsData(PVOID data)
 {
 	m_OsData = data;
 	return CM_SUCCESS;
 }
 
-INT CmEvent::GetTaskDriverId(INT & id)
+INT CmEvent_RT::GetTaskDriverId(INT & id)
 {
 	id = m_TaskDriverId;
 	return CM_SUCCESS;
 }
 
-INT CmEvent::Query(void)
+INT CmEvent_RT::Query(void)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
 
@@ -397,7 +399,7 @@ INT CmEvent::Query(void)
 						    &param));
 
 	if (param.status == CM_TASK_FINISHED) {
-		CmQueue *pQueue = NULL;
+		CmQueue_RT *pQueue = NULL;
 
 		m_Time = param.iTaskDuration;
 		m_Status = CM_STATUS_FINISHED;
@@ -431,7 +433,7 @@ INT CmEvent::Query(void)
 	return hr;
 }
 
-CM_RT_API INT CmEvent::WaitForTaskFinished(DWORD dwTimeOutMs)
+CM_RT_API INT CmEvent_RT::WaitForTaskFinished(DWORD dwTimeOutMs)
 {
 	INT result = CM_SUCCESS;
 	m_pQueue->AcquireQueueLock();

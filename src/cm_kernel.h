@@ -32,27 +32,29 @@
 #include "cm_array.h"
 #include "cm_program.h"
 
-class CmDevice;
+class CmDevice_RT;
 class CmKernelData;
 class CmThreadSpace;
 class CmThreadGroupSpace;
 
-class CmKernel {
+#include "cm_kernel_base.h"
+
+class CmKernel_RT : public CmKernel {
  public:
 
-	static INT Create(CmDevice * pCmDev, CmProgram * pProgram,
+	static INT Create(CmDevice_RT * pCmDev, CmProgram_RT * pProgram,
 			  const char *kernelName, UINT KernelIndex,
-			  UINT KernelSeqNum, CmKernel * &pKernel,
+			  UINT KernelSeqNum, CmKernel_RT * &pKernel,
 			  const char *options);
-	static INT Destroy(CmKernel * &pKernel, CmProgram * &pProgram);
+	static INT Destroy(CmKernel_RT * &pKernel, CmProgram_RT * &pProgram);
 
 	INT GetBinary(void *&pBinary, UINT & size);
 	INT GetThreadCount(UINT & count);
 
-	CM_RT_API INT SetThreadCount(UINT count);
-	CM_RT_API INT SetKernelArg(UINT index, size_t size, const void *pValue);
+	virtual CM_RT_API INT SetThreadCount(UINT count);
+	virtual CM_RT_API INT SetKernelArg(UINT index, size_t size, const void *pValue);
 
-	CM_RT_API INT SetThreadArg(UINT threadId, UINT index, size_t size,
+	virtual CM_RT_API INT SetThreadArg(UINT threadId, UINT index, size_t size,
 				   const void *pValue);
 	CM_RT_API INT SetThreadDependencyMask(UINT threadId, BYTE mask);
 
@@ -62,7 +64,7 @@ class CmKernel {
 					      SurfaceIndex ** pSurfaces);
 
 	CM_RT_API INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex);
-	CM_RT_API INT AssociateThreadSpace(CmThreadSpace * &pThreadSpace);
+	virtual CM_RT_API INT AssociateThreadSpace(CmThreadSpace * &pThreadSpace);
 	CM_RT_API INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS);
 
 	INT GetArgs(CM_ARG * &pArg);
@@ -72,8 +74,8 @@ class CmKernel {
 	INT SetCurbeEnable(BOOL b);
 	INT GetSizeInCurbe(UINT & size);
 	UINT GetAlignedCurbeSize(UINT value);
-	INT GetCmDevice(CmDevice * &);
-	INT GetCmProgram(CmProgram * &);
+	INT GetCmDevice(CmDevice_RT * &);
+	INT GetCmProgram(CmProgram_RT * &);
 	INT GetSizeInPayload(UINT & size);
 
 	INT CreateKernelData(CmKernelData * &pKernelData, UINT & kernelDataSize,
@@ -114,9 +116,9 @@ class CmKernel {
 	UINT GetKernelGenxBinarySize(void);
 
  protected:
-	CmKernel(CmDevice * pCmDev, CmProgram * pProgram, UINT KernelIndex,
+	CmKernel_RT(CmDevice_RT * pCmDev, CmProgram_RT * pProgram, UINT KernelIndex,
 		 UINT KernelSeqNum);
-	~CmKernel(void);
+	virtual ~CmKernel_RT(void);
 
 	INT SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
 			    size_t size, const void *pValue, UINT nThreadID =
@@ -170,8 +172,8 @@ class CmKernel {
 					      pHalKernelParam);
 	CM_ARG_KIND SurfTypeToArgKind(CM_ENUM_CLASS_TYPE SurfType);
 
-	CmDevice *m_pCmDev;
-	CmProgram *m_pProgram;
+	CmDevice_RT *m_pCmDev;
+	CmProgram_RT *m_pProgram;
 	char *m_Options;
 	char *m_pBinary;
 	UINT m_uiBinarySize;
@@ -227,6 +229,6 @@ class CmKernel {
 	CmThreadGroupSpace *m_pThreadGroupSpace;
 
  private:
-	CmKernel(const CmKernel & other);
-	CmKernel & operator=(const CmKernel & other);
+	CmKernel_RT(const CmKernel_RT & other);
+	CmKernel_RT & operator=(const CmKernel_RT & other);
 };

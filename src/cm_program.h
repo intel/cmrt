@@ -30,15 +30,17 @@
 #pragma once
 #include "cm_def.h"
 
-class CmDevice;
+class CmDevice_RT;
 
-class CmProgram {
+#include "cm_program_base.h"
+
+class CmProgram_RT : public CmProgram {
  public:
-	static INT Create(CmDevice * pCmDev, void *pCISACode,
+	static INT Create(CmDevice_RT * pCmDev, void *pCISACode,
 			  const UINT uiCISACodeSize, void *pGenCode,
-			  const UINT uiGenCodeSize, CmProgram * &pProgram,
+			  const UINT uiGenCodeSize, CmProgram_RT * &pProgram,
 			  const char *options, const UINT programId);
-	static INT Destroy(CmProgram * &pProgram);
+	static INT Destroy(CmProgram_RT * &pProgram);
 
 	INT GetCommonISACode(void *&pCommonISACode, UINT & size);
 	INT GetKernelCount(UINT & kernelCount);
@@ -67,14 +69,14 @@ class CmProgram {
 	UINT GetProgramIndex();
 
  protected:
-	CmProgram(CmDevice * pCmDev, UINT programId);
-	~CmProgram(void);
+	CmProgram_RT(CmDevice_RT * pCmDev, UINT programId);
+	virtual ~CmProgram_RT(void);
 
 	INT Initialize(void *pCISACode, const UINT uiCISACodeSize,
 		       void *pGenCode, const UINT uiGenCodeSize,
 		       const char *options);
 
-	CmDevice *m_pCmDev;
+	CmDevice_RT *m_pCmDev;
 
 	UINT m_ProgramCodeSize;
 	BYTE *m_pProgramCode;
@@ -102,6 +104,6 @@ class CmProgram {
 	BYTE m_CISA_minorVersion;
 
  private:
-	CmProgram(const CmProgram & other);
-	CmProgram & operator=(const CmProgram & other);
+	CmProgram_RT(const CmProgram_RT & other);
+	CmProgram_RT & operator=(const CmProgram_RT & other);
 };

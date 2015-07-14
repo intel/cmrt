@@ -116,20 +116,20 @@ void QuickSort(PCM_ARG * ppArg, INT p, INT r)
 	}
 }
 
-INT CmKernel::Create(CmDevice * pCmDev, CmProgram * pProgram,
+INT CmKernel_RT::Create(CmDevice_RT * pCmDev, CmProgram_RT * pProgram,
 		     const char *kernelName, UINT KernelIndex,
-		     UINT KernelSeqNum, CmKernel * &pKernel,
+		     UINT KernelSeqNum, CmKernel_RT * &pKernel,
 		     const char *options)
 {
 	INT result = CM_SUCCESS;
 	pKernel =
-	    new(std::nothrow) CmKernel(pCmDev, pProgram, KernelIndex,
+	    new(std::nothrow) CmKernel_RT(pCmDev, pProgram, KernelIndex,
 				       KernelSeqNum);
 	if (pKernel) {
 		pKernel->Acquire();
 		result = pKernel->Initialize(kernelName, options);
 		if (result != CM_SUCCESS) {
-			CmKernel::Destroy(pKernel, pProgram);
+		    CmKernel_RT::Destroy(pKernel, pProgram);
 			return result;
 		}
 	} else {
@@ -140,7 +140,7 @@ INT CmKernel::Create(CmDevice * pCmDev, CmProgram * pProgram,
 	return result;
 }
 
-INT CmKernel::Destroy(CmKernel * &pKernel, CmProgram * &pProgram)
+INT CmKernel_RT::Destroy(CmKernel_RT * &pKernel, CmProgram_RT * &pProgram)
 {
 	UINT refCount = pKernel->SafeRelease();
 	if (refCount == 0) {
@@ -154,13 +154,13 @@ INT CmKernel::Destroy(CmKernel * &pKernel, CmProgram * &pProgram)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::Acquire(void)
+INT CmKernel_RT::Acquire(void)
 {
 	m_refcount++;
 	return m_refcount;
 }
 
-INT CmKernel::SafeRelease(void)
+INT CmKernel_RT::SafeRelease(void)
 {
 	--m_refcount;
 	if (m_refcount == 0) {
@@ -170,7 +170,7 @@ INT CmKernel::SafeRelease(void)
 	return m_refcount;
 }
 
- CmKernel::CmKernel(CmDevice * pCmDev, CmProgram * pProgram, UINT KernelIndex, UINT KernelSeqNum):
+CmKernel_RT::CmKernel_RT(CmDevice_RT * pCmDev, CmProgram_RT * pProgram, UINT KernelIndex, UINT KernelSeqNum):
 m_pCmDev(pCmDev),
 m_pProgram(pProgram),
 m_Options(NULL),
@@ -224,7 +224,7 @@ m_pHalMaxValuesEx(NULL), m_SurfaceArray(NULL), m_pThreadGroupSpace(NULL)
 	ResetKernelSurfaces();
 }
 
-CmKernel::~CmKernel(void)
+CmKernel_RT::~CmKernel_RT(void)
 {
 	CmSafeDeleteArray(m_Options);
 
@@ -240,14 +240,20 @@ CmKernel::~CmKernel(void)
 
 	for (int i = 0; i < CM_GLOBAL_SURFACE_NUMBER; i++) {
 		SurfaceIndex *pSurfIndex = m_GlobalSurfaces[i];
-		CmSafeDelete(pSurfIndex);
+		//CmSafeDelete(pSurfIndex);
+		{
+		  if(pSurfIndex) {
+		      delete pSurfIndex;
+		      pSurfIndex = 0;
+		  }
+		}
 	}
 
 	CmSafeDeleteArray(m_pKernelPayloadData);
 	CmSafeDeleteArray(m_SurfaceArray);
 }
 
-INT CmKernel::Initialize(const char *kernelName, const char *options)
+INT CmKernel_RT::Initialize(const char *kernelName, const char *options)
 {
 	if (kernelName == NULL) {
 		CM_ASSERT(0);
@@ -648,7 +654,7 @@ INT CmKernel::Initialize(const char *kernelName, const char *options)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetBinary(void *&pBinary, UINT & size)
+INT CmKernel_RT::GetBinary(void *&pBinary, UINT & size)
 {
 	pBinary = m_pBinary;
 
@@ -657,7 +663,7 @@ INT CmKernel::GetBinary(void *&pBinary, UINT & size)
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmKernel::SetThreadCount(UINT count)
+CM_RT_API INT CmKernel_RT::SetThreadCount(UINT count)
 {
 	if ((int)count <= 0)
 		return CM_INVALID_ARG_VALUE;
@@ -675,19 +681,19 @@ CM_RT_API INT CmKernel::SetThreadCount(UINT count)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetThreadCount(UINT & count)
+INT CmKernel_RT::GetThreadCount(UINT & count)
 {
 	count = m_ThreadCount;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetKernelSurfaces(BOOL * &surfArray)
+INT CmKernel_RT::GetKernelSurfaces(BOOL * &surfArray)
 {
 	surfArray = m_SurfaceArray;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::ResetKernelSurfaces()
+INT CmKernel_RT::ResetKernelSurfaces()
 {
 	CmSurfaceManager *pSurfaceMgr = NULL;
 	m_pCmDev->GetSurfaceManager(pSurfaceMgr);
@@ -711,7 +717,7 @@ INT CmKernel::ResetKernelSurfaces()
 #define SET_MEMORY_OBJECT_CONTROL(x, memCtl) \
            x = ((WORD)(memCtl.mem_ctrl<< 8 | memCtl.mem_type << 4 | memCtl.age)) << 16 | (x);
 
-INT CmKernel::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
+INT CmKernel_RT::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
 			      size_t size, const void *pValue, UINT nThreadID)
 {
 	UINT surfRegTableIndex = 0;
@@ -922,8 +928,8 @@ INT CmKernel::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
 			}
 		case CM_ENUM_CLASS_TYPE_CMSURFACE2DUP:
 			{
-				CmSurface2DUP *pSurf2DUP =
-				    static_cast < CmSurface2DUP * >(pSurface);
+				CmSurface2DUP_RT *pSurf2DUP =
+				    static_cast < CmSurface2DUP_RT * >(pSurface);
 				int i = 0;
 
 				while (i < num_surfaces) {
@@ -940,8 +946,7 @@ INT CmKernel::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
 					pSurfaceMgr->GetSurface(surfIndex,
 								pSurface);
 					pSurf2DUP =
-					    static_cast <
-					    CmSurface2DUP * >(pSurface);
+					    static_cast < CmSurface2DUP_RT * >(pSurface);
 					if (pSurf2DUP == NULL) {
 						CM_ASSERT(0);
 						return CM_FAILURE;
@@ -1148,7 +1153,7 @@ INT CmKernel::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT index,
 }
 
 CM_RT_API INT
-    CmKernel::SetKernelArg(UINT index, size_t size, const void *pValue)
+CmKernel_RT::SetKernelArg(UINT index, size_t size, const void *pValue)
 {
 	if (m_pKernelPayloadData) {
 		CM_ASSERT(0);
@@ -1181,7 +1186,7 @@ CM_RT_API INT
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmKernel::SetStaticBuffer(UINT index, const void *pValue)
+CM_RT_API INT CmKernel_RT::SetStaticBuffer(UINT index, const void *pValue)
 {
 	if (index >= CM_GLOBAL_SURFACE_NUMBER) {
 		CM_ASSERT(0);
@@ -1232,7 +1237,7 @@ CM_RT_API INT CmKernel::SetStaticBuffer(UINT index, const void *pValue)
 }
 
 CM_RT_API INT
-    CmKernel::SetThreadArg(UINT threadId, UINT index, size_t size,
+CmKernel_RT::SetThreadArg(UINT threadId, UINT index, size_t size,
 			   const void *pValue)
 {
 	if (m_pKernelPayloadData) {
@@ -1280,7 +1285,7 @@ CM_RT_API INT
 	return CM_SUCCESS;
 }
 
-INT CmKernel::CalcKernelDataSize(UINT MovInsNum,
+INT CmKernel_RT::CalcKernelDataSize(UINT MovInsNum,
 				 UINT NumArgs,
 				 UINT ArgSize, UINT & TotalKernelDataSize)
 {
@@ -1315,7 +1320,7 @@ INT CmKernel::CalcKernelDataSize(UINT MovInsNum,
 	return hr;
 }
 
-INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
+INT CmKernel_RT::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 				    CM_ARG * pTempArgs, UINT NumArgs)
 {
 	CmDynamicArray movInsts(NumArgs);
@@ -1503,7 +1508,7 @@ INT CmKernel::CreateMovInstructions(UINT & movInstNum, PBYTE & pCodeDst,
 	return CM_SUCCESS;
 }
 
-INT CmKernel::CreateKernelArgDataGroup(PBYTE & pData, UINT Value)
+INT CmKernel_RT::CreateKernelArgDataGroup(PBYTE & pData, UINT Value)
 {
 	pData = new(std::nothrow) BYTE[sizeof(UINT)];
 	if (!pData) {
@@ -1513,7 +1518,7 @@ INT CmKernel::CreateKernelArgDataGroup(PBYTE & pData, UINT Value)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::CreateThreadArgData(PCM_HAL_KERNEL_ARG_PARAM pKernelArg,
+INT CmKernel_RT::CreateThreadArgData(PCM_HAL_KERNEL_ARG_PARAM pKernelArg,
 				  UINT ThreadArgIndex,
 				  CmThreadSpace * pThreadSpace,
 				  BOOL isKernelThreadSpace, CM_ARG * pCmArgs)
@@ -1580,7 +1585,7 @@ INT CmKernel::CreateThreadArgData(PCM_HAL_KERNEL_ARG_PARAM pKernelArg,
 	return hr;
 }
 
-INT CmKernel::SortThreadSpace(CmThreadSpace * pThreadSpace)
+INT CmKernel_RT::SortThreadSpace(CmThreadSpace * pThreadSpace)
 {
 	INT hr = CM_SUCCESS;
 	CM_HAL_DEPENDENCY_PATTERN DependencyPatternType = CM_DEPENDENCY_NONE;
@@ -1649,7 +1654,7 @@ INT CmKernel::SortThreadSpace(CmThreadSpace * pThreadSpace)
 	return hr;
 }
 
-INT CmKernel::CreateTempArgs(UINT NumofArgs, CM_ARG * &pTempArgs)
+INT CmKernel_RT::CreateTempArgs(UINT NumofArgs, CM_ARG * &pTempArgs)
 {
 	INT hr = CM_SUCCESS;
 	INT num_surfaces = 0;
@@ -1785,7 +1790,7 @@ INT CmKernel::CreateTempArgs(UINT NumofArgs, CM_ARG * &pTempArgs)
 	return hr;
 }
 
-INT CmKernel::GetArgCountPlusSurfArray(UINT & ArgSize, UINT & ArgCountPlus)
+INT CmKernel_RT::GetArgCountPlusSurfArray(UINT & ArgSize, UINT & ArgCountPlus)
 {
 	UINT extra_surfaces = 0;
 
@@ -1838,7 +1843,7 @@ INT CmKernel::GetArgCountPlusSurfArray(UINT & ArgSize, UINT & ArgCountPlus)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::CreateThreadSpaceParam(PCM_HAL_KERNEL_THREADSPACE_PARAM
+INT CmKernel_RT::CreateThreadSpaceParam(PCM_HAL_KERNEL_THREADSPACE_PARAM
 				     pCmKernelThreadSpaceParam,
 				     CmThreadSpace * pThreadSpace)
 {
@@ -1964,7 +1969,7 @@ INT CmKernel::CreateThreadSpaceParam(PCM_HAL_KERNEL_THREADSPACE_PARAM
 	return hr;
 }
 
-INT CmKernel::DestroyArgs(void)
+INT CmKernel_RT::DestroyArgs(void)
 {
 	for (UINT i = 0; i < m_ArgCount; i++) {
 		CM_ARG & arg = m_Args[i];
@@ -1997,7 +2002,7 @@ INT CmKernel::DestroyArgs(void)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::Reset(void)
+INT CmKernel_RT::Reset(void)
 {
 	for (UINT i = 0; i < m_ArgCount; i++) {
 		CM_ARG & arg = m_Args[i];
@@ -2050,61 +2055,61 @@ INT CmKernel::Reset(void)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetArgs(CM_ARG * &pArg)
+INT CmKernel_RT::GetArgs(CM_ARG * &pArg)
 {
 	pArg = m_Args;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetArgCount(UINT & argCount)
+INT CmKernel_RT::GetArgCount(UINT & argCount)
 {
 	argCount = m_ArgCount;
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmKernel::SetThreadDependencyMask(UINT threadId, BYTE mask)
+CM_RT_API INT CmKernel_RT::SetThreadDependencyMask(UINT threadId, BYTE mask)
 {
 	CM_ASSERT(0);
 	return CM_NOT_IMPLEMENTED;
 }
 
-INT CmKernel::GetCurbeEnable(BOOL & b)
+INT CmKernel_RT::GetCurbeEnable(BOOL & b)
 {
 	b = m_CurbeEnable;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::SetCurbeEnable(BOOL b)
+INT CmKernel_RT::SetCurbeEnable(BOOL b)
 {
 	m_CurbeEnable = b;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetSizeInCurbe(UINT & size)
+INT CmKernel_RT::GetSizeInCurbe(UINT & size)
 {
 	size = m_SizeInCurbe;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetSizeInPayload(UINT & size)
+INT CmKernel_RT::GetSizeInPayload(UINT & size)
 {
 	size = m_SizeInPayload;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetCmDevice(CmDevice * &pCmDev)
+INT CmKernel_RT::GetCmDevice(CmDevice_RT * &pCmDev)
 {
 	pCmDev = m_pCmDev;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::GetCmProgram(CmProgram * &pProgram)
+INT CmKernel_RT::GetCmProgram(CmProgram_RT * &pProgram)
 {
 	pProgram = m_pProgram;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::CollectKernelSurface()
+INT CmKernel_RT::CollectKernelSurface()
 {
 	for (UINT j = 0; j < m_ArgCount; j++) {
 		if ((m_Args[j].unitKind == ARG_KIND_SURFACE) ||
@@ -2145,7 +2150,7 @@ INT CmKernel::CollectKernelSurface()
 	return CM_SUCCESS;
 }
 
-INT CmKernel::IsKernelDataReusable(CmThreadSpace * pTS)
+INT CmKernel_RT::IsKernelDataReusable(CmThreadSpace * pTS)
 {
 	if (pTS) {
 		if (pTS->IsThreadAssociated()
@@ -2167,7 +2172,7 @@ INT CmKernel::IsKernelDataReusable(CmThreadSpace * pTS)
 	return TRUE;
 }
 
-INT CmKernel::CreateKernelData(CmKernelData * &pKernelData,
+INT CmKernel_RT::CreateKernelData(CmKernelData * &pKernelData,
 			       UINT & kernelDataSize, const CmThreadSpace * pTS)
 {
 	INT hr = CM_SUCCESS;
@@ -2243,7 +2248,7 @@ INT CmKernel::CreateKernelData(CmKernelData * &pKernelData,
 	return hr;
 }
 
-INT CmKernel::CreateKernelData(CmKernelData * &pKernelData,
+INT CmKernel_RT::CreateKernelData(CmKernelData * &pKernelData,
 			       UINT & kernelDataSize,
 			       const CmThreadGroupSpace * pTGS)
 {
@@ -2292,7 +2297,7 @@ INT CmKernel::CreateKernelData(CmKernelData * &pKernelData,
 	return hr;
 }
 
-INT CmKernel::CleanArgDirtyFlag()
+INT CmKernel_RT::CleanArgDirtyFlag()
 {
 
 	for (UINT i = 0; i < m_ArgCount; i++) {
@@ -2308,7 +2313,7 @@ INT CmKernel::CleanArgDirtyFlag()
 	return CM_SUCCESS;
 }
 
-INT CmKernel::UpdateKernelDataGlobalSurfaceInfo(PCM_HAL_KERNEL_PARAM
+INT CmKernel_RT::UpdateKernelDataGlobalSurfaceInfo(PCM_HAL_KERNEL_PARAM
 						pHalKernelParam)
 {
 	INT hr = CM_SUCCESS;
@@ -2326,7 +2331,7 @@ INT CmKernel::UpdateKernelDataGlobalSurfaceInfo(PCM_HAL_KERNEL_PARAM
 	return hr;
 }
 
-INT CmKernel::CreateKernelDataInternal(CmKernelData * &pKernelData,
+INT CmKernel_RT::CreateKernelDataInternal(CmKernelData * &pKernelData,
 				       UINT & kernelDataSize,
 				       const CmThreadGroupSpace * pTGS)
 {
@@ -2496,7 +2501,7 @@ INT CmKernel::CreateKernelDataInternal(CmKernelData * &pKernelData,
 	return hr;
 }
 
-BOOL CmKernel::IsBatchBufferReusable(CmThreadSpace * pTaskThreadSpace)
+BOOL CmKernel_RT::IsBatchBufferReusable(CmThreadSpace * pTaskThreadSpace)
 {
 	BOOL Reusable = TRUE;
 	if (m_Dirty & CM_KERNEL_DATA_THREAD_ARG_DIRTY) {
@@ -2521,7 +2526,7 @@ BOOL CmKernel::IsBatchBufferReusable(CmThreadSpace * pTaskThreadSpace)
 
 }
 
-BOOL CmKernel::IsPrologueDirty(void)
+BOOL CmKernel_RT::IsPrologueDirty(void)
 {
 	BOOL prologueDirty = FALSE;
 
@@ -2544,7 +2549,7 @@ BOOL CmKernel::IsPrologueDirty(void)
 	return prologueDirty;
 }
 
-INT CmKernel::CreateKernelDataInternal(CmKernelData * &pKernelData,
+INT CmKernel_RT::CreateKernelDataInternal(CmKernelData * &pKernelData,
 				       UINT & kernelDataSize,
 				       const CmThreadSpace * pTS)
 {
@@ -2726,7 +2731,7 @@ INT CmKernel::CreateKernelDataInternal(CmKernelData * &pKernelData,
 	return hr;
 }
 
-INT CmKernel::UpdateKernelData(CmKernelData * pKernelData,
+INT CmKernel_RT::UpdateKernelData(CmKernelData * pKernelData,
 			       const CmThreadSpace * pTS)
 {
 	INT hr = CM_SUCCESS;
@@ -3031,7 +3036,7 @@ INT CmKernel::UpdateKernelData(CmKernelData * pKernelData,
 	return hr;
 }
 
-INT CmKernel::UpdateKernelData(CmKernelData * pKernelData,
+INT CmKernel_RT::UpdateKernelData(CmKernelData * pKernelData,
 			       const CmThreadGroupSpace * pTGS)
 {
 	INT hr = CM_SUCCESS;
@@ -3141,7 +3146,7 @@ INT CmKernel::UpdateKernelData(CmKernelData * pKernelData,
 	return hr;
 }
 
-INT CmKernel::CreateKernelIndirectData(PCM_HAL_INDIRECT_DATA_PARAM
+INT CmKernel_RT::CreateKernelIndirectData(PCM_HAL_INDIRECT_DATA_PARAM
 				       pHalIndreictData)
 {
 	INT hr = CM_SUCCESS;
@@ -3186,7 +3191,7 @@ INT CmKernel::CreateKernelIndirectData(PCM_HAL_INDIRECT_DATA_PARAM
 	return hr;
 }
 
-INT CmKernel::UpdateLastKernelData(CmKernelData * &pKernelData)
+INT CmKernel_RT::UpdateLastKernelData(CmKernelData * &pKernelData)
 {
 	INT hr = CM_SUCCESS;
 
@@ -3206,24 +3211,24 @@ INT CmKernel::UpdateLastKernelData(CmKernelData * &pKernelData)
 	return hr;
 }
 
-INT CmKernel::SetIndexInTask(UINT index)
+INT CmKernel_RT::SetIndexInTask(UINT index)
 {
 	m_IndexInTask = index;
 	return CM_SUCCESS;
 }
 
-UINT CmKernel::GetIndexInTask(void)
+UINT CmKernel_RT::GetIndexInTask(void)
 {
 	return m_IndexInTask;
 }
 
-INT CmKernel::SetAssociatedToTSFlag(BOOLEAN b)
+INT CmKernel_RT::SetAssociatedToTSFlag(BOOLEAN b)
 {
 	m_AssociatedToTS = b;
 	return CM_SUCCESS;
 }
 
-INT CmKernel::AssociateThreadSpace(CmThreadSpace * &pThreadSpace)
+INT CmKernel_RT::AssociateThreadSpace(CmThreadSpace * &pThreadSpace)
 {
 	if (pThreadSpace == NULL) {
 		CM_ASSERT(0);
@@ -3250,7 +3255,7 @@ INT CmKernel::AssociateThreadSpace(CmThreadSpace * &pThreadSpace)
 	return CM_SUCCESS;
 }
 
-INT CmKernel::AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS)
+INT CmKernel_RT::AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS)
 {
 	if (pTGS == NULL) {
 		CM_ASSERT(0);
@@ -3267,17 +3272,17 @@ INT CmKernel::AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS)
 	return CM_SUCCESS;
 }
 
-BOOLEAN CmKernel::IsThreadArgExisted()
+BOOLEAN CmKernel_RT::IsThreadArgExisted()
 {
 	return (BOOLEAN) m_blPerThreadArgExists;
 }
 
-UINT CmKernel::GetSLMSize()
+UINT CmKernel_RT::GetSLMSize()
 {
 	return (UINT) m_pKernelInfo->kernelSLMSize;
 }
 
-CM_RT_API INT CmKernel::SetKernelPayloadData(size_t size, const void *pValue)
+CM_RT_API INT CmKernel_RT::SetKernelPayloadData(size_t size, const void *pValue)
 {
 	if (m_blPerThreadArgExists) {
 		CM_ASSERT(0);
@@ -3329,7 +3334,7 @@ CM_RT_API INT CmKernel::SetKernelPayloadData(size_t size, const void *pValue)
 }
 
 CM_RT_API INT
-    CmKernel::SetKernelPayloadSurface(UINT surfaceCount,
+CmKernel_RT::SetKernelPayloadSurface(UINT surfaceCount,
 				      SurfaceIndex ** pSurfaces)
 {
 	if (m_blPerThreadArgExists) {
@@ -3426,12 +3431,11 @@ CM_RT_API INT
 				m_IndirectSurfaceInfoArray[i].iSurfaceIndex =
 				    (WORD) handle;
 			} else {
-				CmSurface2DUP *pSurf2DUP = NULL;
+				CmSurface2DUP_RT *pSurf2DUP = NULL;
 				if (pSurface->Type() ==
 				    CM_ENUM_CLASS_TYPE_CMSURFACE2DUP) {
 					pSurf2DUP =
-					    static_cast <
-					    CmSurface2DUP * >(pSurface);
+					    static_cast < CmSurface2DUP_RT * >(pSurface);
 					m_IndirectSurfaceInfoArray[i].iKind =
 					    ARG_KIND_SURFACE_2D_UP;
 					pSurf2DUP->GetHandle(handle);
@@ -3459,7 +3463,7 @@ CM_RT_API INT
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmKernel::SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex)
+CM_RT_API INT CmKernel_RT::SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex)
 {
 	if (pSurface == NULL) {
 		CM_ASSERT(0);
@@ -3505,12 +3509,11 @@ CM_RT_API INT CmKernel::SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex)
 			    [m_usKernelPayloadSurfaceCount].iSurfaceIndex =
 			    (WORD) handle;
 		} else {
-			CmSurface2DUP *pSurf2DUP = NULL;
+			CmSurface2DUP_RT *pSurf2DUP = NULL;
 			if (pSurface_RT->Type() ==
 			    CM_ENUM_CLASS_TYPE_CMSURFACE2DUP) {
 				pSurf2DUP =
-				    static_cast <
-				    CmSurface2DUP * >(pSurface_RT);
+				    static_cast < CmSurface2DUP_RT * >(pSurface_RT);
 				m_IndirectSurfaceInfoArray
 				    [m_usKernelPayloadSurfaceCount].iKind =
 				    ARG_KIND_SURFACE_2D_UP;
@@ -3537,12 +3540,12 @@ CM_RT_API INT CmKernel::SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex)
 	return CM_SUCCESS;
 }
 
-UINT CmKernel::GetKernelIndex()
+UINT CmKernel_RT::GetKernelIndex()
 {
 	return m_kernelIndex;
 }
 
-UINT CmKernel::GetKernelGenxBinarySize(void)
+UINT CmKernel_RT::GetKernelGenxBinarySize(void)
 {
 	if (m_pKernelInfo == NULL) {
 		CM_ASSERT(0);
@@ -3552,7 +3555,7 @@ UINT CmKernel::GetKernelGenxBinarySize(void)
 	}
 }
 
-CM_ARG_KIND CmKernel::SurfTypeToArgKind(CM_ENUM_CLASS_TYPE SurfType)
+CM_ARG_KIND CmKernel_RT::SurfTypeToArgKind(CM_ENUM_CLASS_TYPE SurfType)
 {
 	switch (SurfType) {
 	case CM_ENUM_CLASS_TYPE_CMBUFFER_RT:
@@ -3568,14 +3571,14 @@ CM_ARG_KIND CmKernel::SurfTypeToArgKind(CM_ENUM_CLASS_TYPE SurfType)
 	return ARG_KIND_GENERAL;
 }
 
-INT CmKernel::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
+INT CmKernel_RT::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
 					 UINT & neededBTEntryNum)
 {
 	UINT surfaceArraySize = 0;
 	CmSurfaceManager *pSurfaceMgr = NULL;
 	CmSurface *pSurf = NULL;
 	CmSurface2D *pSurf2D = NULL;
-	CmSurface2DUP *pSurf2D_UP = NULL;
+	CmSurface2DUP_RT *pSurf2D_UP = NULL;
 	CM_SURFACE_FORMAT format;
 	UINT width, height, bytesPerPixel;
 	UINT uiMaxBTIndex = 0;
@@ -3620,8 +3623,7 @@ INT CmKernel::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
 				case CM_ENUM_CLASS_TYPE_CMSURFACE2DUP:
 					kernelSurfaceNum++;
 					pSurf2D_UP =
-					    static_cast <
-					    CmSurface2DUP * >(pSurf);
+					    static_cast < CmSurface2DUP_RT * >(pSurf);
 					pSurf2D_UP->GetSurfaceDesc(width,
 								   height,
 								   format,
@@ -3646,7 +3648,7 @@ INT CmKernel::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
 	return CM_SUCCESS;
 }
 
-UINT CmKernel::GetAlignedCurbeSize(UINT value)
+UINT CmKernel_RT::GetAlignedCurbeSize(UINT value)
 {
 	UINT platform = IGFX_UNKNOWN_CORE;
 	UINT CurbeBlockAlignment = 0;

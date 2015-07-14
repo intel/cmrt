@@ -29,97 +29,27 @@
 
 #include "cm_device.h"
 #include "cm_program.h"
+#include "gen_debugger.h"
 #include "hal_cm.h"
-
-namespace {
-
-	class SharedLibrary {
- public:
-		SharedLibrary(const char *path):handle_(NULL), path_(path) {
-		} ~SharedLibrary();
-
-		bool open();
-		void *symbolAddress(const char *symbol);
-
- private:
-		void *handle_;
-		const char *path_;
-	};
-
-	inline SharedLibrary::~SharedLibrary() {
-		if (handle_)
-			dlclose(handle_);
-	}
-
-	inline bool SharedLibrary::open() {
-		handle_ = dlopen((path_), RTLD_NOW);
-		return handle_ != NULL;
-	}
-
-	inline void *SharedLibrary::symbolAddress(const char *symbol) {
-		return dlsym(handle_, symbol);
-	}
-
-	static const char g_soName32[] = "libigfxdbgxchg32.so";
-	static const char g_soName64[] = "libigfxdbgxchg64.so";
-
-	static const char notifyKernelBinaryName[] = "notifyKernelBinary";
-	static const char requestSipBinaryName[] = "requestSipBinary";
-
-	class SharedLibraryHolder {
- public:
-		SharedLibraryHolder() {
-			if (!sl_) {
-				const char *soName =
-				    sizeof(void *) ==
-				    4 ? g_soName32 : g_soName64;
-
-				 sl_ = new SharedLibrary(soName);
-				if (!sl_->open()) {
-					delete sl_;
-					 sl_ = NULL;
-				}
-
-			}
-		}
-		bool isEnabled() const {
-			return sl_ != NULL;
-		}
-		SharedLibrary *operator->() {
-			return sl_;
-		}
-
- private:
-		static SharedLibrary *sl_;
-	};
-
-	SharedLibrary *SharedLibraryHolder::sl_ = NULL;
-
-	typedef void *Handle;
-	typedef Handle CmUmdDeviceHandle;
-	typedef Handle CmUmdProgramHandle;
-
-	const unsigned int IGFX_DBG_CURRENT_VERSION = 1;
-}
 
 #define READ_FIELD_FROM_BUF( dst, type ) \
     dst = *((type *) &buf[byte_pos]); \
     byte_pos += sizeof(type);
 
-INT CmProgram::Create(CmDevice * pCmDev, void *pCISACode,
+INT CmProgram_RT::Create(CmDevice_RT * pCmDev, void *pCISACode,
 		      const UINT uiCISACodeSize, void *pGenCode,
-		      const UINT uiGenCodeSize, CmProgram * &pProgram,
+		      const UINT uiGenCodeSize, CmProgram_RT * &pProgram,
 		      const char *options, const UINT programId)
 {
 	INT result = CM_SUCCESS;
-	pProgram = new(std::nothrow) CmProgram(pCmDev, programId);
+	pProgram = new(std::nothrow) CmProgram_RT(pCmDev, programId);
 	if (pProgram) {
 		pProgram->Acquire();
 		result =
 		    pProgram->Initialize(pCISACode, uiCISACodeSize, pGenCode,
 					 uiGenCodeSize, options);
 		if (result != CM_SUCCESS) {
-			CmProgram::Destroy(pProgram);
+		    CmProgram_RT::Destroy(pProgram);
 		}
 	} else {
 		CM_ASSERT(0);
@@ -128,7 +58,7 @@ INT CmProgram::Create(CmDevice * pCmDev, void *pCISACode,
 	return result;
 }
 
-INT CmProgram::Destroy(CmProgram * &pProgram)
+INT CmProgram_RT::Destroy(CmProgram_RT * &pProgram)
 {
 	long refCount = pProgram->SafeRelease();
 	if (refCount == 0) {
@@ -137,13 +67,13 @@ INT CmProgram::Destroy(CmProgram * &pProgram)
 	return CM_SUCCESS;
 }
 
-INT CmProgram::Acquire(void)
+INT CmProgram_RT::Acquire(void)
 {
 	m_refCount++;
 	return CM_SUCCESS;
 }
 
-INT CmProgram::SafeRelease(void)
+INT CmProgram_RT::SafeRelease(void)
 {
 	--m_refCount;
 	if (m_refCount == 0) {
@@ -153,7 +83,7 @@ INT CmProgram::SafeRelease(void)
 	return m_refCount;
 }
 
- CmProgram::CmProgram(CmDevice * pCmDev, UINT programId):
+CmProgram_RT::CmProgram_RT(CmDevice_RT * pCmDev, UINT programId):
 m_pCmDev(pCmDev),
 m_ProgramCodeSize(0),
 m_pProgramCode(NULL),
@@ -173,7 +103,7 @@ m_CISA_magicNumber(0), m_CISA_majorVersion(0), m_CISA_minorVersion(0)
 		     sizeof(char) * CM_MAX_ISA_FILE_NAME_SIZE_IN_BYTE);
 }
 
-CmProgram::~CmProgram(void)
+CmProgram_RT::~CmProgram_RT(void)
 {
 	CmSafeDeleteArray(m_Options);
 	CmSafeDeleteArray(m_pProgramCode);
@@ -183,7 +113,7 @@ CmProgram::~CmProgram(void)
 	m_pKernelInfo.Delete();
 }
 
-INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
+INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 			  void *pGenCode, const UINT uiGenCodeSize,
 			  const char *options)
 {
@@ -234,6 +164,10 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 						CM_ASSERT(0);
 						CmSafeDeleteArray(m_Options);
 						return CM_FAILURE;
+					}
+
+					if (!strcmp(token, CM_RT_JITTER_DEBUG_FLAG)) {
+						m_IsHwDebugEnabled = true;
 					}
 
 					jitFlags[numJitFlags] = token;
@@ -547,6 +481,17 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 			pKernInfo->jitBinarySize = jitBinarySize;
 			pKernInfo->jitInfo = jitProfInfo;
 
+			if (m_IsHwDebugEnabled) {
+				 GenDbgNotifyKernelBinary(this->m_pCmDev,
+							  this,
+							  pKernInfo->kernelName,
+							  jitBinary,
+							  jitBinarySize,
+							  jitProfInfo->genDebugInfo,
+							  jitProfInfo->genDebugInfoSize,
+							  NULL);
+			}
+
 		}
 
 		m_pKernelInfo.SetElement(i, pKernInfo);
@@ -578,7 +523,7 @@ INT CmProgram::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 	return hr;
 }
 
-INT CmProgram::GetCommonISACode(void *&pCommonISACode, UINT & size)
+INT CmProgram_RT::GetCommonISACode(void *&pCommonISACode, UINT & size)
 {
 	pCommonISACode = (void *)m_pProgramCode;
 	size = m_ProgramCodeSize;
@@ -586,13 +531,13 @@ INT CmProgram::GetCommonISACode(void *&pCommonISACode, UINT & size)
 	return CM_SUCCESS;
 }
 
-INT CmProgram::GetKernelCount(UINT & kernelCount)
+INT CmProgram_RT::GetKernelCount(UINT & kernelCount)
 {
 	kernelCount = m_KernelCount;
 	return CM_SUCCESS;
 }
 
-INT CmProgram::GetKernelInfo(UINT index, CM_KERNEL_INFO * &pKernelInfo)
+INT CmProgram_RT::GetKernelInfo(UINT index, CM_KERNEL_INFO * &pKernelInfo)
 {
 	if (index < m_KernelCount) {
 		pKernelInfo =
@@ -604,30 +549,30 @@ INT CmProgram::GetKernelInfo(UINT index, CM_KERNEL_INFO * &pKernelInfo)
 	}
 }
 
-INT CmProgram::GetIsaFileName(char *&isaFileName)
+INT CmProgram_RT::GetIsaFileName(char *&isaFileName)
 {
 	isaFileName = m_IsaFileName;
 	return CM_SUCCESS;
 }
 
-INT CmProgram::GetKernelOptions(char *&kernelOptions)
+INT CmProgram_RT::GetKernelOptions(char *&kernelOptions)
 {
 	kernelOptions = m_Options;
 	return CM_SUCCESS;
 }
 
-UINT CmProgram::GetSurfaceCount(void)
+UINT CmProgram_RT::GetSurfaceCount(void)
 {
 	return m_SurfaceCount;
 }
 
-INT CmProgram::SetSurfaceCount(UINT count)
+INT CmProgram_RT::SetSurfaceCount(UINT count)
 {
 	m_SurfaceCount = count;
 	return CM_SUCCESS;
 }
 
-UINT CmProgram::AcquireKernelInfo(UINT index)
+UINT CmProgram_RT::AcquireKernelInfo(UINT index)
 {
 	CM_KERNEL_INFO *pKernelInfo = NULL;
 
@@ -648,7 +593,7 @@ UINT CmProgram::AcquireKernelInfo(UINT index)
 	}
 }
 
-UINT CmProgram::ReleaseKernelInfo(UINT index)
+UINT CmProgram_RT::ReleaseKernelInfo(UINT index)
 {
 	CM_KERNEL_INFO *pKernelInfo = NULL;
 
@@ -747,7 +692,7 @@ UINT CmProgram::ReleaseKernelInfo(UINT index)
 	}
 }
 
-INT CmProgram::GetKernelInfoRefCount(UINT index, UINT & refCount)
+INT CmProgram_RT::GetKernelInfoRefCount(UINT index, UINT & refCount)
 {
 	CM_KERNEL_INFO *pKernelInfo = NULL;
 
@@ -767,7 +712,7 @@ INT CmProgram::GetKernelInfoRefCount(UINT index, UINT & refCount)
 	}
 }
 
-INT CmProgram::GetCISAVersion(UINT & majorVersion, UINT & minorVersion)
+INT CmProgram_RT::GetCISAVersion(UINT & majorVersion, UINT & minorVersion)
 {
 	majorVersion = m_CISA_majorVersion;
 	minorVersion = m_CISA_minorVersion;
@@ -775,7 +720,7 @@ INT CmProgram::GetCISAVersion(UINT & majorVersion, UINT & minorVersion)
 	return CM_SUCCESS;
 }
 
-UINT CmProgram::GetProgramIndex()
+UINT CmProgram_RT::GetProgramIndex()
 {
 	return m_programIndex;
 }

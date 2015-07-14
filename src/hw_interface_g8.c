@@ -620,7 +620,6 @@ GENOS_STATUS IntelGen_HwSendVfeState_g8(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pCmdBuffer);
 	GENHW_HW_ASSERT(pHwInterface->pHwCommands);
-	GENHW_HW_ASSERT(pHwInterface->pWaTable);
 	GENHW_HW_ASSERT(pHwInterface->pGeneralStateHeap);
 
 	eStatus = GENOS_STATUS_SUCCESS;
@@ -887,6 +886,28 @@ GENOS_STATUS IntelGen_HwSendWalkerState_g8(PGENHW_HW_INTERFACE pHwInterface,
 	return eStatus;
 }
 
+static GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
+					       PGENOS_COMMAND_BUFFER pCmd)
+{
+	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
+	PGENHW_GSH pGsh = pHw->pGeneralStateHeap;
+	STATE_SIP_CMD_G8 *pStateSipCmd;
+
+	pStateSipCmd = (PSTATE_SIP_CMD_G8)IntelGen_OsGetCmdBufferSpace(pCmd,
+						sizeof(*pStateSipCmd));
+	GENHW_HW_CHK_NULL(pStateSipCmd);
+
+	*pStateSipCmd = g_cInit_STATE_SIP_CMD_G8;
+
+	// We use a bitfield so bits [3:0] of DWord1 will be zero
+	pStateSipCmd->DW1.SystemInstructionPointer = pGsh->dwSipBase >> 4;
+
+	IntelGen_OsAdjustCmdBufferFreeSpace(pCmd, sizeof(*pStateSipCmd));
+
+finish:
+	return eStatus;
+}
+
 VOID IntelGen_HwInitInterface_g8(PGENHW_HW_INTERFACE pHwInterface)
 {
 	if (GFX_IS_PRODUCT(pHwInterface->Platform, IGFX_CHERRYVIEW)) {
@@ -953,6 +974,7 @@ VOID IntelGen_HwInitInterface_g8(PGENHW_HW_INTERFACE pHwInterface)
 	    IntelGen_HwSkipPipeControlCmdBb_g75;
 	pHwInterface->pfnAddPipeControlCmdBb =
 	    IntelGen_HwAddPipeControlCmdBb_g75;
+	pHwInterface->pfnSendStateSip = IntelGen_HwSendStateSip_g8;
 
 	pHwInterface->pfnIs2PlaneNV12Needed = IntelGen_HwIs2PlaneNV12Needed_g75;
 }

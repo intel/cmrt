@@ -105,7 +105,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 
@@ -153,7 +153,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 
@@ -192,7 +192,7 @@ CM_RT_API INT CmBuffer_RT::InitSurface(const DWORD initValue, CmEvent * pEvent)
 		FlushDeviceQueue(pEvent);
 	}
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	CM_ASSERT(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();

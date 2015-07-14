@@ -315,27 +315,35 @@ typedef enum _GPU_GT_PLATFORM {
 	PLATFORM_INTEL_GTC = 9,
 } GPU_GT_PLATFORM;
 
-typedef enum _CM_DEVICE_CAP_NAME {
-	CAP_KERNEL_COUNT_PER_TASK,
-	CAP_KERNEL_BINARY_SIZE,
-	CAP_BUFFER_COUNT,
-	CAP_SURFACE2D_COUNT,
-	CAP_SURFACE_COUNT_PER_KERNEL,
-	CAP_ARG_COUNT_PER_KERNEL,
-	CAP_ARG_SIZE_PER_KERNEL,
-	CAP_USER_DEFINED_THREAD_COUNT_PER_TASK,
-	CAP_HW_THREAD_COUNT,
-	CAP_SURFACE2D_FORMAT_COUNT,
-	CAP_SURFACE2D_FORMATS,
-	CAP_GPU_PLATFORM,
-	CAP_GT_PLATFORM,
-	CAP_MIN_FREQUENCY,
-	CAP_MAX_FREQUENCY,
-	CAP_L3_CONFIG,
-	CAP_GPU_CURRENT_FREQUENCY,
-	CAP_USER_DEFINED_THREAD_COUNT_PER_TASK_NO_THREAD_ARG,
-	CAP_USER_DEFINED_THREAD_COUNT_PER_MEDIA_WALKER,
-	CAP_USER_DEFINED_THREAD_COUNT_PER_THREAD_GROUP
+typedef enum _CM_DEVICE_CAP_NAME
+{
+    CAP_KERNEL_COUNT_PER_TASK,
+    CAP_KERNEL_BINARY_SIZE,
+    CAP_SAMPLER_COUNT ,
+    CAP_SAMPLER_COUNT_PER_KERNEL,
+    CAP_BUFFER_COUNT ,
+    CAP_SURFACE2D_COUNT,
+    CAP_SURFACE3D_COUNT,
+    CAP_SURFACE_COUNT_PER_KERNEL,
+    CAP_ARG_COUNT_PER_KERNEL,
+    CAP_ARG_SIZE_PER_KERNEL ,
+    CAP_USER_DEFINED_THREAD_COUNT_PER_TASK,
+    CAP_HW_THREAD_COUNT,
+    CAP_SURFACE2D_FORMAT_COUNT,
+    CAP_SURFACE2D_FORMATS,
+    CAP_SURFACE3D_FORMAT_COUNT,
+    CAP_SURFACE3D_FORMATS,
+    CAP_VME_STATE_G6_COUNT,
+    CAP_GPU_PLATFORM,
+    CAP_GT_PLATFORM,
+    CAP_MIN_FREQUENCY,
+    CAP_MAX_FREQUENCY,
+    CAP_L3_CONFIG,
+    CAP_GPU_CURRENT_FREQUENCY,
+    CAP_USER_DEFINED_THREAD_COUNT_PER_TASK_NO_THREAD_ARG,
+    CAP_USER_DEFINED_THREAD_COUNT_PER_MEDIA_WALKER,
+    CAP_USER_DEFINED_THREAD_COUNT_PER_THREAD_GROUP,
+    CAP_SURFACE2DUP_COUNT
 } CM_DEVICE_CAP_NAME;
 
 #define SKL_L3_CONFIG_NUM 8
@@ -504,8 +512,8 @@ class SurfaceIndex {
 	virtual unsigned int get_data(void) {
 		return index;
 	};
-	virtual ~ SurfaceIndex() {
-	};
+
+	virtual ~SurfaceIndex() {};
 
  private:
 	unsigned int index;
@@ -515,55 +523,55 @@ class SurfaceIndex {
 
 class CmEvent {
  public:
-	INT GetStatus(CM_STATUS & status);
-	INT GetExecutionTime(UINT64 & time);
-	INT WaitForTaskFinished(DWORD dwTimeOutMs = CM_MAX_TIMEOUT_MS);
+	virtual INT GetStatus(CM_STATUS & status) = 0;
+	virtual INT GetExecutionTime(UINT64 & time) = 0;
+	virtual INT WaitForTaskFinished(DWORD dwTimeOutMs = CM_MAX_TIMEOUT_MS) = 0;
 
 };
 
 class CmThreadSpace;
 class CmThreadGroupSpace {
  public:
-	INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
-				    UINT & threadSpaceHeight,
-				    UINT & groupSpaceWidth,
-				    UINT & groupSpaceHeight);
+	virtual INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
+					    UINT & threadSpaceHeight,
+					    UINT & groupSpaceWidth,
+					    UINT & groupSpaceHeight) = 0;
 
 };
 
 class CmKernel {
  public:
-	INT SetThreadCount(UINT count);
-	INT SetKernelArg(UINT index, size_t size, const void *pValue);
+	virtual INT SetThreadCount(UINT count) = 0;
+	virtual INT SetKernelArg(UINT index, size_t size, const void *pValue) = 0;
 
-	INT SetThreadArg(UINT threadId, UINT index, size_t size,
-			 const void *pValue);
+	virtual INT SetThreadArg(UINT threadId, UINT index, size_t size,
+			 const void *pValue) = 0;
 
-	INT AssociateThreadSpace(CmThreadSpace * &pTS);
-	INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS);
-	INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex);
-	INT SetStaticBuffer(UINT index, const void *pValue);
+	virtual INT AssociateThreadSpace(CmThreadSpace * &pTS) = 0;
+	virtual INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS) = 0;
+	virtual INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex) = 0;
+	virtual INT SetStaticBuffer(UINT index, const void *pValue) = 0;
 };
 
 class CmTask {
  public:
-	INT AddKernel(CmKernel * pKernel);
-	INT Reset(void);
-	INT AddSync(void);
+	virtual INT AddKernel(CmKernel * pKernel) = 0;
+	virtual INT Reset(void) = 0;
+	virtual INT AddSync(void) = 0;
 };
 
 class CmProgram {
  public:
-	INT GetKernelCount(UINT & kernelCount);
+	virtual INT GetKernelCount(UINT & kernelCount) = 0;
 };
 
 class CmBuffer {
  public:
-	virtual INT GetIndex(SurfaceIndex * &pIndex);
+	virtual INT GetIndex(SurfaceIndex * &pIndex) = 0;
 	virtual INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
-				UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
+				UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
 	virtual INT WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
-				 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
+				 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
 };
 
 class CmBufferUP {
@@ -573,109 +581,109 @@ class CmBufferUP {
 
 class CmSurface2D {
  public:
-	INT GetIndex(SurfaceIndex * &pIndex);
-	INT SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
-				      SurfaceIndex * pSurfIndex = NULL);
+	virtual INT GetIndex(SurfaceIndex * &pIndex) = 0;
+	virtual INT SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
+				      SurfaceIndex * pSurfIndex = NULL) = 0;
 
 	/* The following Read/Write of 2D surface is not required as when it is
 	 * shared between Cm and other component.
 	 */
 
-	INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
-			UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
-	INT WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
-			 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
-	INT ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
-			      const UINT stride, UINT64 sysMemSize =
-			      0xFFFFFFFFFFFFFFFFULL);
-	INT WriteSurfaceStride(const unsigned char *pSysMem, CmEvent * pEvent,
-			       const UINT stride, UINT64 sysMemSize =
-			       0xFFFFFFFFFFFFFFFFULL);
+	virtual INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
+			UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
+			 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
+			      const UINT stride, UINT64 sysMemSize = 
+                  0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT WriteSurfaceStride(const unsigned char *pSysMem, CmEvent * pEvent,
+			       const UINT stride, UINT64 sysMemSize = 
+                   0xFFFFFFFFFFFFFFFFULL) = 0;
 };
 
 class CmSurface2DUP {
  public:
-	INT GetIndex(SurfaceIndex * &pIndex);
+	virtual INT GetIndex(SurfaceIndex * &pIndex) = 0;
 
-	INT GetSurfaceDesc(UINT & width, UINT & height,
-			   CM_SURFACE_FORMAT & format, UINT & sizeperpixel);
+	virtual INT GetSurfaceDesc(UINT & width, UINT & height,
+			   CM_SURFACE_FORMAT & format, UINT & sizeperpixel) = 0;
 
 };
 
 class CmThreadSpace {
  public:
-	INT SelectThreadDependencyPattern(CM_DEPENDENCY_PATTERN pattern);
-	INT AssociateThread(UINT x, UINT y, CmKernel * pKernel, UINT threadId,
-			    BYTE nDependencyMask =
-			    CM_DEFAULT_THREAD_DEPENDENCY_MASK);
-	INT Set26ZIDispatchPattern(CM_26ZI_DISPATCH_PATTERN pattern);
-	INT Set26ZIMacroBlockSize(UINT width, UINT height);
+	virtual INT SelectThreadDependencyPattern(CM_DEPENDENCY_PATTERN pattern) = 0;
+	virtual INT AssociateThread(UINT x, UINT y, CmKernel * pKernel, UINT threadId,
+			    BYTE nDependencyMask = 
+                CM_DEFAULT_THREAD_DEPENDENCY_MASK) = 0;
+	virtual INT Set26ZIDispatchPattern(CM_26ZI_DISPATCH_PATTERN pattern) = 0;
+	virtual INT Set26ZIMacroBlockSize(UINT width, UINT height) = 0;
 };
 
 class CmThreadGroupSpace;
 
 class CmQueue {
  public:
-	INT Enqueue(CmTask * pTask, CmEvent * &pEvent,
-		    const CmThreadSpace * pTS = NULL);
-	INT DestroyEvent(CmEvent * &pEvent);
+	virtual INT Enqueue(CmTask * pTask, CmEvent * &pEvent,
+		    const CmThreadSpace * pTS = NULL) = 0;
+	virtual INT DestroyEvent(CmEvent * &pEvent) = 0;
 
  public:
-	 INT EnqueueWithGroup(CmTask * pTask, CmEvent * &pEvent,
-			      const CmThreadGroupSpace * pTGS = NULL);
-	INT EnqueueWithHints(CmTask * pTask, CmEvent * &pEvent, UINT hints);
+	virtual INT EnqueueWithGroup(CmTask * pTask, CmEvent * &pEvent,
+			const CmThreadGroupSpace * pTGS = NULL) = 0;
+	virtual INT EnqueueWithHints(CmTask * pTask, CmEvent * &pEvent, UINT hints) = 0;
 };
 
 class CmDevice {
  public:
 
-	INT CreateBuffer(UINT size, CmBuffer * &pSurface);
-	INT CreateSurface2D(UINT width, UINT height, CM_SURFACE_FORMAT format,
-			    CmSurface2D * &pSurface);
+	virtual INT CreateBuffer(UINT size, CmBuffer * &pSurface) = 0;
+	virtual INT CreateSurface2D(UINT width, UINT height, CM_SURFACE_FORMAT format,
+			    CmSurface2D * &pSurface) = 0;
 
-	INT CreateSurface2D(CmOsResource * pOsResource,
-			    CmSurface2D * &pSurface);
-	INT CreateBuffer(CmOsResource * pOsResource, CmBuffer * &pSurface);
+	virtual INT CreateSurface2D(CmOsResource * pOsResource,
+			    CmSurface2D * &pSurface) = 0;
+	virtual INT CreateBuffer(CmOsResource * pOsResource, CmBuffer * &pSurface) = 0;
 
-	INT CreateBufferUP(UINT size, void *pSystMem, CmBufferUP * &pSurface);
-	INT DestroyBufferUP(CmBufferUP * &pSurface);
+	virtual INT CreateBufferUP(UINT size, void *pSystMem, CmBufferUP * &pSurface) = 0;
+	virtual INT DestroyBufferUP(CmBufferUP * &pSurface) = 0;
 
-	INT CreateSurface2DUP(UINT width, UINT height,
+	virtual INT CreateSurface2DUP(UINT width, UINT height,
 			      CM_SURFACE_FORMAT format, void *pSysMem,
-			      CmSurface2DUP * &pSurface);
-	INT DestroySurface(CmSurface2DUP * &pSurface);
+			      CmSurface2DUP * &pSurface) = 0;
+	virtual INT DestroySurface(CmSurface2DUP * &pSurface) = 0;
 
-	INT DestroySurface(CmBuffer * &pSurface);
-	INT DestroySurface(CmSurface2D * &pSurface);
+	virtual INT DestroySurface(CmBuffer * &pSurface) = 0;
+	virtual INT DestroySurface(CmSurface2D * &pSurface) = 0;
 
-	INT GetSurface2DInfo(UINT width, UINT height, CM_SURFACE_FORMAT format,
-			     UINT & pitch, UINT & physicalSize);
+	virtual INT GetSurface2DInfo(UINT width, UINT height, CM_SURFACE_FORMAT format,
+			     UINT & pitch, UINT & physicalSize) = 0;
 
-	INT CreateQueue(CmQueue * &pQueue);
-	INT LoadProgram(void *pCommonISACode, const UINT size,
-			CmProgram * &pProgram, const char *options = NULL);
-	INT CreateKernel(CmProgram * pProgram, const char *kernelName,
-			 CmKernel * &pKernel, const char *options = NULL);
-	INT DestroyKernel(CmKernel * &pKernel);
-	INT DestroyProgram(CmProgram * &pProgram);
+	virtual INT CreateQueue(CmQueue * &pQueue) = 0;
+	virtual INT LoadProgram(void *pCommonISACode, const UINT size,
+			CmProgram * &pProgram, const char *options = NULL) = 0;
+	virtual INT CreateKernel(CmProgram * pProgram, const char *kernelName,
+			 CmKernel * &pKernel, const char *options = NULL) = 0;
+	virtual INT DestroyKernel(CmKernel * &pKernel) = 0;
+	virtual INT DestroyProgram(CmProgram * &pProgram) = 0;
 
-	INT CreateTask(CmTask * &pTask);
-	INT DestroyTask(CmTask * &pTask);
+	virtual INT CreateTask(CmTask * &pTask) = 0;
+	virtual INT DestroyTask(CmTask * &pTask) = 0;
 
-	INT CreateThreadGroupSpace(UINT thrdSpaceWidth, UINT thrdSpaceHeight,
+	virtual INT CreateThreadGroupSpace(UINT thrdSpaceWidth, UINT thrdSpaceHeight,
 				   UINT grpSpaceWidth, UINT grpSpaceHeight,
-				   CmThreadGroupSpace * &pTGS);
-	INT DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS);
+				   CmThreadGroupSpace * &pTGS) = 0;
+	virtual INT DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS) = 0;
 
-	INT CreateThreadSpace(UINT width, UINT height, CmThreadSpace * &pTS);
-	INT DestroyThreadSpace(CmThreadSpace * &pTS);
+	virtual INT CreateThreadSpace(UINT width, UINT height, CmThreadSpace * &pTS) = 0;
+	virtual INT DestroyThreadSpace(CmThreadSpace * &pTS) = 0;
 
-        INT SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c);
-
-	INT GetRTDllVersion(CM_DLL_FILE_VERSION * pFileVersion);
-
-	INT GetCaps(CM_DEVICE_CAP_NAME capName, size_t & capValueSize,
-		    void *pCapValue);
+	virtual INT SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c) = 0;
+/**/
+	virtual INT GetRTDllVersion(CM_DLL_FILE_VERSION * pFileVersion) = 0;
+/**/
+	virtual INT GetCaps(CM_DEVICE_CAP_NAME capName, size_t & capValueSize,
+		    void *pCapValue) = 0;
 };
 
 EXTERN_C INT CreateCmDevice(CmDevice * &pDevice, UINT & version,

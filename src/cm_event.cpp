@@ -444,9 +444,13 @@ CM_RT_API INT CmEvent::WaitForTaskFinished(DWORD dwTimeOutMs)
 
 	while (m_Status != CM_STATUS_FINISHED) {
 		if (m_OsData) {
-			drm_intel_bo_wait_rendering((drm_intel_bo *) m_OsData);
-			drm_intel_gem_bo_clear_relocs((drm_intel_bo *) m_OsData,
-						      0);
+			result = drm_intel_gem_bo_wait((drm_intel_bo*)m_OsData, 1000000LL*dwTimeOutMs);
+			drm_intel_gem_bo_clear_relocs((drm_intel_bo*)m_OsData, 0);
+			if (result) {
+				//translate the drm ecode (-ETIME).
+				result = CM_EXCEED_MAX_TIMEOUT;
+				break;
+			}
 		}
 
 		Query();

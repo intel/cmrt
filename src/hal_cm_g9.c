@@ -56,6 +56,7 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 	INT iTmp;
 	UINT i;
 	UINT uiPatchOffset;
+	MEDIA_STATE_FLUSH_CMD_G75 CmdMediaStateFlush;
 
 	GENOS_ZeroMemory(&CmdBuffer, sizeof(GENOS_COMMAND_BUFFER));
 
@@ -170,6 +171,9 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 			CM_CHK_GENOSSTATUS(pState->pfnSendMediaWalkerState
 					   (pState, pKernels[i], &CmdBuffer));
 		}
+
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendMediaStateFlush
+				   (pHwInterface, &CmdBuffer));
 	} else if (enableGpGpu) {
 		for (UINT i = 0; i < pState->pTaskParam->uiNumKernels; i++) {
 			if ((i > 0)
@@ -187,15 +191,27 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 					   (pState, pKernels[i], &CmdBuffer));
 		}
 
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendMediaStateFlush
+				   (pHwInterface, &CmdBuffer));
+
 	} else {
 		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendBatchBufferStart
 				   (pHwInterface, &CmdBuffer, pBatchBuffer));
 
 		if ((pBatchBuffer->pBBRenderData->BbArgs.BbCmArgs.uiRefCount ==
 		     1) || (pState->pTaskParam->reuseBBUpdateMask == 1)) {
+			CmdMediaStateFlush =
+			    *(pHwInterface->pHwCommands->pMediaStateFlush_g75);
+			CM_CHK_GENOSSTATUS(HalCm_AddMediaStateFlushBb_g8
+					   (pHwInterface, pBatchBuffer,
+					    &CmdMediaStateFlush));
+
 			pHwInterface->pfnAddBatchBufferEndCmdBb(pHwInterface,
 								pBatchBuffer);
 		} else {
+			HalCm_SkipMediaStateFlushBb_g8(pHwInterface,
+						       pBatchBuffer);
+
 			pHwInterface->pfnSkipBatchBufferEndCmdBb(pHwInterface,
 								 pBatchBuffer);
 		}

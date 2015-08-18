@@ -29,6 +29,7 @@ AM_CPPFLAGS = \
 	$(DRM_CFLAGS)		\
 	$(LIBVA_DEPS_CFLAGS)	\
 	-I$(top_srcdirc)/src/cmrt	\
+	-DSYSCONFDIR='"$(sysconfdir)"'	\
 	$(NULL)
 
 
@@ -95,6 +96,7 @@ cmrt_files = \
 	cm_queue.cpp   \
 	cm_surface_2d.cpp \
 	cm_surface_2d_up.cpp \
+	readconf.cpp	\
 	$(NULL)
 
 cmrt_headers = \
@@ -102,15 +104,19 @@ cmrt_headers = \
 	cm_rt_linux.h	\
 	$(NULL)
 
+cmrt_config = cmrt.conf
+
 cmrt_la_LTLIBRARIES     = cmrt.la
 cmrt_ladir              = $(libdir)
 cmrtincludedir          = $(includedir)
+cmrtconfdir		= $(sysconfdir)
 cmrt_la_CFLAGS          = $(cmrt_cflags)
 cmrt_la_CXXFLAGS        = -fpermissive $(cmrt_cflags)
 cmrt_la_LDFLAGS         = $(cmrt_ldflags)
 cmrt_la_LIBADD          = $(cmrt_libs)
 cmrt_la_SOURCES         = $(cmrt_files)
 cmrtinclude_HEADERS     = $(cmrt_headers)
+cmrtconf_DATA		= $(cmrt_config)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in config.h.in

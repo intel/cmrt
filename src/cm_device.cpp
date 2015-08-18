@@ -41,6 +41,7 @@
 #include "cm_group_space.h"
 #include "cm_surface_2d.h"
 #include "hal_cm.h"
+#include "readconf.h"
 
 CSync CmDevice::GlobalCriticalSection_Surf2DUserDataLock = CSync();
 
@@ -570,12 +571,7 @@ INT CmDevice::GetJITCompileFnt(pJITCompile & fJITCompile)
 		fJITCompile = m_fJITCompile;
 	} else {
 		if (!m_hJITDll) {
-			if (sizeof(void *) == 4) {
-				m_hJITDll = dlopen("igfxcmjit32.so", RTLD_LAZY);
-			} else {
-				m_hJITDll = dlopen("igfxcmjit64.so", RTLD_LAZY);
-			}
-
+			m_hJITDll = dlopen(GetJitterName(), RTLD_LAZY);
 			if (NULL == m_hJITDll) {
 				CM_ASSERT(0);
 				return CM_JITDLL_LOAD_FAILURE;
@@ -600,12 +596,7 @@ INT CmDevice::GetFreeBlockFnt(pFreeBlock & fFreeBlock)
 		fFreeBlock = m_fFreeBlock;
 	} else {
 		if (!m_hJITDll) {
-			if (sizeof(void *) == 4) {
-				m_hJITDll = dlopen("igfxcmjit32.so", RTLD_LAZY);
-			} else {
-				m_hJITDll = dlopen("igfxcmjit64.so", RTLD_LAZY);
-			}
-
+			m_hJITDll = dlopen(GetJitterName(), RTLD_LAZY);
 			if (NULL == m_hJITDll) {
 				CM_ASSERT(0);
 				return CM_JITDLL_LOAD_FAILURE;
@@ -630,12 +621,7 @@ INT CmDevice::GetJITVersionFnt(pJITVersion & fJITVersion)
 		fJITVersion = m_fJITVersion;
 	} else {
 		if (!m_hJITDll) {
-			if (sizeof(void *) == 4) {
-				m_hJITDll = dlopen("igfxcmjit32.so", RTLD_LAZY);
-			} else {
-				m_hJITDll = dlopen("igfxcmjit64.so", RTLD_LAZY);
-			}
-
+			m_hJITDll = dlopen(GetJitterName(), RTLD_LAZY);
 			if (NULL == m_hJITDll) {
 				CM_ASSERT(0);
 				return CM_JITDLL_LOAD_FAILURE;
@@ -659,12 +645,7 @@ INT CmDevice::LoadJITDll(void)
 	int result = 0;
 
 	if (NULL == m_hJITDll) {
-		if (sizeof(void *) == 4) {
-			m_hJITDll = dlopen("igfxcmjit32.so", RTLD_LAZY);
-		} else {
-			m_hJITDll = dlopen("igfxcmjit64.so", RTLD_LAZY);
-		}
-
+		m_hJITDll = dlopen(GetJitterName(), RTLD_LAZY);
 		if (NULL == m_hJITDll) {
 			result = CM_JITDLL_LOAD_FAILURE;
 			CM_ASSERT(0);

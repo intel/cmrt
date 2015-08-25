@@ -804,13 +804,8 @@ class SurfaceIndex {
 	virtual unsigned int get_data(void) {
 		return index;
 	};
-
-	virtual ~ SurfaceIndex() {
-	};
-
  private:
 	unsigned int index;
-
 	unsigned char extra_byte;
 
 	SurfaceIndex & operator=(const SurfaceIndex & other);

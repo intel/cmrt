@@ -28,13 +28,13 @@
 #pragma once
 #include "cm_def.h"
 
-class CmDevice;
+class CmDevice_RT;
 class CmKernel;
-class CmTask;
+class CmTask_RT;
 
 class CmThreadSpace {
  public:
-	static INT Create(CmDevice * pDevice, UINT indexTsArray, UINT width,
+	static INT Create(CmDevice_RT * pDevice, UINT indexTsArray, UINT width,
 			  UINT height, CmThreadSpace * &pTS);
 	static INT Destroy(CmThreadSpace * &pTS);
 
@@ -69,7 +69,7 @@ class CmThreadSpace {
 	INT GetColorCountMinusOne(UINT & colorCount);
 	INT GetWavefront26ZDispatchInfo(CM_HAL_WAVEFRONT26Z_DISPATCH_INFO &
 					dispatchInfo);
-	BOOLEAN IntegrityCheck(CmTask * pTask);
+	BOOLEAN IntegrityCheck(CmTask_RT * pTask);
 	INT GetBoardOrder(UINT * &pBoardOrder);
 	INT Wavefront45Sequence();
 	INT Wavefront26Sequence();
@@ -94,13 +94,13 @@ class CmThreadSpace {
 	CmKernel *GetKernelPointer() const;
 
  protected:
-	 CmThreadSpace(CmDevice * pDevice, UINT indexTsArray, UINT width,
+	 CmThreadSpace(CmDevice_RT * pDevice, UINT indexTsArray, UINT width,
 		       UINT height);
 	~CmThreadSpace(void);
 
 	INT Initialize(void);
 
-	CmDevice *m_pDevice;
+	CmDevice_RT *m_pDevice;
 
 	UINT m_Width;
 	UINT m_Height;

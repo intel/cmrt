@@ -22,40 +22,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Authors:
- *     Wei Lin<wei.w.lin@intel.com>
- *     Yuting Yang<yuting.yang@intel.com>
+ *	Igor Chebykin <igor.v.chebykin@intel.com>
  */
-#pragma once
 
-class CmDevice_RT;
+#ifndef CM_KERNEL_BASE_H_
+#define CM_KERNEL_BASE_H_
 
-#include "cm_group_space_base.h"
 
-class CmThreadGroupSpace_RT : public CmThreadGroupSpace {
+class CmKernel {
  public:
-	static INT Create(CmDevice_RT * pDevice, UINT index, UINT thrdSpaceWidth,
-			  UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			  UINT grpSpaceHeight, CmThreadGroupSpace * &pTGS);
-	static INT Destroy(CmThreadGroupSpace * &pTGS);
+        virtual INT SetThreadCount(UINT count) = 0;
+        virtual INT SetKernelArg(UINT index, size_t size, const void *pValue) = 0;
 
-	INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
-				    UINT & threadSpaceHeight,
-				    UINT & groupSpaceWidth,
-				    UINT & groupSpaceHeight) const;
-	UINT GetIndexInTGsArray();
+        virtual INT SetThreadArg(UINT threadId, UINT index, size_t size,
+                         const void *pValue) = 0;
 
- protected:
-	CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth,
-			    UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			    UINT grpSpaceHeight);
-	~CmThreadGroupSpace_RT(void);
-	INT Initialize(void);
-
-	CmDevice_RT *m_pCmDev;
-	UINT m_threadSpaceWidth;
-	UINT m_threadSpaceHeight;
-	UINT m_groupSpaceWidth;
-	UINT m_groupSpaceHeight;
-
-	UINT m_IndexInTGSArray;
+        virtual INT SetStaticBuffer(UINT index, const void *pValue) = 0;
+        virtual INT AssociateThreadSpace(CmThreadSpace * &pTS) = 0;
+        virtual INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS) = 0;
+        virtual INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex) = 0;
+        virtual ~CmKernel() {};
 };
+
+
+#endif /* CM_KERNEL_BASE_H_ */

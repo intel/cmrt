@@ -32,16 +32,16 @@
 #include "cm_thread_space.h"
 #include "cm_device.h"
 
-INT CmTask::Create(CmDevice * pCmDevice, UINT index, UINT max_kernel_count,
-		   CmTask * &pKernelArray)
+INT CmTask_RT::Create(CmDevice_RT * pCmDevice, UINT index, UINT max_kernel_count,
+		   CmTask_RT * &pKernelArray)
 {
 	INT result = CM_SUCCESS;
 	pKernelArray =
-	    new(std::nothrow) CmTask(pCmDevice, index, max_kernel_count);
+	    new(std::nothrow) CmTask_RT(pCmDevice, index, max_kernel_count);
 	if (pKernelArray) {
 		result = pKernelArray->Initialize();
 		if (result != CM_SUCCESS) {
-			CmTask::Destroy(pKernelArray);
+			CmTask_RT::Destroy(pKernelArray);
 		}
 	} else {
 		CM_ASSERT(0);
@@ -50,7 +50,7 @@ INT CmTask::Create(CmDevice * pCmDevice, UINT index, UINT max_kernel_count,
 	return result;
 }
 
-INT CmTask::Destroy(CmTask * &pKernelArray)
+INT CmTask_RT::Destroy(CmTask_RT * &pKernelArray)
 {
 	if (pKernelArray) {
 		delete pKernelArray;
@@ -60,7 +60,7 @@ INT CmTask::Destroy(CmTask * &pKernelArray)
 	return CM_SUCCESS;
 }
 
- CmTask::CmTask(CmDevice * pCmDevice, UINT index, UINT max_kernel_count):
+ CmTask_RT::CmTask_RT(CmDevice_RT * pCmDevice, UINT index, UINT max_kernel_count):
 m_pKernelArray(NULL),
 m_KernelCount(0),
 m_MaxKernelCount(max_kernel_count),
@@ -70,12 +70,12 @@ m_IndexTaskArray(index), m_ui64SyncBitmap(0), m_pCmDev(pCmDevice)
 	m_PreemptionMode = UN_PREEMPTABLE_MODE;
 }
 
-CmTask::~CmTask(void)
+CmTask_RT::~CmTask_RT(void)
 {
 	CmSafeDeleteArray(m_pKernelArray);
 }
 
-INT CmTask::Initialize()
+INT CmTask_RT::Initialize()
 {
 	m_pKernelArray = new(std::nothrow) CmKernel *[m_MaxKernelCount];
 
@@ -89,7 +89,7 @@ INT CmTask::Initialize()
 	}
 }
 
-CM_RT_API INT CmTask::AddKernel(CmKernel * pKernel)
+CM_RT_API INT CmTask_RT::AddKernel(CmKernel * pKernel)
 {
 	if (m_MaxKernelCount <= m_KernelCount) {
 		return CM_EXCEED_MAX_KERNEL_PER_ENQUEUE;
@@ -100,14 +100,15 @@ CM_RT_API INT CmTask::AddKernel(CmKernel * pKernel)
 	}
 
 	m_pKernelArray[m_KernelCount] = pKernel;
-	pKernel->SetIndexInTask(m_KernelCount);
+	CmKernel_RT* pKernel_RT = static_cast<CmKernel_RT*>(pKernel);
+	pKernel_RT->SetIndexInTask(m_KernelCount);
 
 	m_KernelCount++;
 
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmTask::Reset(void)
+CM_RT_API INT CmTask_RT::Reset(void)
 {
 	m_KernelCount = 0;
 	m_ui64SyncBitmap = 0;
@@ -122,12 +123,12 @@ CM_RT_API INT CmTask::Reset(void)
 	}
 }
 
-UINT CmTask::GetKernelCount()
+UINT CmTask_RT::GetKernelCount()
 {
 	return m_KernelCount;
 }
 
-CmKernel *CmTask::GetKernelPointer(UINT index)
+CmKernel *CmTask_RT::GetKernelPointer(UINT index)
 {
 	if (index >= m_KernelCount) {
 		CM_ASSERT(0);
@@ -136,19 +137,19 @@ CmKernel *CmTask::GetKernelPointer(UINT index)
 	return m_pKernelArray[index];
 }
 
-UINT CmTask::GetIndexInTaskArray()
+UINT CmTask_RT::GetIndexInTaskArray()
 {
 	return m_IndexTaskArray;
 }
 
-BOOLEAN CmTask::IntegrityCheckKernelThreadspace(void)
+BOOLEAN CmTask_RT::IntegrityCheckKernelThreadspace(void)
 {
 	INT hr = CM_SUCCESS;
 	UINT kernelCount = 0;
 	UINT i = 0;
 	UINT j = 0;
-	CmKernel *pKernel_RT = NULL;
-	CmKernel *pKernTmp = NULL;
+	CmKernel_RT *pKernel_RT = NULL;
+	CmKernel_RT *pKernTmp = NULL;
 	UINT threadCount = 0;
 	CmThreadSpace *pKernelTS = NULL;
 	UINT width = 0;
@@ -171,7 +172,9 @@ BOOLEAN CmTask::IntegrityCheckKernelThreadspace(void)
 	CmSafeMemSet(pKernelInScoreboard, 0, kernelCount * sizeof(BOOLEAN));
 
 	for (i = 0; i < kernelCount; ++i) {
-		pKernel_RT = this->GetKernelPointer(i);
+                CmKernel *pKernel = NULL;
+		pKernel = this->GetKernelPointer(i);
+                pKernel_RT=(static_cast<CmKernel_RT*>(pKernel));
 		CMCHK_NULL(pKernel_RT);
 
 		CMCHK_HR(pKernel_RT->GetThreadSpace(pKernelTS));
@@ -203,14 +206,12 @@ BOOLEAN CmTask::IntegrityCheckKernelThreadspace(void)
 
 			for (j = 0; j < width * height; ++j) {
 				pKernTmp =
-				    static_cast <
-				    CmKernel * >(pThreadSpaceUnit[j].pKernel);
+				    static_cast < CmKernel_RT * >(pThreadSpaceUnit[j].pKernel);
 				if (pKernTmp == NULL) {
 					if (pKernelTS->GetNeedSetKernelPointer
 					    ()) {
-						pKernTmp =
-						    pKernelTS->GetKernelPointer
-						    ();
+						pKernTmp =static_cast < CmKernel_RT * >
+						    (pKernelTS->GetKernelPointer());
 					}
 					if (pKernTmp == NULL) {
 						CM_ASSERT(0);
@@ -254,7 +255,7 @@ BOOLEAN CmTask::IntegrityCheckKernelThreadspace(void)
 	return (hr == CM_SUCCESS) ? TRUE : FALSE;
 }
 
-CM_RT_API INT CmTask::AddSync(void)
+CM_RT_API INT CmTask_RT::AddSync(void)
 {
 	if (m_KernelCount > 0) {
 		m_ui64SyncBitmap |= (UINT64) 1 << (m_KernelCount - 1);
@@ -263,12 +264,12 @@ CM_RT_API INT CmTask::AddSync(void)
 	return CM_SUCCESS;
 }
 
-UINT64 CmTask::GetSyncBitmap()
+UINT64 CmTask_RT::GetSyncBitmap()
 {
 	return m_ui64SyncBitmap;
 }
 
-CM_RT_API INT CmTask::SetPowerOption(PCM_HAL_POWER_OPTION_PARAM pPowerOption)
+CM_RT_API INT CmTask_RT::SetPowerOption(PCM_HAL_POWER_OPTION_PARAM pPowerOption)
 {
 	UINT nGTPlatform;
 	size_t nGTPlatformSize;
@@ -296,19 +297,19 @@ CM_RT_API INT CmTask::SetPowerOption(PCM_HAL_POWER_OPTION_PARAM pPowerOption)
 	return CM_SUCCESS;
 }
 
-PCM_HAL_POWER_OPTION_PARAM CmTask::GetPowerOption()
+PCM_HAL_POWER_OPTION_PARAM CmTask_RT::GetPowerOption()
 {
 	return &m_PowerOption;
 }
 
-CM_RT_API INT CmTask::SetPreemptionMode(CM_HAL_PREEMPTION_MODE mode)
+CM_RT_API INT CmTask_RT::SetPreemptionMode(CM_HAL_PREEMPTION_MODE mode)
 {
 	m_PreemptionMode = mode;
 
 	return CM_SUCCESS;
 }
 
-CM_RT_API CM_HAL_PREEMPTION_MODE CmTask::GetPreemptionMode()
+CM_RT_API CM_HAL_PREEMPTION_MODE CmTask_RT::GetPreemptionMode()
 {
 	return m_PreemptionMode;
 }

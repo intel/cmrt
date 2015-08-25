@@ -33,12 +33,14 @@
 
 class CmTaskInternal;
 
-class CmEvent:public CmDynamicArray {
+#include "cm_event_base.h"
+
+class CmEvent_RT : public CmEvent, CmDynamicArray {
  public:
 
 	static INT Create(UINT index, CmTaskInternal * pTask, INT taskDriverId,
-			  CmDevice * pCmDev, BOOL isVisible, CmEvent * &pEvent);
-	static INT Destroy(CmEvent * &pEvent);
+			  CmDevice_RT * pCmDev, BOOL isVisible, CmEvent_RT * &pEvent);
+	static INT Destroy(CmEvent_RT * &pEvent);
 
 	CM_RT_API INT GetStatus(CM_STATUS & status);
 	CM_RT_API INT GetExecutionTime(UINT64 & time);
@@ -66,10 +68,10 @@ class CmEvent:public CmDynamicArray {
 	INT SetKernelNames(CmTask * pTask, CmThreadSpace * pThreadSpace,
 			   CmThreadGroupSpace * pThreadGroupSpace);
 
- protected:
-	 CmEvent(UINT index, CmTaskInternal * pTask, INT taskDriverId,
-		 CmDevice * pCmDev, BOOL isVisible);
-	~CmEvent(void);
+       protected:
+	CmEvent_RT(UINT index, CmTaskInternal * pTask, INT taskDriverId,
+		 CmDevice_RT * pCmDev, BOOL isVisible);
+	~CmEvent_RT(void);
 	INT Initialize(void);
 	INT Query(void);
 
@@ -90,8 +92,8 @@ class CmEvent:public CmDynamicArray {
 	UINT *m_ThreadSpace;
 	UINT m_KernelCount;
 
-	CmDevice *m_pDevice;
-	CmQueue *m_pQueue;
+	CmDevice_RT *m_pDevice;
+	CmQueue_RT *m_pQueue;
 
 	INT m_RefCount;
 

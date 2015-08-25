@@ -42,14 +42,14 @@
 #include "cm_surface_manager.h"
 #include <sys/time.h>
 
-INT CmQueue::Create(CmDevice * pDevice, CmQueue * &pQueue)
+INT CmQueue_RT::Create(CmDevice_RT * pDevice, CmQueue_RT * &pQueue)
 {
 	INT result = CM_SUCCESS;
-	pQueue = new(std::nothrow) CmQueue(pDevice);
+	pQueue = new(std::nothrow) CmQueue_RT(pDevice);
 	if (pQueue) {
 		result = pQueue->Initialize();
 		if (result != CM_SUCCESS) {
-			CmQueue::Destroy(pQueue);
+		    CmQueue_RT::Destroy(pQueue);
 		}
 	} else {
 		CM_ASSERT(0);
@@ -58,7 +58,7 @@ INT CmQueue::Create(CmDevice * pDevice, CmQueue * &pQueue)
 	return result;
 }
 
-INT CmQueue::Destroy(CmQueue * &pQueue)
+INT CmQueue_RT::Destroy(CmQueue_RT * &pQueue)
 {
 	if (pQueue == NULL) {
 		return CM_FAILURE;
@@ -70,14 +70,14 @@ INT CmQueue::Destroy(CmQueue * &pQueue)
 	return result;
 }
 
- CmQueue::CmQueue(CmDevice * pDevice):
+CmQueue_RT::CmQueue_RT(CmDevice_RT * pDevice):
 m_pDevice(pDevice),
 m_EventArray(CM_INIT_EVENT_COUNT), m_EventCount(0), m_pHalMaxValues(NULL)
 {
 
 }
 
-CmQueue::~CmQueue(void)
+CmQueue_RT::~CmQueue_RT(void)
 {
 	UINT EventReleaseTimes = 0;
 
@@ -85,14 +85,14 @@ CmQueue::~CmQueue(void)
 
 	UINT EventArrayUsedSize = m_EventArray.GetMaxSize();
 	for (UINT i = 0; i < EventArrayUsedSize; i++) {
-		CmEvent *pEvent = (CmEvent *) m_EventArray.GetElement(i);
+		CmEvent_RT *pEvent = (CmEvent_RT *) m_EventArray.GetElement(i);
 		EventReleaseTimes = 0;
 		while (pEvent) {
 			if (EventReleaseTimes > 2) {
 				CM_ASSERT(0);
 				break;
 			}
-			CmEvent::Destroy(pEvent);
+			CmEvent_RT::Destroy(pEvent);
 			EventReleaseTimes++;
 		}
 	}
@@ -100,14 +100,14 @@ CmQueue::~CmQueue(void)
 
 }
 
-INT CmQueue::Initialize(void)
+INT CmQueue_RT::Initialize(void)
 {
 	CM_HAL_MAX_VALUES_EX *pHalMaxValuesEx = NULL;
 	m_pDevice->GetHalMaxValues(m_pHalMaxValues, pHalMaxValuesEx);
 	return CM_SUCCESS;
 }
 
-INT CmQueue::GetTaskHasThreadArg(CmKernel * pKernelArray[], UINT numKernels,
+INT CmQueue_RT::GetTaskHasThreadArg(CmKernel * pKernelArray[], UINT numKernels,
 				 BOOLEAN & threadArgExists)
 {
 	threadArgExists = FALSE;
@@ -118,7 +118,7 @@ INT CmQueue::GetTaskHasThreadArg(CmKernel * pKernelArray[], UINT numKernels,
 			return CM_FAILURE;
 		}
 
-		if (pKernelArray[iKrn]->IsThreadArgExisted()) {
+		if ((static_cast<CmKernel_RT *>(pKernelArray[iKrn]))->IsThreadArgExisted()) {
 			threadArgExists = TRUE;
 			break;
 		}
@@ -128,7 +128,7 @@ INT CmQueue::GetTaskHasThreadArg(CmKernel * pKernelArray[], UINT numKernels,
 }
 
 CM_RT_API INT
-    CmQueue::Enqueue(CmTask * pKernelArray,
+CmQueue_RT::Enqueue(CmTask * pKernelArray,
 		     CmEvent * &pEvent, const CmThreadSpace * pTS)
 {
 	INT result;
@@ -139,7 +139,8 @@ CM_RT_API INT
 	}
 
 	UINT KernelCount = 0;
-	KernelCount = pKernelArray->GetKernelCount();
+	CmTask_RT* pKernelArray_RT = static_cast<CmTask_RT*>(pKernelArray);
+	KernelCount = pKernelArray_RT->GetKernelCount();
 	if (KernelCount == 0) {
 		CM_ASSERT(0);
 		return CM_FAILURE;
@@ -154,13 +155,13 @@ CM_RT_API INT
 		if (pTS->GetNeedSetKernelPointer()
 		    && pTS->KernelPointerIsNULL()) {
 			CmKernel *pTmp = NULL;
-			pTmp = pKernelArray->GetKernelPointer(0);
+			pTmp = pKernelArray_RT->GetKernelPointer(0);
 			pTS->SetKernelPointer(pTmp);
 		}
 	}
 
-	typedef CmKernel *pCmKernel;
-	CmKernel **pTmp = new(std::nothrow) pCmKernel[KernelCount + 1];
+	typedef CmKernel_RT *pCmKernel;
+	CmKernel_RT **pTmp = new(std::nothrow) pCmKernel[KernelCount + 1];
 	if (pTmp == NULL) {
 		CM_ASSERT(0);
 		return CM_OUT_OF_HOST_MEMORY;
@@ -168,7 +169,7 @@ CM_RT_API INT
 
 	UINT totalThreadNumber = 0;
 	for (UINT i = 0; i < KernelCount; i++) {
-		pTmp[i] = pKernelArray->GetKernelPointer(i);
+		pTmp[i] = (static_cast<CmKernel_RT*>(pKernelArray_RT->GetKernelPointer(i)));
 
 		UINT singleThreadNumber = 0;
 		pTmp[i]->GetThreadCount(singleThreadNumber);
@@ -178,11 +179,11 @@ CM_RT_API INT
 
 	result =
 	    Enqueue_RT(pTmp, KernelCount, totalThreadNumber, pEvent, pTS,
-		       pKernelArray->GetSyncBitmap(),
-		       pKernelArray->GetPowerOption());
-
+	        pKernelArray_RT->GetSyncBitmap(),
+	        pKernelArray_RT->GetPowerOption());
 	if (pEvent) {
-		pEvent->SetKernelNames(pKernelArray,
+	    CmEvent_RT *pEvent_RT = (static_cast<CmEvent_RT*>(pEvent));
+                    pEvent_RT->SetKernelNames(pKernelArray,
 				       const_cast < CmThreadSpace * >(pTS),
 				       NULL);
 	}
@@ -192,7 +193,7 @@ CM_RT_API INT
 	return result;
 }
 
-INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
+INT CmQueue_RT::Enqueue_RT(CmKernel_RT * pKernelArray_RT[],
 			const UINT uiKernelCount,
 			const UINT uiTotalThreadCount,
 			CmEvent * &pEvent,
@@ -201,7 +202,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 			PCM_HAL_POWER_OPTION_PARAM pPowerOption)
 {
 
-	if (pKernelArray == NULL) {
+	if (pKernelArray_RT == NULL) {
 		CM_ASSERTMESSAGE("Kernel array is NULL.");
 		return CM_INVALID_ARG_VALUE;
 	}
@@ -215,7 +216,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 
 	CmTaskInternal *pTask = NULL;
 	INT result = CmTaskInternal::Create(uiKernelCount, uiTotalThreadCount,
-					    pKernelArray,
+					    reinterpret_cast<CmKernel **>(pKernelArray_RT),
 					    pTS, m_pDevice, uiSyncBitmap,
 					    pTask);
 	if (result != CM_SUCCESS) {
@@ -249,7 +250,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 	return result;
 }
 
-INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
+INT CmQueue_RT::Enqueue_RT(CmKernel_RT * pKernelArray[],
 			const UINT uiKernelCount,
 			const UINT uiTotalThreadCount,
 			CmEvent * &pEvent,
@@ -269,7 +270,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 
 	CmTaskInternal *pTask = NULL;
 	INT result = CmTaskInternal::Create(uiKernelCount, uiTotalThreadCount,
-					    pKernelArray,
+					    reinterpret_cast<CmKernel **>(pKernelArray),
 					    pTGS, m_pDevice, uiSyncBitmap,
 					    pTask);
 	if (result != CM_SUCCESS) {
@@ -305,7 +306,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 	return result;
 }
 
-INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
+INT CmQueue_RT::Enqueue_RT(CmKernel_RT * pKernelArray[],
 			CmEvent * &pEvent,
 			UINT numTasksGenerated,
 			BOOLEAN isLastTask,
@@ -339,7 +340,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 		totalThreadCount += threadCount;
 	}
 
-	if (GetTaskHasThreadArg(pKernelArray, kernelCount, threadArgExists) !=
+	if (GetTaskHasThreadArg(reinterpret_cast<CmKernel **>(pKernelArray), kernelCount, threadArgExists) !=
 	    CM_SUCCESS) {
 		CM_ASSERTMESSAGE
 		    ("Error checking if Task has any thread arguments.");
@@ -362,7 +363,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 	}
 
 	result =
-	    CmTaskInternal::Create(kernelCount, totalThreadCount, pKernelArray,
+	    CmTaskInternal::Create(kernelCount, totalThreadCount, reinterpret_cast<CmKernel **>(pKernelArray),
 				   pTask, numTasksGenerated, isLastTask, hints,
 				   m_pDevice);
 	if (result != CM_SUCCESS) {
@@ -385,8 +386,8 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 	}
 
 	for (UINT i = 0; i < kernelCount; ++i) {
-		CmKernel *pKernel = NULL;
-		pTask->GetKernel(i, pKernel);
+		CmKernel_RT *pKernel = NULL;
+		pTask->GetKernel(i, (CmKernel * &)pKernel);
 		if (pKernel != NULL) {
 			pKernel->SetAdjustedYCoord(0);
 		}
@@ -402,7 +403,7 @@ INT CmQueue::Enqueue_RT(CmKernel * pKernelArray[],
 }
 
 CM_RT_API INT
-    CmQueue::EnqueueWithGroup(CmTask * pTask, CmEvent * &pEvent,
+CmQueue_RT::EnqueueWithGroup(CmTask * pTask, CmEvent * &pEvent,
 			      const CmThreadGroupSpace * pTGS)
 {
 	INT result;
@@ -413,15 +414,17 @@ CM_RT_API INT
 	}
 
 	UINT count = 0;
-	count = pTask->GetKernelCount();
+
+        CmTask_RT* pTask_RT = static_cast<CmTask_RT*>(pTask);
+	count = pTask_RT->GetKernelCount();
 
 	if (count == 0) {
 		CM_ASSERTMESSAGE("There are no valid kernels.");
 		return CM_FAILURE;
 	}
 
-	typedef CmKernel *pCmKernel;
-	CmKernel **pTmp = new(std::nothrow) pCmKernel[count + 1];
+	typedef CmKernel_RT *pCmKernel;
+	CmKernel_RT **pTmp = new(std::nothrow) pCmKernel[count + 1];
 	if (pTmp == NULL) {
 		CM_ASSERT(0);
 		return CM_OUT_OF_HOST_MEMORY;
@@ -430,7 +433,7 @@ CM_RT_API INT
 	UINT totalThreadNumber = 0;
 	for (UINT i = 0; i < count; i++) {
 		UINT singleThreadNumber = 0;
-		pTmp[i] = pTask->GetKernelPointer(i);
+		pTmp[i] = static_cast<CmKernel_RT *>(pTask_RT->GetKernelPointer(i));
 
 		if (pTmp[i]->IsThreadArgExisted()) {
 			CM_ASSERTMESSAGE
@@ -446,10 +449,10 @@ CM_RT_API INT
 
 	result =
 	    Enqueue_RT(pTmp, count, totalThreadNumber, pEvent, pTGS,
-		       pTask->GetSyncBitmap(), pTask->GetPreemptionMode());
+	        pTask_RT->GetSyncBitmap(), pTask_RT->GetPreemptionMode());
 
 	if (pEvent) {
-		pEvent->SetKernelNames(pTask, NULL,
+		(static_cast<CmEvent_RT*>(pEvent))->SetKernelNames(pTask_RT, NULL,
 				       const_cast <
 				       CmThreadGroupSpace * >(pTGS));
 	}
@@ -460,7 +463,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmQueue::EnqueueWithHints(CmTask * pKernelArray,
+CmQueue_RT::EnqueueWithHints(CmTask * pKernelArray,
 			      CmEvent * &pEvent, UINT hints)
 {
 	INT hr = CM_FAILURE;
@@ -471,10 +474,11 @@ CM_RT_API INT
 	BOOLEAN splitTask = FALSE;
 	BOOLEAN lastTask = FALSE;
 	UINT numTasksGenerated = 0;
+        CmTask_RT* pKernelArray_RT = static_cast<CmTask_RT*>(pKernelArray);
 
 	CMCHK_NULL_RETURN(pKernelArray, CM_INVALID_ARG_VALUE);
 
-	count = pKernelArray->GetKernelCount();
+	count = pKernelArray_RT->GetKernelCount();
 	if (count == 0) {
 		CM_ASSERT(0);
 		hr = CM_FAILURE;
@@ -488,9 +492,9 @@ CM_RT_API INT
 	}
 
 	for (UINT i = 0; i < count; ++i) {
-		CmKernel *pKernelTmp = NULL;
+		CmKernel_RT *pKernelTmp = NULL;
 		CmThreadSpace *pTSTmp = NULL;
-		pKernelTmp = pKernelArray->GetKernelPointer(i);
+		pKernelTmp = static_cast<CmKernel_RT*>(pKernelArray_RT->GetKernelPointer(i));
 		CMCHK_NULL(pKernelTmp);
 		pKernelTmp->GetThreadSpace(pTSTmp);
 		CMCHK_NULL(pTSTmp);
@@ -511,7 +515,7 @@ CM_RT_API INT
 
 	do {
 		for (index = 0; index < count; ++index) {
-			pKernels[index] = pKernelArray->GetKernelPointer(index);
+			pKernels[index] = pKernelArray_RT->GetKernelPointer(index);
 		}
 
 		pKernels[count] = NULL;
@@ -525,8 +529,7 @@ CM_RT_API INT
 		}
 
 		CMCHK_HR(Enqueue_RT
-			 (pKernels, pEvent, numTasksGenerated, lastTask, hints,
-			  pKernelArray->GetPowerOption()));
+			 (reinterpret_cast<CmKernel_RT **>(pKernels), pEvent, numTasksGenerated, lastTask, hints,pKernelArray_RT->GetPowerOption()));
 
 		numTasksGenerated++;
 
@@ -539,7 +542,7 @@ CM_RT_API INT
 	return hr;
 }
 
-INT CmQueue::UpdateSurfaceStateOnPop(CmTaskInternal * pTask)
+INT CmQueue_RT::UpdateSurfaceStateOnPop(CmTaskInternal * pTask)
 {
 	CmSurfaceManager *pSurfaceMgr = NULL;
 	INT *pSurfState = NULL;
@@ -564,7 +567,7 @@ INT CmQueue::UpdateSurfaceStateOnPop(CmTaskInternal * pTask)
 	return CM_SUCCESS;
 }
 
-INT CmQueue::UpdateSurfaceStateOnPush(CmTaskInternal * pTask)
+INT CmQueue_RT::UpdateSurfaceStateOnPush(CmTaskInternal * pTask)
 {
 	INT *pSurfState = NULL;
 	BOOL *surfArray = NULL;
@@ -597,7 +600,7 @@ INT CmQueue::UpdateSurfaceStateOnPush(CmTaskInternal * pTask)
 	return CM_SUCCESS;
 }
 
-void CmQueue::PopTaskFromFlushedQueue()
+void CmQueue_RT::PopTaskFromFlushedQueue()
 {
 	CmTaskInternal *pTopTask = (CmTaskInternal *) m_FlushedTasks.Pop();
 
@@ -608,7 +611,7 @@ void CmQueue::PopTaskFromFlushedQueue()
 	return;
 }
 
-INT CmQueue::TouchFlushedTasks(void)
+INT CmQueue_RT::TouchFlushedTasks(void)
 {
 	INT hr = CM_SUCCESS;
 
@@ -631,7 +634,7 @@ INT CmQueue::TouchFlushedTasks(void)
 	return hr;
 }
 
-INT CmQueue::QueryFlushedTasks(void)
+INT CmQueue_RT::QueryFlushedTasks(void)
 {
 	INT hr = CM_SUCCESS;
 
@@ -667,11 +670,9 @@ INT CmQueue::QueryFlushedTasks(void)
 						pTask->GetTaskStatus(status);
 						if (status == CM_STATUS_STARTED) {
 							INT iTaskId;
-							CmEvent *pTopTaskEvent;
-							pTask->GetTaskEvent
-							    (pTopTaskEvent);
-							CMCHK_NULL
-							    (pTopTaskEvent);
+							CmEvent_RT *pTopTaskEvent;
+							pTask->GetTaskEvent(pTopTaskEvent);
+							CMCHK_NULL(pTopTaskEvent);
 
 							pTopTaskEvent->GetTaskDriverId
 							    (iTaskId);
@@ -695,25 +696,27 @@ INT CmQueue::QueryFlushedTasks(void)
 	return hr;
 }
 
-CM_RT_API INT CmQueue::DestroyEvent(CmEvent * &pEvent)
+CM_RT_API INT CmQueue_RT::DestroyEvent(CmEvent * &pEvent)
 {
 	if (pEvent == NULL) {
 		return CM_FAILURE;
 	}
 
 	UINT index = 0;
-	pEvent->GetIndex(index);
+	CmEvent_RT *pEvent_RT = (static_cast<CmEvent_RT*>(pEvent));
+
+	pEvent_RT->GetIndex(index);
 	CM_ASSERT(m_EventArray.GetElement(index) == pEvent);
 
-	INT status = CmEvent::Destroy(pEvent);
-	if (status == CM_SUCCESS && pEvent == NULL) {
+	INT status = CmEvent_RT::Destroy(pEvent_RT);
+	if (status == CM_SUCCESS && pEvent_RT == NULL) {
 		m_EventArray.SetElement(index, NULL);
 		pEvent = NULL;
 	}
 	return status;
 }
 
-INT CmQueue::CleanQueue(void)
+INT CmQueue_RT::CleanQueue(void)
 {
 
 	INT status = CM_SUCCESS;
@@ -749,20 +752,20 @@ INT CmQueue::CleanQueue(void)
 	return status;
 }
 
-INT CmQueue::GetTaskCount(UINT & numTasks)
+INT CmQueue_RT::GetTaskCount(UINT & numTasks)
 {
 	numTasks = m_EnqueuedTasks.GetCount() + m_FlushedTasks.GetCount();
 	return CM_SUCCESS;
 }
 
-INT CmQueue::FlushGeneralTask(CmTaskInternal * pTask)
+INT CmQueue_RT::FlushGeneralTask(CmTaskInternal * pTask)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
 	CM_HAL_EXEC_TASK_PARAM param;
 	CmKernelData *pKernelData = NULL;
 	UINT kernelDataSize = 0;
 	PCM_CONTEXT pCmData = NULL;
-	CmEvent *pEvent = NULL;
+	CmEvent_RT *pEvent = NULL;
 	UINT totalThreadCount = 0;
 	UINT count = 0;
 	PCM_HAL_KERNEL_PARAM pTempData = NULL;
@@ -902,7 +905,7 @@ INT CmQueue::FlushGeneralTask(CmTaskInternal * pTask)
 	return hr;
 }
 
-INT CmQueue::FlushGroupTask(CmTaskInternal * pTask)
+INT CmQueue_RT::FlushGroupTask(CmTaskInternal * pTask)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
 
@@ -911,7 +914,7 @@ INT CmQueue::FlushGroupTask(CmTaskInternal * pTask)
 	UINT kernelDataSize = 0;
 	UINT count = 0;
 	PCM_CONTEXT pCmData = NULL;
-	CmEvent *pEvent = NULL;
+	CmEvent_RT *pEvent = NULL;
 	PCM_HAL_KERNEL_PARAM pTempData = NULL;
 
 	CmSafeMemSet(&param, 0, sizeof(CM_HAL_EXEC_TASK_GROUP_PARAM));
@@ -988,7 +991,7 @@ INT CmQueue::FlushGroupTask(CmTaskInternal * pTask)
 	return hr;
 }
 
-INT CmQueue::FlushEnqueueWithHintsTask(CmTaskInternal * pTask)
+INT CmQueue_RT::FlushEnqueueWithHintsTask(CmTaskInternal * pTask)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
 	CM_HAL_EXEC_HINTS_TASK_PARAM param;
@@ -996,7 +999,7 @@ INT CmQueue::FlushEnqueueWithHintsTask(CmTaskInternal * pTask)
 	CmKernelData *pKernelData = NULL;
 	UINT kernelDataSize = 0;
 	UINT count = 0;
-	CmEvent *pEvent = NULL;
+	CmEvent_RT *pEvent = NULL;
 	PCM_HAL_KERNEL_PARAM pTempData = NULL;
 
 	CmSafeMemSet(&param, 0, sizeof(CM_HAL_EXEC_HINTS_TASK_PARAM));
@@ -1066,7 +1069,7 @@ INT CmQueue::FlushEnqueueWithHintsTask(CmTaskInternal * pTask)
 	return hr;
 }
 
-INT CmQueue::FlushTaskWithoutSync(bool bIfFlushBlock)
+INT CmQueue_RT::FlushTaskWithoutSync(bool bIfFlushBlock)
 {
 	INT hr = CM_SUCCESS;
 	CmTaskInternal *pTask = NULL;
@@ -1123,7 +1126,7 @@ INT CmQueue::FlushTaskWithoutSync(bool bIfFlushBlock)
 	return hr;
 }
 
-INT CmQueue::CreateEvent(CmTaskInternal * pTask, BOOL bIsVisible,
+INT CmQueue_RT::CreateEvent(CmTaskInternal * pTask, BOOL bIsVisible,
 			 INT & taskDriverId, CmEvent * &pEvent)
 {
 	INT hr = CM_SUCCESS;
@@ -1132,34 +1135,35 @@ INT CmQueue::CreateEvent(CmTaskInternal * pTask, BOOL bIsVisible,
 	UINT freeSlotInEventArray = m_EventArray.GetFirstFreeIndex();
 	m_CriticalSection_Event.Release();
 
-	hr = CmEvent::Create(freeSlotInEventArray, pTask, taskDriverId,
-			     m_pDevice, bIsVisible, pEvent);
+	CmEvent_RT *ptmp = NULL;
+	hr = CmEvent_RT::Create(freeSlotInEventArray, pTask, taskDriverId,
+			     m_pDevice, bIsVisible, ptmp);
 
 	if (hr == CM_SUCCESS) {
 		m_CriticalSection_Event.Acquire();
-
-		m_EventArray.SetElement(freeSlotInEventArray, pEvent);
+        m_EventArray.SetElement(freeSlotInEventArray, ptmp);
 		m_EventCount++;
 
 		m_CriticalSection_Event.Release();
 
-		pTask->SetTaskEvent(pEvent);
+		pTask->SetTaskEvent(ptmp);
 
 		if (bIsVisible == FALSE) {
-			pEvent = NULL;
+			ptmp = NULL;
 		}
+		pEvent =(static_cast<CmEvent*>(ptmp));
 
 	}
 
 	return hr;
 }
 
-void CmQueue::AcquireQueueLock(void)
+void CmQueue_RT::AcquireQueueLock(void)
 {
 	m_CriticalSection_Queue.Acquire();
 }
 
-void CmQueue::ReleaseQueueLock(void)
+void CmQueue_RT::ReleaseQueueLock(void)
 {
 	m_CriticalSection_Queue.Release();
 }

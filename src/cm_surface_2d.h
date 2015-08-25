@@ -29,16 +29,17 @@
 
 #pragma once
 #include "cm_surface.h"
+#include "cm_surface_2d_base.h"
 
 class CmEvent;
 class CmSurfaceManager;
 
-class CmSurface2D:public CmSurface {
+class CmSurface2D_RT: public CmSurface2D, public CmSurface {
  public:
 	static INT Create(UINT index, UINT handle, UINT width, UINT height,
 			  UINT pitch, CM_SURFACE_FORMAT format,
 			  BOOL isCmCreated, CmSurfaceManager * pSurfaceManager,
-			  CmSurface2D * &pSurface);
+			  CmSurface2D_RT * &pSurface);
 
 	CM_RT_API INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
 				  UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
@@ -88,10 +89,10 @@ class CmSurface2D:public CmSurface {
 	INT SetReadSyncFlag();
 
  protected:
-	 CmSurface2D(UINT handle, UINT width, UINT height, UINT pitch,
+	 CmSurface2D_RT(UINT handle, UINT width, UINT height, UINT pitch,
 		     CM_SURFACE_FORMAT format,
 		     CmSurfaceManager * pSurfaceManager, BOOL isCmCreated);
-	~CmSurface2D(void);
+	~CmSurface2D_RT(void);
 
 	INT Initialize(UINT index);
 

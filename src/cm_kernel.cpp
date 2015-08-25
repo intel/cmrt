@@ -789,8 +789,8 @@ INT CmKernel_RT::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT inde
 		switch (pSurface->Type()) {
 		case CM_ENUM_CLASS_TYPE_CMSURFACE2D:
 			{
-				CmSurface2D *pSurf2D =
-				    static_cast < CmSurface2D * >(pSurface);
+				CmSurface2D_RT *pSurf2D =
+				    static_cast < CmSurface2D_RT * >(pSurface);
 				if (CISA_majorVersion >= 2
 				    && CISA_minorVersion >= 4) {
 					if (m_Args[index].s_k == DUAL_SURF) {
@@ -828,7 +828,7 @@ INT CmKernel_RT::SetArgsInternal(CM_KERNEL_INTERNAL_ARG_TYPE nArgType, UINT inde
 						    (surfIndex, pSurface);
 						pSurf2D =
 						    static_cast <
-						    CmSurface2D * >(pSurface);
+						    CmSurface2D_RT * >(pSurface);
 					}
 
 					if (pSurf2D == NULL) {
@@ -3406,9 +3406,9 @@ CmKernel_RT::SetKernelPayloadSurface(UINT surfaceCount,
 			return CM_KERNELPAYLOAD_SETTING_FAILURE;
 		}
 
-		CmSurface2D *pSurf2D = NULL;
+		CmSurface2D_RT *pSurf2D = NULL;
 		if (pSurface->Type() == CM_ENUM_CLASS_TYPE_CMSURFACE2D) {
-			pSurf2D = static_cast < CmSurface2D * >(pSurface);
+			pSurf2D = static_cast < CmSurface2D_RT * >(pSurface);
 			m_IndirectSurfaceInfoArray[i].iKind =
 			    ARG_KIND_SURFACE_2D;
 			pSurf2D->GetHandle(handle);
@@ -3482,9 +3482,9 @@ CM_RT_API INT CmKernel_RT::SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex)
 		return CM_FAILURE;
 	}
 
-	CmSurface2D *pSurf2D = NULL;
+	CmSurface2D_RT *pSurf2D = NULL;
 	if (pSurface_RT->Type() == CM_ENUM_CLASS_TYPE_CMSURFACE2D) {
-		pSurf2D = static_cast < CmSurface2D * >(pSurface_RT);
+		pSurf2D = static_cast < CmSurface2D_RT * >(pSurface_RT);
 		m_IndirectSurfaceInfoArray[m_usKernelPayloadSurfaceCount].iKind
 		    = ARG_KIND_SURFACE_2D;
 		pSurf2D->GetHandle(handle);
@@ -3571,7 +3571,7 @@ INT CmKernel_RT::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
 	UINT surfaceArraySize = 0;
 	CmSurfaceManager *pSurfaceMgr = NULL;
 	CmSurface *pSurf = NULL;
-	CmSurface2D *pSurf2D = NULL;
+	CmSurface2D_RT *pSurf2D = NULL;
 	CmSurface2DUP_RT *pSurf2D_UP = NULL;
 	CM_SURFACE_FORMAT format;
 	UINT width, height, bytesPerPixel;
@@ -3603,7 +3603,7 @@ INT CmKernel_RT::CalculateKernelSurfacesNum(UINT & kernelSurfaceNum,
 					kernelSurfaceNum++;
 					pSurf2D =
 					    static_cast <
-					    CmSurface2D * >(pSurf);
+					    CmSurface2D_RT * >(pSurf);
 					pSurf2D->GetSurfaceDesc(width, height,
 								format,
 								bytesPerPixel);

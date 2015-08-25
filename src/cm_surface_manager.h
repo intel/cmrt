@@ -59,11 +59,11 @@ class CmSurfaceManager {
 
 	INT CreateSurface2D(UINT width, UINT height, UINT pitch,
 			    BOOL bIsCmCreated, CM_SURFACE_FORMAT format,
-			    CmSurface2D * &pSurface);
+			    CmSurface2D_RT * &pSurface);
 	INT CreateSurface2D(CmOsResource * pCmOsResource, BOOL bIsCmCreated,
-			    CmSurface2D * &pSurface2D);
+			    CmSurface2D_RT * &pSurface2D);
 
-	INT DestroySurface(CmSurface2D * &pSurface,
+	INT DestroySurface(CmSurface2D_RT * &pSurface,
 			   SURFACE_DESTROY_KIND destroyKind);
 
 	INT GetSurface(const UINT index, CmSurface * &pSurface);
@@ -92,7 +92,7 @@ class CmSurfaceManager {
 
 	INT GetSurface2dInPool(UINT width, UINT height,
 			       CM_SURFACE_FORMAT format,
-			       CmSurface2D * &pSurf2D);
+			       CmSurface2D_RT * &pSurf2D);
 
 	INT GetSurfaceIdInPool(INT iIndex);
 
@@ -136,7 +136,7 @@ class CmSurfaceManager {
 	INT FreeSurface2D(UINT handle);
 
 	INT UpdateBuffer(CmBuffer_RT * pSurface1D, UINT size);
-	INT UpdateSurface2D(CmSurface2D * pSurface2D, UINT width, UINT height,
+	INT UpdateSurface2D(CmSurface2D_RT * pSurface2D, UINT width, UINT height,
 			    CM_SURFACE_FORMAT format);
 	INT GetFormatSize(CM_SURFACE_FORMAT format, UINT & sizeperpixel);
 	INT GetSurfaceInfo(CmOsResource * pCmOsResource, UINT & width,

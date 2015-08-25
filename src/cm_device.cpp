@@ -432,24 +432,29 @@ CM_RT_API INT
 CM_RT_API INT
     CmDevice_RT::CreateSurface2D(UINT width, UINT height, CM_SURFACE_FORMAT format,
 			      CmSurface2D * &pSurface)
-{
+{       INT result;
 	CLock locker(m_CriticalSection_Surface);
-
-	return m_pSurfaceMgr->CreateSurface2D(width, height, 0, TRUE, format,
-					      pSurface);
+        CmSurface2D_RT* pSurface_RT = NULL;
+	result=m_pSurfaceMgr->CreateSurface2D(width, height, 0, TRUE, format,
+					      pSurface_RT);
+	pSurface=(static_cast<CmSurface2D *>(pSurface_RT));
+	return result;
 }
 
 CM_RT_API INT
     CmDevice_RT::CreateSurface2D(CmOsResource * pCmOsResource,
 			      CmSurface2D * &pSurface)
 {
+	INT result;
 	if (pCmOsResource == NULL) {
 		return CM_INVALID_GENOS_RESOURCE_HANDLE;
 	}
 
 	CLock locker(m_CriticalSection_Surface);
-
-	return m_pSurfaceMgr->CreateSurface2D(pCmOsResource, FALSE, pSurface);
+        CmSurface2D_RT* pSurface_RT = NULL;
+	result=m_pSurfaceMgr->CreateSurface2D(pCmOsResource, FALSE, pSurface_RT);
+	pSurface=(static_cast<CmSurface2D *>(pSurface_RT));
+	return result;
 }
 
 INT CmDevice_RT::DestroySurface(CmBuffer * &pSurface, INT iIndexInPool,
@@ -546,8 +551,8 @@ INT CmDevice_RT::DestroySurface(CmSurface2D * &pSurface, INT iIndexInPool,
 	if (currentID > iSurfaceID) {
 		return CM_SUCCESS;
 	}
-
-	INT status = m_pSurfaceMgr->DestroySurface(pSurface, kind);
+	CmSurface2D_RT *pSurface_RT = static_cast<CmSurface2D_RT *>(pSurface);
+	INT status = m_pSurfaceMgr->DestroySurface(pSurface_RT, kind);
 
 	if (status == CM_SUCCESS) {
 		pSurface = NULL;
@@ -560,7 +565,8 @@ CM_RT_API INT CmDevice_RT::DestroySurface(CmSurface2D * &pSurface)
 {
 	CLock locker(m_CriticalSection_Surface);
 
-	INT status = m_pSurfaceMgr->DestroySurface(pSurface, APP_DESTROY);
+	CmSurface2D_RT *pSurface_RT = static_cast<CmSurface2D_RT *>(pSurface);
+	INT status = m_pSurfaceMgr->DestroySurface(pSurface_RT, APP_DESTROY);
 
 	if (status != CM_FAILURE) {
 		pSurface = NULL;
@@ -1749,8 +1755,10 @@ INT CmDevice_RT::GetSurface2DInPool(UINT width, UINT height,
 {
 	CLock locker(m_CriticalSection_Surface);
 
+	CmSurface2D_RT *pSurface_RT = NULL;
 	INT result =
-	    m_pSurfaceMgr->GetSurface2dInPool(width, height, format, pSurface);
+	    m_pSurfaceMgr->GetSurface2dInPool(width, height, format, pSurface_RT);
+	pSurface=static_cast<CmSurface2D *>(pSurface_RT);
 	return result;
 }
 

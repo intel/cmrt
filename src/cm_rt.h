@@ -580,24 +580,24 @@ class CmBufferUP {
 
 class CmSurface2D {
  public:
-	INT GetIndex(SurfaceIndex * &pIndex);
-	INT SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
-				      SurfaceIndex * pSurfIndex = NULL);
+	virtual INT GetIndex(SurfaceIndex * &pIndex) = 0;
+	virtual INT SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
+				      SurfaceIndex * pSurfIndex = NULL) = 0;
 
 	/* The following Read/Write of 2D surface is not required as when it is
 	 * shared between Cm and other component.
 	 */
 
-	INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
-			UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
-	INT WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
-			 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL);
-	INT ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
+	virtual INT ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
+			UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
+			 UINT64 sysMemSize = 0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
 			      const UINT stride, UINT64 sysMemSize =
-			      0xFFFFFFFFFFFFFFFFULL);
-	INT WriteSurfaceStride(const unsigned char *pSysMem, CmEvent * pEvent,
+			      0xFFFFFFFFFFFFFFFFULL) = 0;
+	virtual INT WriteSurfaceStride(const unsigned char *pSysMem, CmEvent * pEvent,
 			       const UINT stride, UINT64 sysMemSize =
-			       0xFFFFFFFFFFFFFFFFULL);
+			       0xFFFFFFFFFFFFFFFFULL) = 0;
 };
 
 class CmSurface2DUP {

@@ -314,6 +314,12 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g9(PCM_HAL_STATE pState,
 {
 	GENOS_STATUS hr = GENOS_STATUS_SUCCESS;
 
+	//index 2 - drm:i915 intel_mocs.c skylake_mocs_table[2]
+	//{ (LE_CACHEABILITY(LE_WB) | LE_TGT_CACHE(LLC_ELLC) | LE_LRUM(3) |
+	//   LE_AOM(0) | LE_RSC(0) | LE_SCC(0) | LE_PFM(0) | LE_SCF(0)),
+	//  (L3_ESC(0) | L3_SCC(0) | L3_CACHEABILITY(L3_WB)) }
+	pParams->MemObjCtl = 2;
+
 	return hr;
 }
 

@@ -353,12 +353,6 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 		BYTE name_len;
 		READ_FIELD_FROM_BUF(name_len, BYTE);
 
-		if (name_len > CM_MAX_KERNEL_NAME_SIZE_IN_BYTE) {
-			CM_ASSERT(0);
-			hr = CM_FAILURE;
-			goto finish;
-		}
-
 		CM_KERNEL_INFO *pKernInfo = new(std::nothrow) CM_KERNEL_INFO;
 		if (!pKernInfo) {
 			CM_ASSERT(0);

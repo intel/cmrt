@@ -282,12 +282,12 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g75(PCM_HAL_STATE pState,
 						       pParams)
 {
 	GENOS_STATUS hr = GENOS_STATUS_SUCCESS;
+	const WORD rawCacheType = (wMemObjCtl & CM_MEMOBJCTL_CACHE_MASK) >> 8;
 
 	CM_HAL_MEMORY_OBJECT_CONTROL_G75 cache_type =
-	    (CM_HAL_MEMORY_OBJECT_CONTROL_G75) ((wMemObjCtl &
-						 CM_MEMOBJCTL_CACHE_MASK) >> 8);
+	    (CM_HAL_MEMORY_OBJECT_CONTROL_G75) rawCacheType;
 
-	if (cache_type == CM_INVALID_MEMOBJCTL) {
+	if (rawCacheType == CM_INVALID_MEMOBJCTL) {
 		cache_type = CM_MEMORY_OBJECT_CONTROL_L3_LLC_ELLC_WB_CACHED;
 	}
 

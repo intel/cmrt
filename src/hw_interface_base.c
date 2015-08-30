@@ -194,7 +194,7 @@ GENOS_STATUS IntelGen_HwSetupSurfaceState_g75_base(PGENHW_HW_INTERFACE pHwInterf
 							&
 							(pSurface->OsResource));
 	GENHW_HW_ASSERT(pTokenState->DW1.SurfaceAllocationIndex !=
-			GENOS_INVALID_ALLOC_INDEX);
+			(unsigned)GENOS_INVALID_ALLOC_INDEX);
 	pTokenState->DW3.RenderTargetEnable = pSurfaceEntry->bRenderTarget;
 	pTokenState->DW3.YUVPlane = pSurfaceEntry->YUVPlane;
 

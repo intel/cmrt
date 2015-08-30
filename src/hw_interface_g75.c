@@ -1293,7 +1293,7 @@ GENHW_MEDIA_WALKER_MODE IntelGen_HwSelectWalkerStateMode_g75(PGENHW_HW_INTERFACE
 		    GENHW_MEDIA_WALKER_REPEL_MODE) {
 			Mode = GENHW_MEDIA_WALKER_DUAL_MODE;
 		}
-	} else if ((pHwInterface->Platform.GtType == GTTYPE_GT3)) {
+	} else if (pHwInterface->Platform.GtType == GTTYPE_GT3) {
 		if ((pHwInterface->MediaWalkerMode !=
 		     GENHW_MEDIA_WALKER_REPEL_MODE)
 		    && (pHwInterface->MediaWalkerMode !=

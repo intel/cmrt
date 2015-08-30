@@ -287,7 +287,7 @@ GENOS_STATUS HalCm_HwSetSurfaceMemoryObjectControl_g75(PCM_HAL_STATE pState,
 	    (CM_HAL_MEMORY_OBJECT_CONTROL_G75) ((wMemObjCtl &
 						 CM_MEMOBJCTL_CACHE_MASK) >> 8);
 
-	if (cache_type == CM_INVALID_MEMOBJCTL) {
+	if ((wMemObjCtl & CM_MEMOBJCTL_CACHE_MASK) == CM_INVALID_MEMOBJCTL) {
 		cache_type = CM_MEMORY_OBJECT_CONTROL_L3_LLC_ELLC_WB_CACHED;
 	}
 

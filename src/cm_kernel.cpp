@@ -2473,7 +2473,7 @@ INT CmKernel_RT::CreateKernelDataInternal(CmKernelData * &pKernelData,
 	UpdateKernelDataGlobalSurfaceInfo(pHalKernelParam);
 
 	for (UINT j = 0; j < NumArgs; j++) {
-		if (pTempArgs[j].unitOffsetInPayloadOrig == (UINT) - 1) {
+		if (pTempArgs[j].unitOffsetInPayloadOrig == (WORD)-1) {
 			CmSafeDeleteArray(pTempArgs[j].pValue);
 		}
 	}
@@ -2704,7 +2704,7 @@ INT CmKernel_RT::CreateKernelDataInternal(CmKernelData * &pKernelData,
 	CMCHK_HR(UpdateKernelDataGlobalSurfaceInfo(pHalKernelParam));
 
 	for (UINT j = 0; j < NumArgs; j++) {
-		if (pTempArgs[j].unitOffsetInPayloadOrig == (UINT) - 1) {
+		if (pTempArgs[j].unitOffsetInPayloadOrig == (WORD)-1) {
 			CmSafeDeleteArray(pTempArgs[j].pValue);
 		}
 	}

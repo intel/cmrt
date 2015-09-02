@@ -30,12 +30,14 @@
 #pragma once
 #include "cm_surface.h"
 
-class CmSurface2DUP:public CmSurface {
+#include "cm_surface_2d_up_base.h"
+
+class CmSurface2DUP_RT : public CmSurface2DUP, public CmSurface {
  public:
 	static INT Create(UINT index, UINT handle, UINT width, UINT height,
 			  CM_SURFACE_FORMAT format,
 			  CmSurfaceManager * pSurfaceManager,
-			  CmSurface2DUP * &pSurface);
+			  CmSurface2DUP_RT * &pSurface);
 	CM_RT_API INT GetIndex(SurfaceIndex * &pIndex);
 	INT GetHandle(UINT & handle);
 
@@ -50,10 +52,10 @@ class CmSurface2DUP:public CmSurface {
 				     UINT & sizeperpixel);
 
  protected:
-	 CmSurface2DUP(UINT handle, UINT width, UINT height,
+	CmSurface2DUP_RT(UINT handle, UINT width, UINT height,
 		       CM_SURFACE_FORMAT format,
 		       CmSurfaceManager * pSurfaceManager);
-	~CmSurface2DUP(void);
+	~CmSurface2DUP_RT(void);
 
 	INT Initialize(UINT index);
 

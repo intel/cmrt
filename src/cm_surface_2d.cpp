@@ -35,7 +35,7 @@
 #include "cm_queue.h"
 
 
-INT CmSurface2D::Create(UINT index,
+INT CmSurface2D_RT::Create(UINT index,
 			UINT handle,
 			UINT width,
 			UINT height,
@@ -43,12 +43,12 @@ INT CmSurface2D::Create(UINT index,
 			CM_SURFACE_FORMAT format,
 			BOOL isCmCreated,
 			CmSurfaceManager * pSurfaceManager,
-			CmSurface2D * &pSurface)
+			CmSurface2D_RT * &pSurface)
 {
 	INT result = CM_SUCCESS;
 
 	pSurface =
-	    new(std::nothrow) CmSurface2D(handle, width, height, pitch, format,
+	    new(std::nothrow) CmSurface2D_RT(handle, width, height, pitch, format,
 					  pSurfaceManager, isCmCreated);
 	if (pSurface) {
 		result = pSurface->Initialize(index);
@@ -64,7 +64,7 @@ INT CmSurface2D::Create(UINT index,
 	return result;
 }
 
- CmSurface2D::CmSurface2D(UINT handle, UINT width, UINT height, UINT pitch, CM_SURFACE_FORMAT format, CmSurfaceManager * pSurfaceManager, BOOL isCmCreated):
+ CmSurface2D_RT::CmSurface2D_RT(UINT handle, UINT width, UINT height, UINT pitch, CM_SURFACE_FORMAT format, CmSurfaceManager * pSurfaceManager, BOOL isCmCreated):
 CmSurface(pSurfaceManager, isCmCreated),
 m_Width(width),
 m_Height(height),
@@ -74,17 +74,17 @@ m_Handle(handle), m_Pitch(pitch), m_Format(format), m_SubResourceIndex(0)
 					  CM_USE_PTE, 0);
 }
 
-CmSurface2D::~CmSurface2D(void)
+CmSurface2D_RT::~CmSurface2D_RT(void)
 {
 }
 
-INT CmSurface2D::Initialize(UINT index)
+INT CmSurface2D_RT::Initialize(UINT index)
 {
 	return CmSurface::Initialize(index);
 }
 
 CM_RT_API INT
-    CmSurface2D::WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
+    CmSurface2D_RT::WriteSurface(const unsigned char *pSysMem, CmEvent * pEvent,
 			      UINT64 sysMemSize)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
@@ -106,7 +106,7 @@ CM_RT_API INT
 	}
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -155,7 +155,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmSurface2D::ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
+    CmSurface2D_RT::ReadSurface(unsigned char *pSysMem, CmEvent * pEvent,
 			     UINT64 sysMemSize)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
@@ -178,7 +178,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -227,14 +227,14 @@ CM_RT_API INT
 	return hr;
 }
 
-CM_RT_API INT CmSurface2D::GetIndex(SurfaceIndex * &pIndex)
+CM_RT_API INT CmSurface2D_RT::GetIndex(SurfaceIndex * &pIndex)
 {
 	pIndex = m_pIndex;
 	return CM_SUCCESS;
 }
 
 CM_RT_API INT
-    CmSurface2D::WriteSurfaceStride(const unsigned char *pSysMem,
+    CmSurface2D_RT::WriteSurfaceStride(const unsigned char *pSysMem,
 				    CmEvent * pEvent, const UINT stride,
 				    UINT64 sysMemSize)
 {
@@ -258,7 +258,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -306,7 +306,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmSurface2D::ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
+    CmSurface2D_RT::ReadSurfaceStride(unsigned char *pSysMem, CmEvent * pEvent,
 				   const UINT stride, UINT64 sysMemSize)
 {
 	return ReadSurfaceFullStride(pSysMem, pEvent, stride, m_Height,
@@ -314,7 +314,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmSurface2D::ReadSurfaceFullStride(unsigned char *pSysMem, CmEvent * pEvent,
+    CmSurface2D_RT::ReadSurfaceFullStride(unsigned char *pSysMem, CmEvent * pEvent,
 				       const UINT iWidthStride,
 				       const UINT iHeightStride,
 				       UINT64 sysMemSize)
@@ -336,7 +336,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -405,7 +405,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmSurface2D::WriteSurfaceFullStride(const unsigned char *pSysMem,
+    CmSurface2D_RT::WriteSurfaceFullStride(const unsigned char *pSysMem,
 					CmEvent * pEvent,
 					const UINT iWidthStride,
 					const UINT iHeightStride,
@@ -428,7 +428,7 @@ CM_RT_API INT
 
 	WaitForReferenceFree();
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 
 	CSync *pSurfaceLock = pCmDevice->GetSurfaceLock();
@@ -494,19 +494,19 @@ CM_RT_API INT
 	return hr;
 }
 
-INT CmSurface2D::GetHandle(UINT & handle)
+INT CmSurface2D_RT::GetHandle(UINT & handle)
 {
 	handle = m_Handle;
 	return CM_SUCCESS;
 }
 
-INT CmSurface2D::GetIndexFor2D(UINT & index)
+INT CmSurface2D_RT::GetIndexFor2D(UINT & index)
 {
 	index = m_Handle;
 	return CM_SUCCESS;
 }
 
-INT CmSurface2D::SetSurfaceProperties(UINT width, UINT height,
+INT CmSurface2D_RT::SetSurfaceProperties(UINT width, UINT height,
 				      CM_SURFACE_FORMAT format)
 {
 	if (format == (CM_SURFACE_FORMAT) FOURCC_NV12) {
@@ -520,7 +520,7 @@ INT CmSurface2D::SetSurfaceProperties(UINT width, UINT height,
 }
 
 CM_RT_API INT
-    CmSurface2D::GetSurfaceDesc(UINT & width, UINT & height,
+    CmSurface2D_RT::GetSurfaceDesc(UINT & width, UINT & height,
 				CM_SURFACE_FORMAT & format, UINT & sizeperpixel)
 {
 	int ret = CM_SUCCESS;
@@ -537,10 +537,10 @@ CM_RT_API INT
 	return ret;
 }
 
-CM_RT_API INT CmSurface2D::InitSurface(const DWORD pInitValue, CmEvent * pEvent)
+CM_RT_API INT CmSurface2D_RT::InitSurface(const DWORD pInitValue, CmEvent * pEvent)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	PCM_CONTEXT pCmData = NULL;
 	CM_HAL_SURFACE2D_LOCK_UNLOCK_PARAM inParam;
 	UINT pitch = 0;
@@ -594,7 +594,7 @@ CM_RT_API INT CmSurface2D::InitSurface(const DWORD pInitValue, CmEvent * pEvent)
 }
 
 CM_RT_API INT
-    CmSurface2D::SetMemoryObjectControl(MEMORY_OBJECT_CONTROL mem_ctrl,
+    CmSurface2D_RT::SetMemoryObjectControl(MEMORY_OBJECT_CONTROL mem_ctrl,
 					MEMORY_TYPE mem_type, UINT age)
 {
 	CmSurface::SetMemoryObjectControl(mem_ctrl, mem_type, age);
@@ -602,20 +602,20 @@ CM_RT_API INT
 	return CM_SUCCESS;
 }
 
-INT CmSurface2D::GetSubResourceIndex(UINT & nIndex)
+INT CmSurface2D_RT::GetSubResourceIndex(UINT & nIndex)
 {
 	nIndex = m_SubResourceIndex;
 	return CM_SUCCESS;
 }
 
-INT CmSurface2D::SetSubResourceIndex(UINT nIndex)
+INT CmSurface2D_RT::SetSubResourceIndex(UINT nIndex)
 {
 	m_SubResourceIndex = nIndex;
 	return CM_SUCCESS;
 }
 
 CM_RT_API INT
-    CmSurface2D::SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
+    CmSurface2D_RT::SetSurfaceStateDimensions(UINT iWidth, UINT iHeight,
 					   SurfaceIndex * pSurfIndex)
 {
 	CM_RETURN_CODE hr = CM_SUCCESS;
@@ -630,7 +630,7 @@ CM_RT_API INT
 		return CM_NOT_IMPLEMENTED;
 	}
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 
@@ -649,11 +649,11 @@ CM_RT_API INT
 	return hr;
 }
 
-INT CmSurface2D::SetReadSyncFlag()
+INT CmSurface2D_RT::SetReadSyncFlag()
 {
 	HRESULT hr = CM_SUCCESS;
 
-	CmDevice *pCmDevice = NULL;
+	CmDevice_RT *pCmDevice = NULL;
 	m_SurfaceMgr->GetCmDevice(pCmDevice);
 	PCM_CONTEXT pCmData = (PCM_CONTEXT) pCmDevice->GetAccelData();
 

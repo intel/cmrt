@@ -57,7 +57,7 @@ class CmKernelData:public CmDynamicArray {
 	INT Initialize(void);
 
 	UINT m_kerneldatasize;
-	CmKernel *m_pCmKernel;
+	CmKernel_RT *m_pCmKernel;
 	UINT m_RefCount;
 	CM_HAL_KERNEL_PARAM m_HalKernelParam;
 

@@ -22,40 +22,22 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Authors:
- *     Wei Lin<wei.w.lin@intel.com>
- *     Yuting Yang<yuting.yang@intel.com>
+ *	Igor Chebykin <igor.v.chebykin@intel.com>
  */
-#pragma once
 
-class CmDevice_RT;
+#ifndef CM_GROUP_SPACE_BASE_H_
+#define CM_GROUP_SPACE_BASE_H_
 
-#include "cm_group_space_base.h"
 
-class CmThreadGroupSpace_RT : public CmThreadGroupSpace {
+class CmThreadGroupSpace {
  public:
-	static INT Create(CmDevice_RT * pDevice, UINT index, UINT thrdSpaceWidth,
-			  UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			  UINT grpSpaceHeight, CmThreadGroupSpace * &pTGS);
-	static INT Destroy(CmThreadGroupSpace * &pTGS);
+        virtual INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
+                                    UINT & threadSpaceHeight,
+                                    UINT & groupSpaceWidth,
+                                    UINT & groupSpaceHeight) const = 0;
 
-	INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
-				    UINT & threadSpaceHeight,
-				    UINT & groupSpaceWidth,
-				    UINT & groupSpaceHeight) const;
-	UINT GetIndexInTGsArray();
-
- protected:
-	CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth,
-			    UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			    UINT grpSpaceHeight);
-	~CmThreadGroupSpace_RT(void);
-	INT Initialize(void);
-
-	CmDevice_RT *m_pCmDev;
-	UINT m_threadSpaceWidth;
-	UINT m_threadSpaceHeight;
-	UINT m_groupSpaceWidth;
-	UINT m_groupSpaceHeight;
-
-	UINT m_IndexInTGSArray;
+      virtual ~CmThreadGroupSpace(){};
 };
+
+
+#endif /* CM_GROUP_SPACE_BASE_H_ */

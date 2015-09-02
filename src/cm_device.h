@@ -41,18 +41,21 @@
 
 class CmSurfaceManager;
 class CmQueue;
+class CmQueue_RT;
 class CmKernel;
 class CmTask;
 class CmThreadSpace;
 class CmThreadGroupSpace;
 
-class CmDevice {
+#include "cm_device_base.h"
+
+class CmDevice_RT : public CmDevice {
  public:
 
-	static INT Create(CmDriverContext * pUmdContext, CmDevice * &pDevice,
+	static INT Create(CmDriverContext * pUmdContext, CmDevice_RT * &pDevice,
 			  UINT DevCreateOption =
 			  CM_DEVICE_CREATE_OPTION_DEFAULT);
-	static INT Destroy(CmDevice * &pDevice);
+	static INT Destroy(CmDevice_RT * &pDevice);
 
 	CM_RT_API INT CreateBuffer(UINT size, CmBuffer * &pSurface);
 	CM_RT_API INT CreateBuffer(CmOsResource * pOsResource,
@@ -120,7 +123,7 @@ class CmDevice {
 	INT GetGenPlatform(UINT & platform);
 
 	INT GetSurfaceManager(CmSurfaceManager * &pSurfaceMgr);
-	INT GetQueue(CmQueue * &pQueue);
+	INT GetQueue(CmQueue_RT * &pQueue);
 	CSync *GetSurfaceLock();
 	CSync *GetSurfaceCreationLock();
 	CSync *GetProgramKernelLock();
@@ -149,7 +152,7 @@ class CmDevice {
 
 	INT LoadProgramWithGenCode(void *pCISACode, const UINT uiCISACodeSize,
 				   void *pGenCode, const UINT uiGenCodeSize,
-				   CmProgram * &pProgram, const char *options =
+				   CmProgram_RT * &pProgram, const char *options =
 				   NULL);
 
 	INT GetSurface2DInPool(UINT width, UINT height,
@@ -184,7 +187,7 @@ class CmDevice {
 	INT DestroyAuxDevice(void);
 
 	INT CreateQueue_Internel(void);
-	INT DestroyQueue(CmQueue * &pQueue);
+	INT DestroyQueue(CmQueue_RT * &pQueue);
 
 	INT GetMaxValueFromCaps(CM_HAL_MAX_VALUES & MaxValues,
 				CM_HAL_MAX_VALUES_EX & MaxValuesEx);
@@ -192,8 +195,8 @@ class CmDevice {
 	INT InitDevCreateOption(CM_HAL_CREATE_PARAM & DevCreateParam,
 				UINT DevCreateOption);
 
-	CmDevice(UINT DevCreateOption);
-	~CmDevice(void);
+	CmDevice_RT(UINT DevCreateOption);
+	~CmDevice_RT(void);
 
 	GENOS_CONTEXT *m_pUmdContext;
 
@@ -204,7 +207,7 @@ class CmDevice {
 	CM_HAL_MAX_VALUES_EX m_HalMaxValuesEx;
 
 	CmSurfaceManager *m_pSurfaceMgr;
-	CmQueue *m_pQueue;
+	CmQueue_RT *m_pQueue;
 
 	CmDynamicArray m_ProgramArray;
 	UINT m_ProgramCount;
@@ -247,13 +250,13 @@ class CmDevice {
 	CM_HAL_CREATE_PARAM m_DevCreateOption;
 
  private:
-	CmDevice(const CmDevice & other);
-	CmDevice & operator=(const CmDevice & other);
+	CmDevice_RT(const CmDevice_RT & other);
+	CmDevice_RT & operator=(const CmDevice_RT & other);
 };
 
-EXTERN_C INT CreateCmDevice(CmDevice * &pDevice, UINT & version,
+EXTERN_C INT CreateCmDevice(CmDevice_RT * &pDevice, UINT & version,
 			    CmDriverContext * drivercontext,
 			    UINT DevCreateOption =
 			    CM_DEVICE_CREATE_OPTION_DEFAULT);
 
-EXTERN_C INT DestroyCmDevice(CmDevice * &pDevice);
+EXTERN_C INT DestroyCmDevice(CmDevice_RT * &pDevice);

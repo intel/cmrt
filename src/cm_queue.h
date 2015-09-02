@@ -35,14 +35,17 @@
 #include "cm_program.h"
 #include "cm_surface_2d.h"
 
-class CmDevice;
+class CmDevice_RT;
 class CmKernel;
-class CmTask;
+class CmKernel_RT;
+class CmTask_RT;
 class CmTaskInternal;
 class CmEvent;
 class CmThreadSpace;
 class CQueue;
 class CmThreadGroupSpace;
+
+#include "cm_queue_base.h"
 
 typedef struct _CM_GPUCOPY_KERNEL {
 	CmKernel *pKernel;
@@ -50,10 +53,10 @@ typedef struct _CM_GPUCOPY_KERNEL {
 	BOOL bLocked;
 } CM_GPUCOPY_KERNEL, *PCM_GPUCOPY_KERNEL;
 
-class CmQueue:public CmDynamicArray {
+class CmQueue_RT : public CmQueue, CmDynamicArray {
  public:
-	static INT Create(CmDevice * pDevice, CmQueue * &pQueue);
-	static INT Destroy(CmQueue * &pQueue);
+	static INT Create(CmDevice_RT * pDevice, CmQueue_RT * &pQueue);
+	static INT Destroy(CmQueue_RT * &pQueue);
 
 	CM_RT_API INT Enqueue(CmTask * pTask, CmEvent * &pEvent,
 			      const CmThreadSpace * pTS = NULL);
@@ -74,23 +77,23 @@ class CmQueue:public CmDynamicArray {
 	void ReleaseQueueLock(void);
 
  protected:
-	 CmQueue(CmDevice * pDevice);
-	~CmQueue(void);
+	 CmQueue_RT(CmDevice_RT * pDevice);
+	~CmQueue_RT(void);
 
 	INT Initialize(void);
 
-	INT Enqueue_RT(CmKernel * pKernelArray[], const UINT uiKernelCount,
+	INT Enqueue_RT(CmKernel_RT * pKernelArray[], const UINT uiKernelCount,
 		       const UINT uiTotalThreadCount, CmEvent * &pEvent,
 		       const CmThreadSpace * pTS =
 		       NULL, const UINT64 uiSyncBitmap =
 		       0, PCM_HAL_POWER_OPTION_PARAM pPowerOption = NULL);
-	INT Enqueue_RT(CmKernel * pKernelArray[], const UINT uiKernelCount,
+	INT Enqueue_RT(CmKernel_RT * pKernelArray[], const UINT uiKernelCount,
 		       const UINT uiTotalThreadCount, CmEvent * &pEvent,
 		       const CmThreadGroupSpace * pTGS =
 		       NULL, const UINT64 uiSyncBitmap =
 		       0, CM_HAL_PREEMPTION_MODE preemptionMode =
 		       UN_PREEMPTABLE_MODE);
-	INT Enqueue_RT(CmKernel * pKernelArray[], CmEvent * &pEvent,
+	INT Enqueue_RT(CmKernel_RT * pKernelArray[], CmEvent * &pEvent,
 		       UINT numTaskGenerated, BOOLEAN isLastTask, UINT hints =
 		       0, PCM_HAL_POWER_OPTION_PARAM pPowerOption = NULL);
 
@@ -108,7 +111,7 @@ class CmQueue:public CmDynamicArray {
 	INT CreateEvent(CmTaskInternal * pTask, BOOL bIsVisible,
 			INT & taskDriverId, CmEvent * &pEvent);
 
-	CmDevice *m_pDevice;
+	CmDevice_RT *m_pDevice;
 	CQueue m_EnqueuedTasks;
 	CQueue m_FlushedTasks;
 

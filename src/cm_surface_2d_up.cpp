@@ -31,15 +31,15 @@
 #include "cm_device.h"
 #include "cm_surface_manager.h"
 
-INT CmSurface2DUP::Create(UINT index, UINT handle, UINT width, UINT height,
+INT CmSurface2DUP_RT::Create(UINT index, UINT handle, UINT width, UINT height,
 			  CM_SURFACE_FORMAT format,
 			  CmSurfaceManager * pSurfaceManager,
-			  CmSurface2DUP * &pSurface)
+			  CmSurface2DUP_RT * &pSurface)
 {
 	INT result = CM_SUCCESS;
 
 	pSurface =
-	    new(std::nothrow) CmSurface2DUP(handle, width, height, format,
+	    new(std::nothrow) CmSurface2DUP_RT(handle, width, height, format,
 					    pSurfaceManager);
 	if (pSurface) {
 		result = pSurface->Initialize(index);
@@ -57,7 +57,7 @@ INT CmSurface2DUP::Create(UINT index, UINT handle, UINT width, UINT height,
 
 }
 
- CmSurface2DUP::CmSurface2DUP(UINT handle, UINT width, UINT height, CM_SURFACE_FORMAT format, CmSurfaceManager * pSurfaceManager):
+CmSurface2DUP_RT::CmSurface2DUP_RT(UINT handle, UINT width, UINT height, CM_SURFACE_FORMAT format, CmSurfaceManager * pSurfaceManager):
 CmSurface(pSurfaceManager, TRUE),
 m_Handle(handle), m_Width(width), m_Height(height), m_Format(format)
 {
@@ -65,31 +65,31 @@ m_Handle(handle), m_Width(width), m_Height(height), m_Format(format)
 					  CM_USE_PTE, 0);
 }
 
-CmSurface2DUP::~CmSurface2DUP(void)
+CmSurface2DUP_RT::~CmSurface2DUP_RT(void)
 {
 
 }
 
-INT CmSurface2DUP::Initialize(UINT index)
+INT CmSurface2DUP_RT::Initialize(UINT index)
 {
 	return CmSurface::Initialize(index);
 
 }
 
-INT CmSurface2DUP::GetHandle(UINT & handle)
+INT CmSurface2DUP_RT::GetHandle(UINT & handle)
 {
 	handle = m_Handle;
 	return CM_SUCCESS;
 }
 
-CM_RT_API INT CmSurface2DUP::GetIndex(SurfaceIndex * &pIndex)
+CM_RT_API INT CmSurface2DUP_RT::GetIndex(SurfaceIndex * &pIndex)
 {
 	pIndex = m_pIndex;
 	return CM_SUCCESS;
 }
 
 CM_RT_API INT
-    CmSurface2DUP::SetMemoryObjectControl(MEMORY_OBJECT_CONTROL mem_ctrl,
+CmSurface2DUP_RT::SetMemoryObjectControl(MEMORY_OBJECT_CONTROL mem_ctrl,
 					  MEMORY_TYPE mem_type, UINT age)
 {
 	CmSurface::SetMemoryObjectControl(mem_ctrl, mem_type, age);
@@ -98,7 +98,7 @@ CM_RT_API INT
 }
 
 CM_RT_API INT
-    CmSurface2DUP::GetSurfaceDesc(UINT & width, UINT & height,
+CmSurface2DUP_RT::GetSurfaceDesc(UINT & width, UINT & height,
 				  CM_SURFACE_FORMAT & format,
 				  UINT & sizeperpixel)
 {

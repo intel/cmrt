@@ -23,39 +23,22 @@
  *
  * Authors:
  *     Wei Lin<wei.w.lin@intel.com>
- *     Yuting Yang<yuting.yang@intel.com>
+ *
  */
-#pragma once
 
-class CmDevice_RT;
 
-#include "cm_group_space_base.h"
+#ifndef CM_SURFACE_2D_UP_BASE_H_
+#define CM_SURFACE_2D_UP_BASE_H_
 
-class CmThreadGroupSpace_RT : public CmThreadGroupSpace {
+
+class CmSurface2DUP {
  public:
-	static INT Create(CmDevice_RT * pDevice, UINT index, UINT thrdSpaceWidth,
-			  UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			  UINT grpSpaceHeight, CmThreadGroupSpace * &pTGS);
-	static INT Destroy(CmThreadGroupSpace * &pTGS);
+        virtual INT GetIndex(SurfaceIndex * &pIndex) = 0;
 
-	INT GetThreadGroupSpaceSize(UINT & threadSpaceWidth,
-				    UINT & threadSpaceHeight,
-				    UINT & groupSpaceWidth,
-				    UINT & groupSpaceHeight) const;
-	UINT GetIndexInTGsArray();
+        virtual INT GetSurfaceDesc(UINT & width, UINT & height,
+                           CM_SURFACE_FORMAT & format, UINT & sizeperpixel) = 0;
 
- protected:
-	CmThreadGroupSpace_RT(CmDevice_RT * pCmDev, UINT index, UINT thrdSpaceWidth,
-			    UINT thrdSpaceHeight, UINT grpSpaceWidth,
-			    UINT grpSpaceHeight);
-	~CmThreadGroupSpace_RT(void);
-	INT Initialize(void);
-
-	CmDevice_RT *m_pCmDev;
-	UINT m_threadSpaceWidth;
-	UINT m_threadSpaceHeight;
-	UINT m_groupSpaceWidth;
-	UINT m_groupSpaceHeight;
-
-	UINT m_IndexInTGSArray;
 };
+
+
+#endif /* CM_SURFACE_2D_UP_BASE_H_ */

@@ -30,28 +30,30 @@
 #include "cm_array.h"
 
 class CmKernel;
+class CmKernel_RT;
 class CmEvent;
+class CmEvent_RT;
 class CmKernelData;
 class CmThreadSpace;
 class CmThreadGroupSpace;
-class CmDevice;
+class CmDevice_RT;
 
 class CmTaskInternal:public CmDynamicArray {
  public:
 
 	static INT Create(const UINT kernelCount, const UINT totalThreadCount,
 			  CmKernel * pKernelArray[], const CmThreadSpace * pTS,
-			  CmDevice * pCmDevice, const UINT64 uiSyncBitmap,
+			  CmDevice_RT * pCmDevice, const UINT64 uiSyncBitmap,
 			  CmTaskInternal * &pTask);
 	static INT Destroy(CmTaskInternal * &pTask);
 	static INT Create(const UINT kernelCount, const UINT totalThreadCount,
 			  CmKernel * pKernelArray[],
-			  const CmThreadGroupSpace * pTGS, CmDevice * pCmDevice,
+			  const CmThreadGroupSpace * pTGS, CmDevice_RT * pCmDevice,
 			  const UINT64 uiSyncBitmap, CmTaskInternal * &pTask);
 	static INT Create(const UINT kernelCount, const UINT totalThreadCount,
 			  CmKernel * pKernelArray[], CmTaskInternal * &pTask,
 			  UINT numTasksGenerated, BOOLEAN isLastTask,
-			  UINT hints, CmDevice * pCmDevice);
+			  UINT hints, CmDevice_RT * pCmDevice);
 
 	INT GetKernelCount(UINT & count);
 	INT GetKernel(const UINT index, CmKernel * &pKernel);
@@ -60,8 +62,8 @@ class CmTaskInternal:public CmDynamicArray {
 	UINT GetKernelCurbeOffset(const UINT index);
 	INT GetTotalThreadCount(UINT & totalThreadCount);
 
-	INT SetTaskEvent(CmEvent * pEvent);
-	INT GetTaskEvent(CmEvent * &pEvent);
+	INT SetTaskEvent(CmEvent_RT * pEvent);
+	INT GetTaskEvent(CmEvent_RT * &pEvent);
 
 	INT CreateThreadSpaceData(const CmThreadSpace * pTS);
 	INT GetKernelCoordinates(const UINT index, VOID * &pKernelCoordinates);
@@ -106,7 +108,7 @@ class CmTaskInternal:public CmDynamicArray {
  protected:
 
 	 CmTaskInternal(const UINT kernelCount, const UINT totalThreadCount,
-			CmKernel * pKernelArray[], CmDevice * pCmDevice,
+			CmKernel * pKernelArray[], CmDevice_RT * pCmDevice,
 			const UINT64 uiSyncBitmap);
 	~CmTaskInternal(void);
 
@@ -149,7 +151,7 @@ class CmTaskInternal:public CmDynamicArray {
 
 	UINT64 m_ui64SyncBitmap;
 
-	CmDevice *m_pCmDevice;
+	CmDevice_RT *m_pCmDevice;
 	BOOL *m_SurfaceArray;
 
 	UINT m_TaskType;

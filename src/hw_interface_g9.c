@@ -396,7 +396,7 @@ GENOS_STATUS IntelGen_HwSetupSurfaceState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	return eStatus;
 }
 
-inline DWORD EncodeSLMSize(DWORD SLMSize)
+static inline DWORD EncodeSLMSize(DWORD SLMSize)
 {
 	DWORD EncodedValue;
 	if (SLMSize <= 2)

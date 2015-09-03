@@ -780,36 +780,33 @@ typedef enum _CM_ENUM_CLASS_TYPE {
 	CM_ENUM_CLASS_TYPE_CMSURFACE2DUP = 2,
 } CM_ENUM_CLASS_TYPE;
 
-#define CM_NOINLINE __attribute__((noinline))
-
 class SurfaceIndex {
  public:
-	CM_NOINLINE SurfaceIndex() {
+	SurfaceIndex() {
 		index = 0;
 	};
-	CM_NOINLINE SurfaceIndex(const SurfaceIndex & _src) {
+	SurfaceIndex(const SurfaceIndex & _src) {
 		index = _src.index;
 	};
-	CM_NOINLINE SurfaceIndex(const unsigned int &_n) {
+	SurfaceIndex(const unsigned int &_n) {
 		index = _n;
 	};
-	CM_NOINLINE SurfaceIndex & operator =(const unsigned int &_n) {
+	SurfaceIndex & operator =(const unsigned int &_n) {
 		this->index = _n;
 		return *this;
 	};
-	CM_NOINLINE SurfaceIndex & operator +(const unsigned int &_n) {
+	SurfaceIndex & operator +(const unsigned int &_n) {
 		this->index += _n;
 		return *this;
 	};
-	virtual unsigned int get_data(void) {
+	unsigned int get_data(void) {
 		return index;
 	};
-	virtual ~SurfaceIndex() {};
  private:
+	// TODO Remove this placeholder once the offload lib is updated.
+	void *vptr_placeholder __attribute__((unused));
 	unsigned int index;
-	unsigned char extra_byte;
-
-	SurfaceIndex & operator=(const SurfaceIndex & other);
+	unsigned char extra_byte __attribute__((unused));
 };
 
 typedef enum _CM_KERNEL_INTERNAL_ARG_TYPE {

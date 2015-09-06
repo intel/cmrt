@@ -467,9 +467,9 @@ GENOS_STATUS IntelGen_HwSendVfeState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	PGENHW_GSH pGSH;
 	PCGENHW_HW_CAPS pHwCaps;
 	DWORD dwMaxURBSize;
-	DWORD dwCURBEAllocationSize, dwMaxCURBEAllocationSize;
-	DWORD dwURBEntryAllocationSize, dwMaxURBEntryAllocationSize;
-	DWORD dwNumberofURBEntries, dwMaxURBEntries;
+	DWORD dwCURBEAllocationSize;
+	DWORD dwURBEntryAllocationSize;
+	DWORD dwNumberofURBEntries;
 	DWORD dwMaxInterfaceDescriptorEntries;
 	GENOS_STATUS eStatus;
 	INT iSize;
@@ -525,9 +525,6 @@ GENOS_STATUS IntelGen_HwSendVfeState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	}
 
 	dwMaxURBSize = pHwCaps->dwMaxURBSize;
-	dwMaxURBEntries = pHwCaps->dwMaxURBEntries;
-	dwMaxURBEntryAllocationSize = pHwCaps->dwMaxURBEntryAllocationSize;
-	dwMaxCURBEAllocationSize = pHwCaps->dwMaxCURBEAllocationSize;
 	dwMaxInterfaceDescriptorEntries =
 	    pHwCaps->dwMaxInterfaceDescriptorEntries;
 
@@ -566,11 +563,11 @@ GENOS_STATUS IntelGen_HwSendVfeState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	}
 
 	GENHW_HW_ASSERT(pVideoFrontEnd->DW3.NumberofURBEntries <=
-			dwMaxURBEntries);
+			pHwCaps->dwMaxURBEntries);
 	GENHW_HW_ASSERT(pVideoFrontEnd->DW5.CURBEAllocationSize <=
-			dwMaxCURBEAllocationSize);
+			pHwCaps->dwMaxCURBEAllocationSize);
 	GENHW_HW_ASSERT(pVideoFrontEnd->DW5.URBEntryAllocationSize <=
-			dwMaxURBEntryAllocationSize);
+			pHwCaps->dwMaxURBEntryAllocationSize);
 	GENHW_HW_ASSERT(pVideoFrontEnd->DW3.NumberofURBEntries *
 			pVideoFrontEnd->DW5.URBEntryAllocationSize +
 			pVideoFrontEnd->DW5.CURBEAllocationSize +

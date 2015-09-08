@@ -33,8 +33,6 @@ m4_define([cmrt_api_micro_version], [0])
 m4_define([cmrt_api_version],
           [cmrt_api_major_version.cmrt_api_minor_version.cmrt_api_micro_version])
 
-
-
 # CMRT package version number, (as distinct from shared library version)
 # XXX: we want the package version to remain at 1.0.x for CMRT-API 0.10.y
 #
@@ -54,16 +52,16 @@ m4_append([cmrt_version], cmrt_pre_version, [.pre])
 ])
 
 # CMRT library version number (generated, do not change)
-# XXX: we want the SONAME to remain at libva.so.1 for CMRT-API major == 0
+# XXX: we want the SONAME to remain at libcmrt.so.1 for CMRT-API major == 0
 #
-# The library name is generated libva.<x>.<y>.0 where
+# The library name is generated libcmrt.<x>.<y>.0 where
 # <x> = CMRT-API major version + 1
 # <y> = 100 * CMRT-API minor version + CMRT-API micro version
 #
 # For example:
-# CMRT-API 0.10.0 generates libva.so.1.1000.0
-# CMRT-API 0.14.1 generates libva.so.1.1401.0
-# CMRT-API 1.2.13 generates libva.so.2.213.0
+# CMRT-API 0.10.0 generates libcmrt.so.1.1000.0
+# CMRT-API 0.14.1 generates libcmrt.so.1.1401.0
+# CMRT-API 1.2.13 generates libcmrt.so.2.213.0
 m4_define([cmrt_interface_bias], [m4_eval(cmrt_api_major_version + 1)])
 m4_define([cmrt_interface_age],  [0])
 m4_define([cmrt_binary_age],

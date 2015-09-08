@@ -49,10 +49,9 @@ cmrt_cflags = \
 	$(NULL)
 
 cmrt_ldflags = \
-	-module -avoid-version	\
 	-no-undefined		\
 	-Wl,--no-undefined	\
-	-fPIC \
+	$(CMRT_LT_LDFLAGS)	\
 	$(NULL)
 
 cmrt_libs = \
@@ -106,16 +105,16 @@ cmrt_headers = \
 
 cmrt_config = cmrt.conf
 
-cmrt_la_LTLIBRARIES     = cmrt.la
-cmrt_ladir              = $(libdir)
-cmrtincludedir          = $(includedir)
+libcmrt_la_LTLIBRARIES	= libcmrt.la
+libcmrt_ladir		= $(libdir)
+cmrtincludedir		= $(includedir)
 cmrtconfdir		= $(sysconfdir)
-cmrt_la_CFLAGS          = $(cmrt_cflags)
-cmrt_la_CXXFLAGS        = -fpermissive $(cmrt_cflags)
-cmrt_la_LDFLAGS         = $(cmrt_ldflags)
-cmrt_la_LIBADD          = $(cmrt_libs)
-cmrt_la_SOURCES         = $(cmrt_files)
-cmrtinclude_HEADERS     = $(cmrt_headers)
+libcmrt_la_CFLAGS	= $(cmrt_cflags)
+libcmrt_la_CXXFLAGS	= -fpermissive $(cmrt_cflags)
+libcmrt_la_LDFLAGS	= $(cmrt_ldflags)
+libcmrt_la_LIBADD	= $(cmrt_libs)
+libcmrt_la_SOURCES	= $(cmrt_files)
+cmrtinclude_HEADERS	= $(cmrt_headers)
 cmrtconf_DATA		= $(cmrt_config)
 
 # Extra clean files so that maintainer-clean removes *everything*

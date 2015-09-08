@@ -44,8 +44,8 @@ m4_define([cmrt_api_version],
 # - reset micro version to zero when CMRT-API major or minor version is changed
 m4_define([cmrt_major_version], [m4_eval(cmrt_api_major_version + 1)])
 m4_define([cmrt_minor_version], [m4_eval(cmrt_api_minor_version - 10)])
-m4_define([cmrt_micro_version], [1])
-m4_define([cmrt_pre_version],   [0])
+m4_define([cmrt_micro_version], [6])
+m4_define([cmrt_pre_version],   [1])
 
 m4_define([cmrt_version],
           [cmrt_major_version.cmrt_minor_version.cmrt_micro_version])
@@ -54,11 +54,11 @@ m4_append([cmrt_version], cmrt_pre_version, [.pre])
 ])
 
 # CMRT library version number (generated, do not change)
-# XXX: we want the SONAME to remain at libva.so.1 for VA-API major == 0
+# XXX: we want the SONAME to remain at libva.so.1 for CMRT-API major == 0
 #
 # The library name is generated libva.<x>.<y>.0 where
-# <x> = VA-API major version + 1
-# <y> = 100 * VA-API minor version + VA-API micro version
+# <x> = CMRT-API major version + 1
+# <y> = 100 * CMRT-API minor version + CMRT-API micro version
 #
 # For example:
 # CMRT-API 0.10.0 generates libva.so.1.1000.0
@@ -145,17 +145,8 @@ LIBDRM_VERSION=libdrm_version
 PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
 AC_SUBST(LIBDRM_VERSION)
 
-dnl Check for VA-API
+dnl Check for CMRT-API
 PKG_CHECK_MODULES(LIBVA_DEPS,     [libva >= va_api_version])
-
-dnl Check for VA-API drivers path
-AC_MSG_CHECKING([for VA drivers path])
-LIBVA_DRIVERS_PATH=`$PKG_CONFIG libva --variable driverdir`
-if test -z "$LIBVA_DRIVERS_PATH"; then
-    LIBVA_DRIVERS_PATH="/usr/lib/xorg/modules/drivers"
-fi
-AC_MSG_RESULT([$LIBVA_DRIVERS_PATH])
-AC_SUBST(LIBVA_DRIVERS_PATH)
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)

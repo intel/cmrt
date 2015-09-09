@@ -722,11 +722,6 @@ INT CmTaskInternal::GetWalkingPattern(CM_HAL_WALKING_PATTERN & WalkingPattern)
 INT CmTaskInternal::GetWalkingParameters(CM_HAL_WALKING_PARAMETERS &
 					 pWalkingParameters)
 {
-	if (&pWalkingParameters == NULL) {
-		CM_ASSERT(0);
-		return CM_FAILURE;
-	}
-
 	CmSafeMemCopy(&pWalkingParameters, &m_WalkingParameters,
 		      sizeof(m_WalkingParameters));
 	return CM_SUCCESS;
@@ -739,11 +734,6 @@ BOOLEAN CmTaskInternal::CheckWalkingParametersSet()
 
 INT CmTaskInternal::GetDependencyVectors(CM_HAL_DEPENDENCY & pDependencyVectors)
 {
-	if (&pDependencyVectors == NULL) {
-		CM_ASSERT(0);
-		return CM_FAILURE;
-	}
-
 	CmSafeMemCopy(&pDependencyVectors, &m_DependencyVectors,
 		      sizeof(m_DependencyVectors));
 	return CM_SUCCESS;

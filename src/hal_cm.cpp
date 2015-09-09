@@ -25,6 +25,8 @@
  *     Wei Lin<wei.w.lin@intel.com>
  *     Yuting Yang<yuting.yang@intel.com>
  */
+
+#include "gen_debugger.h"
 #include "os_interface.h"
 #include "hw_interface.h"
 #include "hal_cm.h"
@@ -142,6 +144,61 @@ __inline VOID HalCm_FreeTsResource(PCM_HAL_STATE pState)
 
 		pOsInterface->pfnFreeResource(pOsInterface,
 					      &pState->TsResource.OsResource);
+	}
+}
+
+static GENOS_STATUS HalCm_AllocateSipResource(PCM_HAL_STATE pState)
+{
+	PGENOS_INTERFACE		pOsInterface = pState->pHwInterface->pOsInterface;
+	GENOS_STATUS			hr = GENOS_STATUS_SUCCESS;
+	UINT				iSize;
+	GENOS_ALLOC_GFXRES_PARAMS	AllocParams;
+	GENOS_LOCK_PARAMS		LockFlags;
+
+	iSize = CM_DEBUG_SURFACE_SIZE;
+
+	GENOS_ZeroMemory(&AllocParams, sizeof(GENOS_ALLOC_GFXRES_PARAMS));
+	AllocParams.Type	= GENOS_GFXRES_BUFFER;
+	AllocParams.dwBytes	= iSize;
+	AllocParams.Format	= Format_Buffer;
+	AllocParams.TileType	= GENOS_TILE_LINEAR;
+	AllocParams.pBufName	= "SipResource";
+
+	CM_HRESULT2GENOSSTATUS_AND_CHECK(pOsInterface->pfnAllocateResource(
+		pOsInterface,
+		&AllocParams,
+		&pState->SipResource.OsResource));
+
+	GENOS_ZeroMemory(&LockFlags, sizeof(GENOS_LOCK_PARAMS));
+
+	LockFlags.ReadOnly = 1;
+
+	pState->SipResource.pData = (PBYTE)pOsInterface->pfnLockResource(
+						pOsInterface,
+						&pState->SipResource.OsResource,
+						&LockFlags);
+	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->SipResource.pData);
+
+	pState->SipResource.bLocked  = TRUE;
+
+finish:
+	return hr;
+}
+
+static void HalCm_FreeSipResource(PCM_HAL_STATE pState)
+{
+	PGENOS_INTERFACE pOsInterface = pState->pHwInterface->pOsInterface;
+
+	if (!IntelGen_OsResourceIsNull(&pState->SipResource.OsResource))
+	{
+		if (pState->SipResource.bLocked)
+			pOsInterface->pfnUnlockResource(
+				pOsInterface,
+				&pState->SipResource.OsResource);
+
+		pOsInterface->pfnFreeResource(
+			pOsInterface,
+			&pState->SipResource.OsResource);
 	}
 }
 
@@ -1701,7 +1758,7 @@ GENOS_STATUS HalCm_SetupBufferSurfaceState(PCM_HAL_STATE pState,
 	if (iBTIndex == (unsigned char)CM_INVALID_INDEX) {
 		if (globalSurface < 0) {
 			iBTIndex =
-			    Halcm_GetFreeBindingIndex(pState, pIndexParam, 1);
+			    HalCm_GetFreeBindingIndex(pState, pIndexParam, 1);
 		} else {
 			iBTIndex =
 			    globalSurface +
@@ -1847,7 +1904,7 @@ GENOS_STATUS HalCm_Setup2DSurfaceStateBasic(PCM_HAL_STATE pState,
 							      pSurfaceEntries));
 
 	iBTIndex =
-	    Halcm_GetFreeBindingIndex(pState, pIndexParam, iSurfaceEntries);
+	    HalCm_GetFreeBindingIndex(pState, pIndexParam, iSurfaceEntries);
 	for (i = 0; i < (UINT) iSurfaceEntries; i++) {
 		CM_CHK_GENOSSTATUS(pHwInterface->pfnBindSurfaceState
 				   (pHwInterface, iBindingTable, iBTIndex + i,
@@ -1973,7 +2030,7 @@ GENOS_STATUS HalCm_Setup2DSurfaceUPStateBasic(PCM_HAL_STATE pState,
 				    &iSurfaceEntries, pSurfaceEntries));
 
 		iBTIndex =
-		    Halcm_GetFreeBindingIndex(pState, pIndexParam,
+		    HalCm_GetFreeBindingIndex(pState, pIndexParam,
 					      iSurfaceEntries);
 		for (i = 0; i < (UINT) iSurfaceEntries; i++) {
 			CM_CHK_GENOSSTATUS(pHwInterface->pfnBindSurfaceState
@@ -2318,6 +2375,53 @@ GENOS_STATUS HalCm_SetNoDependKernelDispatchPattern(UINT numThreads,
 		i++;
 	}
 
+	return hr;
+}
+
+static GENOS_STATUS HalCm_SetupDebugSurfaceState(PCM_HAL_STATE pState,
+						 PCM_HAL_INDEX_PARAM pIndexParam,
+						 INT bindingTable)
+{
+	GENOS_STATUS hr = GENOS_STATUS_SUCCESS;
+	PGENHW_HW_INTERFACE pHw = pState->pHwInterface;
+	PGENHW_SURFACE_STATE_ENTRY pSurfaceStateEntry;
+	GENHW_SURFACE surface;
+	GENHW_SURFACE_STATE_PARAMS surfaceParam;
+	unsigned bti;
+	WORD memObjCtl = CM_DEFAULT_CACHE_TYPE;
+
+	bti = HalCm_GetFreeBindingIndex(pState, pIndexParam, 1);
+	CM_ASSERT(bti);
+
+	pState->cmDebugSurfaceBTI = bti;
+
+	GENOS_ZeroMemory(&surface, sizeof(surface));
+	surface.OsResource	= pState->SipResource.OsResource;
+	surface.dwWidth		= CM_DEBUG_SURFACE_SIZE;
+	surface.dwHeight	= 1;
+	surface.Format		= Format_Buffer;
+	surface.rcSrc.right	= surface.dwWidth;
+	surface.rcSrc.bottom	= surface.dwHeight;
+	surface.rcDst		= surface.rcSrc;
+
+	CM_HRESULT2GENOSSTATUS_AND_CHECK(pHw->pOsInterface->pfnRegisterResource(
+		pHw->pOsInterface, &surface.OsResource, true, true));
+
+	GENOS_ZeroMemory(&surfaceParam, sizeof(surfaceParam));
+
+	pState->pfnSetSurfaceMemoryObjectControl(pState, memObjCtl, &surfaceParam);
+
+	CM_CHK_GENOSSTATUS(pHw->pfnSetupBufferSurfaceState(pHw,
+							   &surface,
+							   &surfaceParam,
+							   &pSurfaceStateEntry));
+
+	CM_CHK_GENOSSTATUS(pHw->pfnBindSurfaceState(pHw,
+						    bindingTable,
+						    bti,
+						    pSurfaceStateEntry));
+	hr = GENOS_STATUS_SUCCESS;
+finish:
 	return hr;
 }
 
@@ -4462,6 +4566,12 @@ GENOS_STATUS HalCm_FinishStatesForKernel(PCM_HAL_STATE pState,
 		}
 	}
 
+	if (pKernelParam->bKernelDebugEnabled) {
+		CM_CHK_GENOSSTATUS(HalCm_SetupDebugSurfaceState(pState,
+								pIndexParam,
+								iBindingTable));
+	}
+
  finish:
 	return hr;
 }
@@ -4557,6 +4667,36 @@ GENOS_STATUS HalCm_Allocate(PCM_HAL_STATE pState)
 	return hr;
 }
 
+static void HalCm_GetSystemRoutineBinary(PCM_HAL_STATE pState)
+{
+	PGENHW_HW_INTERFACE pHw = pState->pHwInterface;
+	PGENHW_GSH pGsh = pHw->pGeneralStateHeap;
+	unsigned char *pDst = pGsh->pGSH + pGsh->dwSipBase;
+	const unsigned char *pSip = NULL;
+	unsigned sipSize, resSize;
+	int ret;
+
+	ret = GenDbgGetSysRoutineBinary(pState->Platform,
+					pState->cmDebugSurfaceBTI,
+					&pSip,
+					&sipSize,
+					&resSize);
+
+	CM_ASSERT(ret == 0);
+	if (ret)
+		return;
+
+	CM_ASSERT(sipSize <= CM_MAX_SIP_SIZE);
+	CM_ASSERT(resSize <= CM_DEBUG_SURFACE_SIZE);
+	if ((sipSize > CM_MAX_SIP_SIZE) || (resSize > CM_DEBUG_SURFACE_SIZE))
+		return;
+
+	if (GENOS_SecureMemcpy(pDst, CM_MAX_SIP_SIZE, pSip, sipSize) != GENOS_STATUS_SUCCESS)
+		return;
+
+	pHw->bSysRoutine = true;
+}
+
 GENOS_STATUS HalCm_ExecuteTask(PCM_HAL_STATE pState,
 			       PCM_HAL_EXEC_TASK_PARAM pExecParam)
 {
@@ -4627,6 +4767,12 @@ GENOS_STATUS HalCm_ExecuteTask(PCM_HAL_STATE pState,
 		    ("Number of Kernels per task exceeds the number can be hold by binding table");
 		goto finish;
 	}
+
+	if (pExecParam->bKernelDebugEnabled &&
+	    IntelGen_OsResourceIsNull(&pState->SipResource.OsResource)) {
+		HalCm_AllocateSipResource(pState);
+	}
+
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
@@ -4691,6 +4837,10 @@ GENOS_STATUS HalCm_ExecuteTask(PCM_HAL_STATE pState,
 			CM_CHK_GENOSSTATUS(pHwInterface->pfnAssignBindingTable
 					   (pHwInterface, &iBindingTable));
 		}
+	}
+
+	if (pExecParam->bKernelDebugEnabled) {
+		HalCm_GetSystemRoutineBinary(pState);
 	}
 
 	CM_CHK_GENOSSTATUS(pState->pfnGetGpuTime(pState,
@@ -4789,6 +4939,12 @@ GENOS_STATUS HalCm_ExecuteGroupTask(PCM_HAL_STATE pState,
 		    ("Number of Kernels per task exceeds the number can be hold by binding table");
 		goto finish;
 	}
+
+	if (pExecGroupParam->bKernelDebugEnabled &&
+	    IntelGen_OsResourceIsNull(&pState->SipResource.OsResource)) {
+		HalCm_AllocateSipResource(pState);
+	}
+
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
@@ -4830,6 +4986,10 @@ GENOS_STATUS HalCm_ExecuteGroupTask(PCM_HAL_STATE pState,
 			CM_CHK_GENOSSTATUS(pHwInterface->pfnAssignBindingTable
 					   (pHwInterface, &iBindingTable));
 		}
+	}
+
+	if (pExecGroupParam->bKernelDebugEnabled) {
+		HalCm_GetSystemRoutineBinary(pState);
 	}
 
 	CM_CHK_GENOSSTATUS(pState->pfnGetGpuTime(pState,
@@ -4954,7 +5114,7 @@ GENOS_STATUS HalCm_ExecuteHintsTask(PCM_HAL_STATE pState,
 	pMediaState = pHwInterface->pfnAssignMediaState(pHwInterface);
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pMediaState);
 
-	CM_ASSERT((pHwInterface->pGeneralStateHeap->iCurMediaStatei >= 0)
+	CM_ASSERT((pHwInterface->pGeneralStateHeap->iCurMediaState >= 0)
 		  && (pHwInterface->pGeneralStateHeap->iCurMediaState <
 		      pState->iNumBatchBuffers));
 
@@ -5786,7 +5946,7 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 	    GENOS_AllocAndZeroMemory(sizeof(GENOS_INTERFACE));
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->pOsInterface);
 	pState->pOsInterface->bDeallocateOnExit = TRUE;
-	CM_HRESULT2GENOSSTATUS_AND_CHECK(IntelGen_OsInitInterface
+	CM_HRESULT2GENOSSTATUS_AND_CHECK(IntelGen_OsInitInterfaceComp
 					 (pState->pOsInterface,
 					  pOsDriverContext, COMPONENT_CM));
 
@@ -5796,7 +5956,7 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 	pState->pHwInterface = (PGENHW_HW_INTERFACE)
 	    GENOS_AllocAndZeroMemory(sizeof(GENHW_HW_INTERFACE));
 	CM_CHK_NULL_RETURN_GENOSSTATUS(pState->pHwInterface);
-	CM_CHK_GENOSSTATUS(IntelGen_HwInitInterface
+	CM_CHK_GENOSSTATUS(IntelGen_HwInitInterfaceOS
 			   (pState->pHwInterface, pState->pOsInterface));
 
 	pState->CmDeviceParam.iMaxKernelBinarySize =
@@ -5949,11 +6109,8 @@ VOID HalCm_Destroy(PCM_HAL_STATE pState)
 			pState->pBatchBuffers = NULL;
 		}
 		HalCm_FreeTsResource(pState);
+		HalCm_FreeSipResource(pState);
 
-		if (pState->hLibModule) {
-			FreeLibrary(pState->hLibModule);
-			pState->hLibModule = NULL;
-		}
 		if (pState->pHwInterface) {
 			pState->pHwInterface->pfnDestroy(pState->pHwInterface);
 			GENOS_FreeMemory(pState->pHwInterface);
@@ -6210,7 +6367,7 @@ GENOS_STATUS HalCm_GetSurfaceDetails(PCM_HAL_STATE pCmState,
 	return hr;
 }
 
-DWORD Halcm_GetFreeBindingIndex(PCM_HAL_STATE pState,
+DWORD HalCm_GetFreeBindingIndex(PCM_HAL_STATE pState,
 				PCM_HAL_INDEX_PARAM pIndexParam, DWORD total)
 {
 	DWORD bt_index = CM_BINDING_START_INDEX_OF_GENERAL_SURFACE(pState);
@@ -6763,18 +6920,17 @@ GENOS_STATUS HalCm_AllocateBuffer(PCM_HAL_STATE pState,
 			    (pOsInterface->pfnAllocateResource
 			     (pOsInterface, &AllocParams, &pEntry->OsResource));
 		} else {
-			if (pState->hLibModule && pState->pDrmVMap) {
-				bo = pState->pDrmVMap(pOsInterface->
-						      pOsContext->bufmgr,
-						      "CM Buffer UP",
-						      (void *)(pParam->pData),
-						      tileformat,
-						      ROUND_UP_TO(iSize,
-								  GENOS_PAGE_SIZE),
-						      ROUND_UP_TO(iSize,
-								  GENOS_PAGE_SIZE),
-						      0);
-			}
+			void *bop;
+			bop = pOsInterface->pfnAllocUserptr(
+					      pOsInterface->pOsContext,
+					      "CM Buffer UP",
+					      (void *)(pParam->pData),
+					      tileformat,
+					      ROUND_UP_TO(iSize, GENOS_PAGE_SIZE),
+					      ROUND_UP_TO(iSize, GENOS_PAGE_SIZE),
+					      0);
+
+			bo = (drm_intel_bo *)bop;
 
 			pOsResource->bMapped = FALSE;
 			if (bo) {
@@ -6867,12 +7023,13 @@ GENOS_STATUS HalCm_AllocateSurface2DUP(PCM_HAL_STATE pState,
 	IntelGen_OsResetResource(pOsResource);
 	HalCm_GetSurfPitchSize(iWidth, iHeight, Format, &align_x, &iSize);
 
-	if (pState->hLibModule && pState->pDrmVMap) {
-		bo = pState->pDrmVMap(pOsInterface->pOsContext->bufmgr,
-				      "CM Surface2D UP",
-				      (void *)(pSysMem),
-				      tileformat, align_x, iSize, 0);
-	}
+	void *bop;
+	bop = pOsInterface->pfnAllocUserptr(pOsInterface->pOsContext,
+					    "CM Surface2D UP",
+					    (void *)(pSysMem),
+					    tileformat, align_x,
+					    iSize, 0);
+	bo = (drm_intel_bo *)bop;
 
 	pOsResource->bMapped = FALSE;
 	if (bo) {
@@ -6935,22 +7092,6 @@ GENOS_STATUS HalCm_GetGpuTime(PCM_HAL_STATE pState, PUINT64 pGpuTime)
 	return hr;
 }
 
-VOID HalCm_GetLibDrmVMapFnt(PCM_HAL_STATE pCmState)
-{
-	if (!pCmState->hLibModule) {
-		pCmState->hLibModule = LoadLibrary("libdrm_intel.so");
-	}
-
-	if (pCmState->hLibModule) {
-		pCmState->pDrmVMap =
-		    (pDrmVMapFnc) GetProcAddress(pCmState->hLibModule,
-						 DRMVMAP_FUNCTION_STR);
-	} else {
-		pCmState->pDrmVMap = NULL;
-	}
-	return;
-}
-
 VOID HalCm_OsInitInterface(PCM_HAL_STATE pCmState)
 {
 	CM_ASSERT(pCmState);
@@ -6963,6 +7104,5 @@ VOID HalCm_OsInitInterface(PCM_HAL_STATE pCmState)
 	pCmState->pfnGetGpuTime = HalCm_GetGpuTime;
 	pCmState->pfnConvertToQPCTime = HalCm_ConvertToQPCTime;
 
-	HalCm_GetLibDrmVMapFnt(pCmState);
 	return;
 }

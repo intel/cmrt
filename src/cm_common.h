@@ -38,14 +38,6 @@
 #define EXTERN_C
 #endif
 
-#define DRMVMAP_FUNCTION_STR        "drm_intel_bo_alloc_userptr"
-typedef drm_intel_bo *(*pDrmVMapFnc) (drm_intel_bufmgr * bufmgr,
-				      const char *name,
-				      void *addr,
-				      uint32_t tiling_mode,
-				      uint32_t stride,
-				      unsigned long size, unsigned long flags);
-
 typedef void *DXVAUMD_RESOURCE;
 
 typedef struct cm_tagLOOKUP_ENTRY {
@@ -201,7 +193,7 @@ typedef enum _CM_RETURN_CODE {
 
 #define CM_MAX_SIP_SIZE                     0x1800
 #define CM_DEBUG_SURFACE_INDEX              252
-#define CM_DEBUG_SURFACE_SIZE               0x200000
+#define CM_DEBUG_SURFACE_SIZE               0x300000
 #define CM_SYNC_QWORD_PER_TASK              2
 
 #define CM_NULL_SURFACE                     0xFFFF

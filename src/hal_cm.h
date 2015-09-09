@@ -262,6 +262,7 @@ typedef struct _CM_HAL_STATE {
 	PCM_HAL_TASK_PARAM pTaskParam;
 	PCM_HAL_TASK_TIMESTAMP pTaskTimeStamp;
 	CM_HAL_TS_RESOURCE TsResource;
+	CM_HAL_TS_RESOURCE SipResource;
 	PVOID pTableMem;
 	CM_HAL_HINT_TASK_INDEXES HintIndexes;
 	BOOL bRequestSingleSlice;
@@ -290,10 +291,7 @@ typedef struct _CM_HAL_STATE {
 	CM_HAL_L3_CONFIG L3Config;
 
 	BOOL bNullHwRenderCm;
-	HMODULE hLibModule;
-	DWORD cmDeubgBTIndex;
-
-	pDrmVMapFnc pDrmVMap;
+	DWORD cmDebugSurfaceBTI;
 
 	CM_HAL_POWER_OPTION_PARAM PowerOption;
 	BOOL bEUSaturationEnabled;
@@ -516,7 +514,7 @@ GENOS_STATUS HalCm_SendGpGpuWalkerState(PCM_HAL_STATE pState,
 					PCM_HAL_KERNEL_PARAM pKernelParam,
 					PGENOS_COMMAND_BUFFER pCmdBuffer);
 
-DWORD Halcm_GetFreeBindingIndex(PCM_HAL_STATE pState,
+DWORD HalCm_GetFreeBindingIndex(PCM_HAL_STATE pState,
 				PCM_HAL_INDEX_PARAM pIndexParam, DWORD count);
 
 void Halcm_PreSetBindingIndex(PCM_HAL_INDEX_PARAM pIndexParam,

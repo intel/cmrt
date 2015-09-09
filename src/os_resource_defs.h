@@ -146,6 +146,35 @@ typedef enum _GENOS_FORMAT {
 } GENOS_FORMAT, *PGENOS_FORMAT;
 C_ASSERT(Format_Count == 80);
 
+#define CASE_PL3_FORMAT		\
+	case Format_PL3:        \
+	case Format_IMC1:       \
+	case Format_IMC2:	\
+	case Format_IMC3:	\
+	case Format_IMC4:	\
+	case Format_I420:	\
+	case Format_IYUV:	\
+	case Format_YV12:	\
+	case Format_YVU9:	\
+	case Format_422H:	\
+	case Format_422V:	\
+	case Format_411P:	\
+	case Format_411R:	\
+	case Format_444P
+
+#define CASE_PL3_RGB_FORMAT	\
+	case Format_RGBP:	\
+	case Format_BGRP
+
+#define CASE_PL2_FORMAT		\
+	case Format_PL2:	\
+	case Format_NV12:	\
+	case Format_NV21:	\
+	case Format_NV11:	\
+	case Format_P208:	\
+	case Format_P010:	\
+	case Format_P016
+
 #define IS_PAL_FORMAT(format)            \
             ( (format == Format_AI44) || \
               (format == Format_IA44) || \

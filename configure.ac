@@ -42,8 +42,8 @@ m4_define([cmrt_api_version],
 # - reset micro version to zero when CMRT-API major or minor version is changed
 m4_define([cmrt_major_version], [m4_eval(cmrt_api_major_version + 1)])
 m4_define([cmrt_minor_version], [m4_eval(cmrt_api_minor_version - 10)])
-m4_define([cmrt_micro_version], [6])
-m4_define([cmrt_pre_version],   [1])
+m4_define([cmrt_micro_version], [5])
+m4_define([cmrt_pre_version],   [0])
 
 m4_define([cmrt_version],
           [cmrt_major_version.cmrt_minor_version.cmrt_micro_version])

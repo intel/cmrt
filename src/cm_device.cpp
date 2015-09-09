@@ -1301,7 +1301,7 @@ CM_RT_API INT CmDevice_RT::DestroyProgram(CmProgram * &pProgram)
 
 	if (pProgram_RT == m_ProgramArray.GetElement(indexInProgramArrary)) {
 		CmProgram_RT::Destroy(pProgram_RT);
-		if (pProgram == NULL) {
+		if (pProgram_RT == NULL) {
 			m_ProgramArray.SetElement(indexInProgramArrary, NULL);
 		}
 		return CM_SUCCESS;

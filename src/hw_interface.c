@@ -465,12 +465,12 @@ VOID IntelGen_GetPixelsPerSample(GENOS_FORMAT format,
 {
 	*pdwPixelsPerSampleUV = 0;
 	switch (format) {
- CASE_PL3_FORMAT:
- CASE_PL3_RGB_FORMAT:
+	CASE_PL3_FORMAT:
+	CASE_PL3_RGB_FORMAT:
 		*pdwPixelsPerSampleUV = 4;
 		break;
 
- CASE_PL2_FORMAT:
+	CASE_PL2_FORMAT:
 	case Format_400P:
 		*pdwPixelsPerSampleUV = 2;
 		break;
@@ -1651,7 +1651,7 @@ VOID IntelGen_HwAddBatchBufferEndCmdBb(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MI_BATCH_BUFFER_END_CMD_G5));
+			(long)sizeof(MI_BATCH_BUFFER_END_CMD_G5));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PMI_BATCH_BUFFER_END_CMD_G5) pBuffer;
@@ -1666,12 +1666,12 @@ VOID IntelGen_HwSkipBatchBufferEndCmdBb(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MI_BATCH_BUFFER_END_CMD_G5));
+			(long)sizeof(MI_BATCH_BUFFER_END_CMD_G5));
 
 	pBatchBuffer->iCurrent += sizeof(MI_BATCH_BUFFER_END_CMD_G5);
 }
 
-GENOS_STATUS IntelGen_HwInitInterface(PGENHW_HW_INTERFACE pHwInterface,
+GENOS_STATUS IntelGen_HwInitInterfaceOS(PGENHW_HW_INTERFACE pHwInterface,
 				      PGENOS_INTERFACE pOsInterface)
 {
 	GENOS_STATUS eStatus;

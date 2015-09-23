@@ -35,9 +35,188 @@
 typedef VAStatus GENOS_OSRESULT;
 #include <stdarg.h>
 
-#define GENOS_USER_CONTROL_MIN_DATA_SIZE         128
-#define GENOS_USER_CONTROL_MAX_DATA_SIZE         2048
-#define REG_FILE                            "/etc/igfx_registry.txt"
+#define GENOS_USER_CONTROL_MIN_DATA_SIZE	128
+#define GENOS_USER_CONTROL_MAX_DATA_SIZE	2048
+#define REG_FILE				"/etc/igfx_registry.txt"
+
+typedef enum _GENOS_USER_FEATURE_VALUE_ID {
+	__GENOS_USER_FEATURE_KEY_INVALID_ID,
+	__GENOS_USER_FEATURE_KEY_MESSAGE_OS_TAG,
+	__GENOS_USER_FEATURE_KEY_BY_SUB_COMPONENT_OS,
+	__GENOS_USER_FEATURE_KEY_SUB_COMPONENT_OS_TAG,
+	__GENOS_USER_FEATURE_KEY_MESSAGE_HW_TAG,
+	__GENOS_USER_FEATURE_KEY_BY_SUB_COMPONENT_HW,
+	__GENOS_USER_FEATURE_KEY_SUB_COMPONENT_HW_TAG,
+	__GENOS_USER_FEATURE_KEY_MESSAGE_DDI_TAG,
+	__GENOS_USER_FEATURE_KEY_BY_SUB_COMPONENT_DDI,
+	__GENOS_USER_FEATURE_KEY_SUB_COMPONENT_DDI_TAG,
+	__GENOS_USER_FEATURE_KEY_MESSAGE_CM_TAG,
+	__GENOS_USER_FEATURE_KEY_BY_SUB_COMPONENT_CM,
+	__GENOS_USER_FEATURE_KEY_SUB_COMPONENT_CM_TAG,
+} GENOS_USER_FEATURE_VALUE_ID;
+
+typedef enum
+{
+	GENOS_USER_FEATURE_TYPE_INVALID,
+	GENOS_USER_FEATURE_TYPE_USER,
+	GENOS_USER_FEATURE_TYPE_SYSTEM,
+} GENOS_USER_FEATURE_TYPE, *PGENOS_USER_FEATURE_TYPE;
+
+typedef enum
+{
+	GENOS_USER_FEATURE_VALUE_TYPE_INVALID,
+	GENOS_USER_FEATURE_VALUE_TYPE_BINARY,
+	GENOS_USER_FEATURE_VALUE_TYPE_BOOL,
+	GENOS_USER_FEATURE_VALUE_TYPE_INT32,
+	GENOS_USER_FEATURE_VALUE_TYPE_INT64,
+	GENOS_USER_FEATURE_VALUE_TYPE_UINT32,
+	GENOS_USER_FEATURE_VALUE_TYPE_UINT64,
+	GENOS_USER_FEATURE_VALUE_TYPE_FLOAT,
+	GENOS_USER_FEATURE_VALUE_TYPE_STRING,
+	GENOS_USER_FEATURE_VALUE_TYPE_MULTI_STRING,
+} GENOS_USER_FEATURE_VALUE_TYPE, *PGENOS_USER_FEATURE_VALUE_TYPE;
+
+typedef enum
+{
+	GENOS_USER_FEATURE_NOTIFY_TYPE_INVALID,
+	GENOS_USER_FEATURE_NOTIFY_TYPE_VALUE_CHANGE,
+} GENOS_USER_FEATURE_NOTIFY_TYPE, *PGENOS_USER_FEATURE_NOTIFY_TYPE;
+
+typedef struct
+{
+	PCHAR   pStringData;
+	DWORD   uMaxSize;
+	DWORD   uSize;
+} GENOS_USER_FEATURE_VALUE_STRING, *PGENOS_USER_FEATURE_VALUE_STRING;
+
+typedef struct
+{
+	PCHAR					pMultStringData;
+	DWORD					uMaxSize;
+	DWORD					uSize;
+	PGENOS_USER_FEATURE_VALUE_STRING	pStrings;
+	DWORD					uCount;
+} GENOS_USER_FEATURE_VALUE_MULTI_STRING, *PGENOS_USER_FEATURE_VALUE_MULTI_STRING;
+
+typedef struct
+{
+	PUCHAR  pBinaryData;
+	DWORD   uMaxSize;
+	DWORD   uSize;
+} GENOS_USER_FEATURE_VALUE_BINARY, *PGENOS_USER_FEATURE_VALUE_BINARY;
+
+typedef struct _GENOS_USER_FEATURE_VALUE_DATA
+{
+	union
+	{
+		BOOL					bData;
+		DWORD					u32Data;
+		QWORD					u64Data;
+		INT32					i32Data;
+		INT64					i64Data;
+		FLOAT					fData;
+		GENOS_USER_FEATURE_VALUE_STRING		StringData;
+		GENOS_USER_FEATURE_VALUE_MULTI_STRING	MultiStringData;
+		GENOS_USER_FEATURE_VALUE_BINARY		BinaryData;
+	};
+	INT32						i32DataFlag;
+} GENOS_USER_FEATURE_VALUE_DATA, *PGENOS_USER_FEATURE_VALUE_DATA;
+
+typedef struct _GENOS_USER_FEATURE_VALUE_INFO
+{
+	PCHAR   pcName;  //store name for the bitmask/enum values
+	DWORD   Value;
+} GENOS_USER_FEATURE_VALUE_INFO, *PGENOS_USER_FEATURE_VALUE_INFO;
+
+typedef struct
+{
+	GENOS_USER_FEATURE_VALUE_ID	ValueID;
+	PCCHAR				pValueName;
+	PCCHAR				pcGroup;	//!< Reg key group - eg: MediaSolo, GENOS, Codec
+	PCCHAR				pcPath;		//!< Reg Key Read Path
+	PCCHAR				pcWritePath;	//!< Reg Key Write Path
+	GENOS_USER_FEATURE_TYPE		Type;		//!< Reg Key User Feature type - eg: System, User
+	GENOS_USER_FEATURE_VALUE_TYPE	ValueType;	//!< Reg key type - eg: bool,dword
+	PCCHAR				DefaultValue;	//!< Reg value
+	PCCHAR				pcDescription;	//<! Reg key description
+	BOOL				bExists;	//<! Set if the reg key is defined in the windows reg key manager
+	UINT				uiNumOfValues;	//<! Number of valid Reg Key values. Useful for reg keys of type bitmask and enum
+	PGENOS_USER_FEATURE_VALUE_INFO	pValueInfo;	//<! Store information of all valid enum/bit mask values and names
+	GENOS_STATUS (*pfnSetDefaultValueData)(PGENOS_USER_FEATURE_VALUE_DATA pValueData);
+	union
+	{
+		BOOL					bData;
+		DWORD					u32Data;
+		QWORD					u64Data;
+		INT32					i32Data;
+		INT64					i64Data;
+		FLOAT					fData;
+		GENOS_USER_FEATURE_VALUE_STRING		StringData;
+		GENOS_USER_FEATURE_VALUE_MULTI_STRING	MultiStringData;
+		GENOS_USER_FEATURE_VALUE_BINARY		BinaryData;
+	};
+	GENOS_USER_FEATURE_VALUE_DATA			Value;			   //!< Reg value
+} GENOS_USER_FEATURE_VALUE, *PGENOS_USER_FEATURE_VALUE;
+
+typedef struct
+{
+	PGENOS_USER_FEATURE_VALUE pUserFeatureValue;
+} GENOS_USER_FEATURE_VALUE_MAP, *PGENOS_USER_FEATURE_VALUE_MAP;
+
+typedef struct
+{
+	GENOS_USER_FEATURE_TYPE		Type;		//!< User Feature Type
+	PCHAR				pPath;		//!< User Feature Path
+	GENOS_USER_FEATURE_NOTIFY_TYPE	NotifyType;	//!< Notification Type
+	BOOL				bTriggered;	//!< Notification is triggered or not
+	PVOID				pHandle;	//!< OS Specific Handle
+} GENOS_USER_FEATURE_NOTIFY_DATA, *PGENOS_USER_FEATURE_NOTIFY_DATA;
+
+
+//!
+//! \brief User Feature Interface
+//!
+typedef struct
+{
+	GENOS_USER_FEATURE_TYPE		Type;		//!< User Feature Type
+	PCCHAR				pPath;		//!< User Feature Path
+	PGENOS_USER_FEATURE_VALUE	pValues;	//!< Array of User Feature Values
+	DWORD				uiNumValues;	//!< Number of User Feature Values
+} GENOS_USER_FEATURE, *PGENOS_USER_FEATURE;
+
+typedef struct _GENOS_USER_FEATURE_INTERFACE *PGENOS_USER_FEATURE_INTERFACE;
+typedef struct _GENOS_USER_FEATURE_INTERFACE
+{
+	PVOID pOsInterface;				//!< Pointer to OS Interface
+	BOOL bIsNotificationSupported;			//!< Whether Notification feature is supported
+	const GENOS_USER_FEATURE *pUserFeatureInit;	//!< Initializer for Os User Feature structure
+
+	GENOS_STATUS (* pfnReadValue) (
+		PGENOS_USER_FEATURE_INTERFACE pOsUserFeatureInterface,
+		PGENOS_USER_FEATURE pUserFeature,
+		PCCHAR pValueName,
+		GENOS_USER_FEATURE_VALUE_TYPE ValueType);
+
+	GENOS_STATUS (* pfnWriteValues) (
+		PGENOS_USER_FEATURE_INTERFACE pOsUserFeatureInterface,
+		PGENOS_USER_FEATURE pUserFeature);
+
+	GENOS_STATUS (* pfnEnableNotification) (
+		PGENOS_USER_FEATURE_INTERFACE pOsUserFeatureInterface,
+		PGENOS_USER_FEATURE_NOTIFY_DATA pNotification);
+
+	GENOS_STATUS (* pfnDisableNotification) (
+		PGENOS_USER_FEATURE_INTERFACE pOsUserFeatureInterface,
+		PGENOS_USER_FEATURE_NOTIFY_DATA pNotification);
+
+	GENOS_STATUS (* pfnParsePath) (
+		PGENOS_USER_FEATURE_INTERFACE pOsUserFeatureInterface,
+		const PCHAR pInputPath,
+		PGENOS_USER_FEATURE_TYPE pUserFeatureType,
+		PPCHAR ppSubPath);
+
+} GENOS_USER_FEATURE_INTERFACE;
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -396,7 +396,7 @@ GENOS_STATUS IntelGen_HwSetupSurfaceState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	return eStatus;
 }
 
-inline DWORD EncodeSLMSize(DWORD SLMSize)
+static inline DWORD EncodeSLMSize(DWORD SLMSize)
 {
 	DWORD EncodedValue;
 	if (SLMSize <= 2)
@@ -480,7 +480,6 @@ GENOS_STATUS IntelGen_HwSendVfeState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pHwInterface);
 	GENHW_HW_ASSERT(pCmdBuffer);
 	GENHW_HW_ASSERT(pHwInterface->pHwCommands);
-	GENHW_HW_ASSERT(pHwInterface->pWaTable);
 	GENHW_HW_ASSERT(pHwInterface->pGeneralStateHeap);
 
 	eStatus = GENOS_STATUS_SUCCESS;
@@ -497,11 +496,6 @@ GENOS_STATUS IntelGen_HwSendVfeState_g9(PGENHW_HW_INTERFACE pHwInterface,
 	*pVideoFrontEnd = *(pHwCommands->pVideoFrontEnd_g9);
 
 	if (pHwInterface->GshSettings.iPerThreadScratchSize > 0) {
-		GENHW_HW_ASSERT(pHwInterface->
-				GshSettings.iPerThreadScratchSize ==
-				MOS_ALIGN_CEIL(pHwInterface->
-					       GshSettings.iPerThreadScratchSize,
-					       1024));
 
 		iPerThreadScratchSize =
 		    pHwInterface->GshSettings.iPerThreadScratchSize >> 10;

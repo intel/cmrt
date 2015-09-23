@@ -63,8 +63,6 @@ namespace {
 	static const char g_soName32[] = "libigfxdbgxchg32.so";
 	static const char g_soName64[] = "libigfxdbgxchg64.so";
 
-	static const char notifyKernelBinaryName[] = "notifyKernelBinary";
-	static const char requestSipBinaryName[] = "requestSipBinary";
 
 	class SharedLibraryHolder {
  public:
@@ -98,8 +96,6 @@ namespace {
 	typedef void *Handle;
 	typedef Handle CmUmdDeviceHandle;
 	typedef Handle CmUmdProgramHandle;
-
-	const unsigned int IGFX_DBG_CURRENT_VERSION = 1;
 }
 
 #define READ_FIELD_FROM_BUF( dst, type ) \
@@ -356,12 +352,6 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 	for (UINT i = 0; i < m_KernelCount; i++) {
 		BYTE name_len;
 		READ_FIELD_FROM_BUF(name_len, BYTE);
-
-		if (name_len > CM_MAX_KERNEL_NAME_SIZE_IN_BYTE) {
-			CM_ASSERT(0);
-			hr = CM_FAILURE;
-			goto finish;
-		}
 
 		CM_KERNEL_INFO *pKernInfo = new(std::nothrow) CM_KERNEL_INFO;
 		if (!pKernInfo) {

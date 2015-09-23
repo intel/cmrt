@@ -220,7 +220,7 @@ typedef GFX_TEXTUREFILTERTYPE GFX_DDITEXTUREFILTERTYPE;
 
 #define GENOS_DIR_SEPERATOR                         '/'
 
-#define GENOS_INVALID_ALLOC_INDEX                         -1
+#define GENOS_INVALID_ALLOC_INDEX                   -1
 #define GENOS_MAX_REGS                              128
 #define GENOS_STATUS_REPORT_DEFAULT                 0
 
@@ -678,15 +678,23 @@ typedef struct _GENOS_INTERFACE {
 	 HRESULT(*pfnResetCommandBuffer) (PGENOS_INTERFACE pOsInterface,
 					  PGENOS_COMMAND_BUFFER pCmdBuffer);
 
+	 PVOID (*pfnAllocUserptr) (PGENOS_CONTEXT pOsContext,
+				   const char *name,
+				   void *addr,
+				   uint32_t tilingMode,
+				   uint32_t stride,
+				   unsigned long size,
+				   unsigned long flags);
+
 } GENOS_INTERFACE;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	HRESULT IntelGen_OsInitInterface(PGENOS_INTERFACE pOsInterface,
-					 PGENOS_CONTEXT pOsDriverContext,
-					 GENOS_COMPONENT component);
+	HRESULT IntelGen_OsInitInterfaceComp(PGENOS_INTERFACE pOsInterface,
+					     PGENOS_CONTEXT pOsDriverContext,
+					     GENOS_COMPONENT component);
 
 	GENOS_STATUS IntelGen_OsAddCommand(PGENOS_COMMAND_BUFFER pCmdBuffer,
 					   PCVOID pCmd, DWORD dwCmdSize);

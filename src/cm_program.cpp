@@ -63,8 +63,6 @@ namespace {
 	static const char g_soName32[] = "libigfxdbgxchg32.so";
 	static const char g_soName64[] = "libigfxdbgxchg64.so";
 
-	static const char notifyKernelBinaryName[] = "notifyKernelBinary";
-	static const char requestSipBinaryName[] = "requestSipBinary";
 
 	class SharedLibraryHolder {
  public:
@@ -98,8 +96,6 @@ namespace {
 	typedef void *Handle;
 	typedef Handle CmUmdDeviceHandle;
 	typedef Handle CmUmdProgramHandle;
-
-	const unsigned int IGFX_DBG_CURRENT_VERSION = 1;
 }
 
 #define READ_FIELD_FROM_BUF( dst, type ) \

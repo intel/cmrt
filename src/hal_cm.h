@@ -290,10 +290,7 @@ typedef struct _CM_HAL_STATE {
 	CM_HAL_L3_CONFIG L3Config;
 
 	BOOL bNullHwRenderCm;
-	HMODULE hLibModule;
 	DWORD cmDeubgBTIndex;
-
-	pDrmVMapFnc pDrmVMap;
 
 	CM_HAL_POWER_OPTION_PARAM PowerOption;
 	BOOL bEUSaturationEnabled;

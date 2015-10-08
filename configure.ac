@@ -153,7 +153,7 @@ AC_OUTPUT([
     Makefile
     src/Makefile
     pkgconfig/Makefile
-    pkgconfig/cmrt.pc
+    pkgconfig/libcmrt.pc
     ])
 
 # Print a small summary

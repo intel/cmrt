@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: CMRT
+Name: libcmrt
 Description: Userspace C for Media runtime
 Version: @CMRT_API_VERSION@
-Libs: -L${libdir}
+Libs: -L${libdir} -lcmrt
 Cflags: -I${includedir}

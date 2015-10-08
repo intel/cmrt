@@ -20,9 +20,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-pcfiles		 = cmrt.pc
+pcfiles		 = libcmrt.pc
 
-all_pcfiles_in	 = cmrt.pc.in
+all_pcfiles_in	 = libcmrt.pc.in
 
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = $(pcfiles)

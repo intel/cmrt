@@ -61,7 +61,7 @@ CONST GENHW_INDIRECT_PATCH_PARAM g_IndirectPatchParam_g75 = {
 	0
 };
 
-extern CONST GENHW_SURFACE_PLANES
+CONST GENHW_SURFACE_PLANES
     g_cInitSurfacePlanes_g75[GENHW_PLANES_DEFINITION_COUNT] = {
 	// GENHW_PLANES_PL3
 	{3,
@@ -449,7 +449,7 @@ CONST GENHW_HW_CAPS g_IntelGen_HwCaps_g75_gt3 = {
 	GENHW_SIZE_REGISTERS_PER_THREAD_G75
 };
 
-extern CONST GENHW_GSH_SETTINGS g_GSH_Settings_g75 = {
+CONST GENHW_GSH_SETTINGS g_GSH_Settings_g75 = {
 	GENHW_SYNC_SIZE_G75,
 	GENHW_MEDIA_STATES_G75,
 	GENHW_MEDIA_IDS_G75,
@@ -888,7 +888,7 @@ VOID IntelGen_HwSkipPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBatchBuffer->iCurrent += sizeof(PIPE_CONTROL_CMD_G7);
 }
@@ -1135,7 +1135,7 @@ VOID IntelGen_HwAddMediaObjectCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pParam->dwMediaObjectSize >=
 			sizeof(MEDIA_OBJECT_HEADER_G6));
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(MEDIA_OBJECT_HEADER_G6));
+			(long)sizeof(MEDIA_OBJECT_HEADER_G6));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PMEDIA_OBJECT_HEADER_G6) pBuffer;
@@ -1199,7 +1199,7 @@ VOID IntelGen_HwAddPipeControlCmdBb_g75(PGENHW_HW_INTERFACE pHwInterface,
 	GENHW_HW_ASSERT(pBatchBuffer);
 	GENHW_HW_ASSERT(pParam);
 	GENHW_HW_ASSERT((pBatchBuffer->iSize - pBatchBuffer->iCurrent) >=
-			sizeof(PIPE_CONTROL_CMD_G7));
+			(long)sizeof(PIPE_CONTROL_CMD_G7));
 
 	pBuffer = pBatchBuffer->pData + pBatchBuffer->iCurrent;
 	pCmd = (PPIPE_CONTROL_CMD_G7) pBuffer;
@@ -1293,7 +1293,7 @@ GENHW_MEDIA_WALKER_MODE IntelGen_HwSelectWalkerStateMode_g75(PGENHW_HW_INTERFACE
 		    GENHW_MEDIA_WALKER_REPEL_MODE) {
 			Mode = GENHW_MEDIA_WALKER_DUAL_MODE;
 		}
-	} else if ((pHwInterface->Platform.GtType == GTTYPE_GT3)) {
+	} else if (pHwInterface->Platform.GtType == GTTYPE_GT3) {
 		if ((pHwInterface->MediaWalkerMode !=
 		     GENHW_MEDIA_WALKER_REPEL_MODE)
 		    && (pHwInterface->MediaWalkerMode !=

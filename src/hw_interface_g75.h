@@ -111,7 +111,8 @@ GENHW_MEDIA_WALKER_MODE IntelGen_HwSelectWalkerStateMode_g75(PGENHW_HW_INTERFACE
 							     pHwInterface);
 
 GENOS_STATUS IntelGen_HwSendWalkerState_g75(PGENHW_HW_INTERFACE pHwInterface,
-					    PGENOS_COMMAND_BUFFER pCmdBuffer);
+					    PGENOS_COMMAND_BUFFER pCmdBuffer,
+					    PGENHW_WALKER_PARAMS pWalkerParams);
 
 BOOL IntelGen_HwIs2PlaneNV12Needed_g75(PGENHW_HW_INTERFACE pHwInterface,
 				       PGENHW_SURFACE pSurface);

@@ -164,7 +164,7 @@ CmDevice_RT::~CmDevice_RT(void)
 	}
 	m_ProgramArray.Delete();
 
-	UINT ThreadSpaceArrayUsedSize = m_ThreadSpaceArray.GetMaxSize();
+	UINT ThreadSpaceArrayUsedSize = m_ThreadSpaceArray.GetSize();
 	for (UINT i = 0; i < ThreadSpaceArrayUsedSize; i++) {
 		CmThreadSpace *pTS_RT =
 		    (CmThreadSpace *) m_ThreadSpaceArray.GetElement(i);
@@ -183,7 +183,7 @@ CmDevice_RT::~CmDevice_RT(void)
 	}
 	m_ThreadGroupSpaceArray.Delete();
 
-	UINT TaskArrayUsedSize = m_TaskArray.GetMaxSize();
+	UINT TaskArrayUsedSize = m_TaskArray.GetSize();
 	for (UINT i = 0; i < TaskArrayUsedSize; i++) {
 		CmTask_RT *pTask = (CmTask_RT *) m_TaskArray.GetElement(i);
 		if (pTask) {

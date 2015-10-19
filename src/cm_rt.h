@@ -692,4 +692,9 @@ EXTERN_C INT CreateCmDevice(CmDevice * &pDevice, UINT & version,
 
 EXTERN_C INT DestroyCmDevice(CmDevice * &pDevice);
 
+typedef INT (*CreateCmDevice_t)(CmDevice * &pDevice, UINT & version,
+			    CmDriverContext * drivercontext, UINT DevCreateOption);
+
+typedef INT (*DestroyCmDevice_t)(CmDevice * &pDevice);
+
 #endif				/* _Cm_H_ */

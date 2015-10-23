@@ -78,14 +78,20 @@ static ReadConf conf;
 
 const char* GetJitterName()
 {
-    std::string base = conf.GetConf("jitter");
-    if (sizeof(void *) == 4)
+    static std::string base;
+
+    if (base.empty())
     {
-        base += "32.so";
+        base = conf.GetConf("jitter");
+        if (sizeof(void *) == 4)
+        {
+            base += "32.so";
+        }
+        else
+        {
+            base += "64.so";
+        }
     }
-    else
-    {
-        base += "64.so";
-    }
+
     return base.c_str();
 }

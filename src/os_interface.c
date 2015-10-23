@@ -1633,14 +1633,18 @@ static int FindDeviceNum(const char *name)
 {
 	int fd = -1;
 	char path[PATH_MAX];
+	char bpo[64];
 	drmVersionPtr version;
 	int num;
+
+	snprintf(bpo, sizeof(bpo), "%s_bpo", name);
 
 	for (num = 0; num < 32; num++) {
 		sprintf(path, "/dev/dri/card%d", num);
 		if ((fd = open(path, O_RDWR)) >= 0) {
 			if ((version = drmGetVersion(fd))) {
-				if (!strcmp(version->name, name)) {
+				if (!(strcmp(version->name, name) &&
+				      strcmp(version->name, bpo))) {
 					drmFreeVersion(version);
 					close(fd);
 					break;

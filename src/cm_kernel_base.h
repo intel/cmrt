@@ -41,6 +41,7 @@ class CmKernel {
         virtual INT AssociateThreadSpace(CmThreadSpace * &pTS) = 0;
         virtual INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS) = 0;
         virtual INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex) = 0;
+		virtual INT GetArgKind(UINT index, WORD &kind) = 0;
         virtual ~CmKernel() {};
 };
 

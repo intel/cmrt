@@ -67,6 +67,8 @@ class CmKernel_RT : public CmKernel {
 	CM_RT_API INT AssociateThreadSpace(CmThreadSpace * &pThreadSpace);
 	CM_RT_API INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS);
 
+	CM_RT_API INT GetArgKind(UINT index, WORD &kind);
+
 	INT GetArgs(CM_ARG * &pArg);
 	INT GetArgCount(UINT & argCount);
 

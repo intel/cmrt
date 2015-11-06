@@ -3371,6 +3371,89 @@ extern "C" {
 
 	 C_ASSERT(SIZE32(STATE_BASE_ADDRESS_CMD_G8) == 16);
 
+	typedef struct _STATE_SIP_CMD_G75
+	{
+		// DWORD 0
+		union
+		{
+			struct
+			{
+				DWORD	   Length		: 8;	// OP_LENGTH
+				DWORD				: 8;
+				DWORD	   InstructionSubOpcode	: 8;	// GFX_COMMON_NONPIPELINED_SUBOPCODE
+				DWORD	   InstructionOpcode	: 3;	// GFX_OPCODE
+				DWORD	   InstructionPipeline	: 2;	// INSTRUCTION_PIPELINE
+				DWORD	   InstructionType	: 3;	// INSTRUCTION_TYPE
+			};
+			struct
+			{
+				DWORD	   Value;
+			};
+		} DW0;
+
+		// DWORD 1
+		union
+		{
+			struct
+			{
+				DWORD					: 4;
+				DWORD	   SystemInstructionPointer	: 28;   // GTT[31:4]
+			};
+			struct
+			{
+				DWORD	   Value;
+			};
+		} DW1;
+	} STATE_SIP_CMD_G75, *PSTATE_SIP_CMD_G75;
+
+	typedef struct _STATE_SIP_CMD_G8
+	{
+		// DWORD 0
+		union
+		{
+			struct
+			{
+				DWORD	   Length		: 8;	// OP_LENGTH
+				DWORD				: 8;
+				DWORD	   InstructionSubOpcode	: 8;	// GFX_COMMON_NONPIPELINED_SUBOPCODE
+				DWORD	   InstructionOpcode	: 3;	// GFX_OPCODE
+				DWORD	   InstructionPipeline	: 2;	// INSTRUCTION_PIPELINE
+				DWORD	   InstructionType	: 3;	// INSTRUCTION_TYPE
+			};
+			struct
+			{
+				DWORD	   Value;
+			};
+		} DW0;
+
+		// DWORD 1
+		union
+		{
+			struct
+			{
+				DWORD									   : 4;
+				DWORD	   SystemInstructionPointer	: 28;   // GTT[31:4]
+			};
+			struct
+			{
+				DWORD	   Value;
+			};
+		} DW1;
+
+		// DWORD 2
+		union
+		{
+			struct
+			{
+				DWORD	   SystemInstructionPointer64	: 28;   // GTT[63:32]
+			};
+			struct
+			{
+				DWORD	   Value;
+			};
+		} DW2;
+	} STATE_SIP_CMD_G8, *PSTATE_SIP_CMD_G8;
+
 	extern CONST MI_BATCH_BUFFER_END_CMD_G5
 	    g_cInit_MI_BATCH_BUFFER_END_CMD_G5;
 
@@ -3419,6 +3502,8 @@ extern "C" {
 	extern CONST INTERFACE_DESCRIPTOR_DATA_G8
 	    g_cInit_INTERFACE_DESCRIPTOR_DATA_G8;
 	extern CONST GPGPU_WALKER_CMD_G8 g_cInit_GPGPU_WALKER_CMD_G8;
+
+    extern CONST STATE_SIP_CMD_G8 g_cInit_STATE_SIP_CMD_G8;
 
 #ifdef __cplusplus
 }

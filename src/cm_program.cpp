@@ -29,74 +29,8 @@
 
 #include "cm_device.h"
 #include "cm_program.h"
+#include "debugger.h"
 #include "hal_cm.h"
-
-namespace {
-
-	class SharedLibrary {
- public:
-		SharedLibrary(const char *path):handle_(NULL), path_(path) {
-		} ~SharedLibrary();
-
-		bool open();
-		void *symbolAddress(const char *symbol);
-
- private:
-		void *handle_;
-		const char *path_;
-	};
-
-	inline SharedLibrary::~SharedLibrary() {
-		if (handle_)
-			dlclose(handle_);
-	}
-
-	inline bool SharedLibrary::open() {
-		handle_ = dlopen((path_), RTLD_NOW);
-		return handle_ != NULL;
-	}
-
-	inline void *SharedLibrary::symbolAddress(const char *symbol) {
-		return dlsym(handle_, symbol);
-	}
-
-	static const char g_soName32[] = "libigfxdbgxchg32.so";
-	static const char g_soName64[] = "libigfxdbgxchg64.so";
-
-
-	class SharedLibraryHolder {
- public:
-		SharedLibraryHolder() {
-			if (!sl_) {
-				const char *soName =
-				    sizeof(void *) ==
-				    4 ? g_soName32 : g_soName64;
-
-				 sl_ = new SharedLibrary(soName);
-				if (!sl_->open()) {
-					delete sl_;
-					 sl_ = NULL;
-				}
-
-			}
-		}
-		bool isEnabled() const {
-			return sl_ != NULL;
-		}
-		SharedLibrary *operator->() {
-			return sl_;
-		}
-
- private:
-		static SharedLibrary *sl_;
-	};
-
-	SharedLibrary *SharedLibraryHolder::sl_ = NULL;
-
-	typedef void *Handle;
-	typedef Handle CmUmdDeviceHandle;
-	typedef Handle CmUmdProgramHandle;
-}
 
 #define READ_FIELD_FROM_BUF( dst, type ) \
     dst = *((type *) &buf[byte_pos]); \
@@ -158,6 +92,7 @@ m_SurfaceCount(0),
 m_KernelCount(0),
 m_pKernelInfo(CM_INIT_KERNEL_PER_PROGRAM),
 m_IsJitterEnabled(false),
+m_IsHwDebugEnabled(false),
 m_refCount(0),
 m_programIndex(programId),
 m_fJITCompile(NULL),
@@ -230,6 +165,10 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 						CM_ASSERT(0);
 						CmSafeDeleteArray(m_Options);
 						return CM_FAILURE;
+					}
+
+					if (!strcmp(token, CM_RT_JITTER_DEBUG_FLAG)) {
+						m_IsHwDebugEnabled = true;
 					}
 
 					jitFlags[numJitFlags] = token;
@@ -536,6 +475,17 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 			pKernInfo->jitBinaryCode = jitBinary;
 			pKernInfo->jitBinarySize = jitBinarySize;
 			pKernInfo->jitInfo = jitProfInfo;
+
+			if (m_IsHwDebugEnabled) {
+				 DbgNotifyKernelBinary(this->m_pCmDev,
+							  this,
+							  pKernInfo->kernelName,
+							  jitBinary,
+							  jitBinarySize,
+							  jitProfInfo->genDebugInfo,
+							  jitProfInfo->genDebugInfoSize,
+							  NULL);
+			}
 
 		}
 

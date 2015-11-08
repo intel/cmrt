@@ -383,7 +383,12 @@ HRESULT Ctx_InitContext(GENOS_OS_CONTEXT * pContext,
 		pContext->platform.pchDeviceID = iDeviceId;
 
 		pContext->wRevision = pOsDriverContext->wRevision;
-		pContext->platform.usRevId = pOsDriverContext->wRevision;
+
+		if (pOsDriverContext->wRevision == -1) {
+			getRevId(&pContext->platform.usRevId);
+		} else {
+			pContext->platform.usRevId = pOsDriverContext->wRevision;
+		}
 	} else {
 		pContext->fd = OpenDevice();
 		if (pContext->fd < 0) {

@@ -420,6 +420,15 @@ typedef enum _L3_SUGGEST_CONFIG{
 	CHV_SLM_PLANE_DEFAULT = CHV_L3_PLANE_5
 } L3_SUGGEST_CONFIG;
 
+typedef enum _CM_ARG_KIND {
+	ARG_KIND_GENERAL = 0x0,
+	ARG_KIND_SURFACE_2D = 0x2,
+	ARG_KIND_SURFACE_1D = 0x3,
+	ARG_KIND_SURFACE_2D_UP = 0x7,
+	ARG_KIND_SURFACE_2D_DUAL = 0xa,
+	ARG_KIND_SURFACE = 0xc,
+} CM_ARG_KIND;
+
 static const L3_CONFIG_REGISTER_VALUES IVB_L3_PLANE[ IVB_1_L3_CONFIG_NUM ] =
 {
 	{ 0x01730000, 0x00080040, 0x00000000 },
@@ -551,6 +560,7 @@ class CmKernel {
 	virtual INT AssociateThreadGroupSpace(CmThreadGroupSpace * &pTGS) = 0;
 	virtual INT SetSurfaceBTI(SurfaceIndex * pSurface, UINT BTIndex) = 0;
 
+	virtual INT GetArgKind(UINT index, WORD &kind) = 0;
 };
 
 class CmTask {

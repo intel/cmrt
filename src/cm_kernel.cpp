@@ -2055,6 +2055,15 @@ INT CmKernel_RT::GetArgs(CM_ARG * &pArg)
 	return CM_SUCCESS;
 }
 
+INT CmKernel_RT::GetArgKind(UINT index, WORD &kind)
+{
+    if (index >= m_ArgCount)
+        return CM_INVALID_ARG_INDEX;
+
+    kind = m_Args[index].unitKind;
+    return CM_SUCCESS;
+}
+
 INT CmKernel_RT::GetArgCount(UINT & argCount)
 {
 	argCount = m_ArgCount;

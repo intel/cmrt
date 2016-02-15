@@ -886,8 +886,8 @@ GENOS_STATUS IntelGen_HwSendWalkerState_g8(PGENHW_HW_INTERFACE pHwInterface,
 	return eStatus;
 }
 
-static GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
-					       PGENOS_COMMAND_BUFFER pCmd)
+GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
+				        PGENOS_COMMAND_BUFFER pCmd)
 {
 	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
 	PGENHW_GSH pGsh = pHw->pGeneralStateHeap;

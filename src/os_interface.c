@@ -1871,6 +1871,7 @@ static int updatePlatformInfo(PLATFORM * pPlatform)
 		pPlatform->GtType = GTTYPE_GT2;
 		break;
 	case ISKL_GT3_DESK_DEVICE_F0_ID:
+	case ISKL_GT3_ULT_DEVICE_F0_ID:
 		platform_setTypeAndFamily(pPlatform, PLATFORM_DESKTOP,
 					  IGFX_SKYLAKE, IGFX_GEN9_CORE,
 					  IGFX_GEN9_CORE);

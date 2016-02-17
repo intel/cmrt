@@ -66,9 +66,12 @@
 #ifndef CM_4_0
 #define CM_4_0          400
 #endif
+#ifndef CM_5_0
+#define CM_5_0          500
+#endif
 
 #ifndef __INTEL_MDF
-#define __INTEL_MDF     CM_4_0
+#define __INTEL_MDF     CM_5_0
 #endif
 
 #define CM_SUCCESS                                  0

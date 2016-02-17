@@ -65,7 +65,13 @@ typedef unsigned char byte;
 #define CM_2_4 204
 #define CM_3_0 300
 #define CM_4_0 400
-#define CURRENT_CM_VERSION  CM_4_0
+#define CM_5_0 500
+#define CURRENT_CM_VERSION  CM_5_0
+
+#define MANVERSION      5
+#define MANREVISION     0
+#define SUBREVISION     0
+#define BUILD_NUMBER    1001
 
 #define CM_RT_API
 
@@ -286,6 +292,14 @@ typedef enum _CM_STATUS {
 	CM_STATUS_FINISHED = 2,
 	CM_STATUS_STARTED = 3
 } CM_STATUS;
+
+typedef struct _CM_DLL_FILE_VERSION
+{
+    WORD wMANVERSION;
+    WORD wMANREVISION;
+    WORD wSUBREVISION;
+    WORD wBUILD_NUMBER;
+} CM_DLL_FILE_VERSION, *PCM_DLL_FILE_VERSION;
 
 typedef enum _CM_TS_FLAG {
 	WHITE = 0,

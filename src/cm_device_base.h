@@ -31,8 +31,6 @@
 #ifndef _Cm_Device_Base_H_
 #define _Cm_Device_Base_H_
 
-typedef struct _CM_DLL_FILE_VERSION_ CM_DLL_FILE_VERSION;
-
 class CmDevice {
  public:
 
@@ -78,10 +76,7 @@ class CmDevice {
 	virtual INT DestroyThreadSpace(CmThreadSpace * &pTS) = 0;
 
 	virtual INT SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c) = 0;
-/*
 	virtual INT GetRTDllVersion(CM_DLL_FILE_VERSION * pFileVersion) = 0;
-*/
-	virtual INT GetRTDllVersion(CM_DLL_FILE_VERSION * pFileVersion) {return 0;};
 	virtual INT GetCaps(CM_DEVICE_CAP_NAME capName, size_t & capValueSize,
 		    void *pCapValue) = 0;
         virtual ~CmDevice(){};

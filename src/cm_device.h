@@ -108,6 +108,7 @@ class CmDevice_RT : public CmDevice {
 	CM_RT_API INT DestroyThreadGroupSpace(CmThreadGroupSpace * &pTGS);
 
         CM_RT_API INT SetSuggestedL3Config( L3_SUGGEST_CONFIG l3_s_c);
+	CM_RT_API INT GetRTDllVersion(CM_DLL_FILE_VERSION* pFileVersion);
 
 	void *GetAccelData(void) {
 		return m_pAccelData;
@@ -223,6 +224,7 @@ class CmDevice_RT : public CmDevice {
 	pFreeBlock m_fFreeBlock;
 	pJITVersion m_fJITVersion;
 
+	static CM_DLL_FILE_VERSION m_RTDllVersion;
 	UINT m_DDIVersion;
 	UINT m_Platform;
 	UINT m_CmDeviceRefCount;

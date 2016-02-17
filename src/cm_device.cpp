@@ -45,6 +45,10 @@
 #include "readconf.h"
 
 CSync CmDevice_RT::GlobalCriticalSection_Surf2DUserDataLock = CSync();
+CM_DLL_FILE_VERSION CmDevice_RT::m_RTDllVersion = {(WORD)MANVERSION,
+                                                   (WORD)MANREVISION,
+                                                   (WORD)SUBREVISION,
+                                                   (WORD)BUILD_NUMBER};
 
 INT CmDevice_RT::Create(CmDriverContext * pDriverContext, CmDevice_RT * &pDevice,
 		     UINT DevCreateOption)
@@ -581,6 +585,22 @@ CM_RT_API INT CmDevice_RT::DestroySurface(CmSurface2D * &pSurface)
 	}
 
 	return status;
+}
+
+CM_RT_API INT CmDevice_RT::GetRTDllVersion(CM_DLL_FILE_VERSION* pFileVersion)
+{
+    if (pFileVersion)
+    {
+        pFileVersion->wMANVERSION   = m_RTDllVersion.wMANVERSION;
+        pFileVersion->wMANREVISION  = m_RTDllVersion.wMANREVISION;
+        pFileVersion->wSUBREVISION  = m_RTDllVersion.wSUBREVISION;
+        pFileVersion->wBUILD_NUMBER = m_RTDllVersion.wBUILD_NUMBER;
+        return CM_SUCCESS;
+    }
+    else
+    {
+        return CM_QUERY_DLL_VERSION_FAILURE;
+    }
 }
 
 INT CmDevice_RT::GetJITCompileFnt(pJITCompile & fJITCompile)

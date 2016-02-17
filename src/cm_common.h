@@ -387,7 +387,8 @@ typedef enum _CM_RETURN_CODE {
 #define CM_NUM_DWORD_FOR_MW_PARAM        16
 
 #define CM_DDI_1_0 100
-#define CM_DDI_1_1 101 #define CM_DDI_1_2 102
+#define CM_DDI_1_1 101
+#define CM_DDI_1_2 102
 #define CM_DDI_1_3 103
 #define CM_DDI_1_4 104
 #define CM_DDI_2_0 200
@@ -397,8 +398,9 @@ typedef enum _CM_RETURN_CODE {
 #define CM_DDI_2_4 204
 #define CM_DDI_3_0 300
 #define CM_DDI_4_0 400
+#define CM_DDI_5_0 500
 
-#define DXVA_CM_VERSION       CM_DDI_4_0
+#define DXVA_CM_VERSION       CM_DDI_5_0
 #define VA_CM_VERSION         DXVA_CM_VERSION
 
 typedef struct _CM_HAL_STATE *PCM_HAL_STATE;

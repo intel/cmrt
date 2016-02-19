@@ -110,6 +110,11 @@ GENOS_STATUS HalCm_SubmitCommands_g75(PCM_HAL_STATE pState,
 
 	HalCm_HwSendL3CacheConfig_g75(pState, &CmdBuffer,&L3CacheConfig);
 
+	if (pHwInterface->bSysRoutine) {
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendDebugCtl(pHwInterface,
+								 &CmdBuffer));
+	}
+
 	if (enableGpGpu) {
 		cmd_select.DW0.PipelineSelect = GFXPIPELINE_GPGPU;
 	}

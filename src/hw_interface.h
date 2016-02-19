@@ -963,6 +963,8 @@ typedef struct _GENHW_HW_INTERFACE {
 	 GENOS_STATUS(*pfnSendStateSip) (PGENHW_HW_INTERFACE pHwInterface,
 					 PGENOS_COMMAND_BUFFER pCmdBuffer);
 
+	 GENOS_STATUS(*pfnSendDebugCtl) (PGENHW_HW_INTERFACE pHwInterface,
+					 PGENOS_COMMAND_BUFFER pCmdBuffer);
 
 	 GENOS_STATUS(*pfnSetupBufferSurfaceState) (PGENHW_HW_INTERFACE
 						    pHwInterface,

@@ -886,8 +886,8 @@ GENOS_STATUS IntelGen_HwSendWalkerState_g8(PGENHW_HW_INTERFACE pHwInterface,
 	return eStatus;
 }
 
-static GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
-					       PGENOS_COMMAND_BUFFER pCmd)
+GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
+				        PGENOS_COMMAND_BUFFER pCmd)
 {
 	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
 	PGENHW_GSH pGsh = pHw->pGeneralStateHeap;
@@ -903,6 +903,31 @@ static GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
 	pStateSipCmd->DW1.SystemInstructionPointer = pGsh->dwSipBase >> 4;
 
 	IntelGen_OsAdjustCmdBufferFreeSpace(pCmd, sizeof(*pStateSipCmd));
+
+finish:
+	return eStatus;
+}
+
+static GENOS_STATUS IntelGen_HwSendDebugCtl_g8(PGENHW_HW_INTERFACE pHw,
+					       PGENOS_COMMAND_BUFFER pCmdBuffer)
+{
+	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
+	GENHW_LOAD_REGISTER_IMM_PARAM lri;
+
+	GENHW_HW_ASSERT(pHw);
+
+	// INSTPM, global debug enable
+	lri.dwRegisterAddress	= GENHW_REG_INSTPM;
+	lri.dwData		= GENHW_REG_INSTPM_GLOBAL_DEBUG |
+				  GENHW_REG_INSTPM_PREDICATE_DISABLE;
+	lri.dwData	       |= (lri.dwData << 16);
+	GENHW_HW_CHK_STATUS(pHw->pfnSendLoadRegImmCmd(pHw, pCmdBuffer, &lri));
+
+	// TD_CTL, force thread breakpoint enable
+	lri.dwRegisterAddress	= GENHW_REG_TD_CTL;
+	lri.dwData		= GENHW_REG_TD_CTL_FORCE_BKPT_ENABLE |
+				  GENHW_REG_TD_CTL_FORCE_EXCEPTION_ENABLE;
+	GENHW_HW_CHK_STATUS(pHw->pfnSendLoadRegImmCmd(pHw, pCmdBuffer, &lri));
 
 finish:
 	return eStatus;
@@ -975,6 +1000,7 @@ VOID IntelGen_HwInitInterface_g8(PGENHW_HW_INTERFACE pHwInterface)
 	pHwInterface->pfnAddPipeControlCmdBb =
 	    IntelGen_HwAddPipeControlCmdBb_g75;
 	pHwInterface->pfnSendStateSip = IntelGen_HwSendStateSip_g8;
+	pHwInterface->pfnSendDebugCtl = IntelGen_HwSendDebugCtl_g8;
 
 	pHwInterface->pfnIs2PlaneNV12Needed = IntelGen_HwIs2PlaneNV12Needed_g75;
 }

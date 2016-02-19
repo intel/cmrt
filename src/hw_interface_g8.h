@@ -76,4 +76,7 @@ GENOS_STATUS IntelGen_HwSetupBufferSurfaceState_g8(PGENHW_HW_INTERFACE
 						   PGENHW_SURFACE_STATE_ENTRY *
 						   ppSurfaceEntry);
 
+GENOS_STATUS IntelGen_HwSendStateSip_g8(PGENHW_HW_INTERFACE pHw,
+				        PGENOS_COMMAND_BUFFER pCmd);
+
 #endif

@@ -30,6 +30,9 @@
 #ifndef __HW_INTERFACE_G9_H__
 #define __HW_INTERFACE_G9_H__
 
+#define GENHW_REG_CS_DEBUG_MODE1		0x20ec
+#define GENHW_REG_CS_DEBUG_MODE1_GLOBAL_DEBUG	(1 << 6)
+
 VOID IntelGen_HwInitInterface_g9(PGENHW_HW_INTERFACE pHwInterface);
 
 GENOS_STATUS IntelGen_HwSendSurfaces_g9(PGENHW_HW_INTERFACE pHwInterface,

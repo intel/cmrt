@@ -106,6 +106,15 @@ GENOS_STATUS HalCm_SubmitCommands_g9(PCM_HAL_STATE pState,
 
 	HalCm_HwSendL3CacheConfig_g8(pState, &CmdBuffer,&L3CacheConfig);
 
+	if (pHwInterface->bSysRoutine) {
+		// Enable shader debugging
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendDebugCtl(pHwInterface,
+								 &CmdBuffer));
+		// Configure the address of the system routine for debug
+		CM_CHK_GENOSSTATUS(pHwInterface->pfnSendStateSip(pHwInterface,
+								 &CmdBuffer));
+	}
+
 	if (enableGpGpu) {
 		cmd_select.DW0.PipelineSelect = GFXPIPELINE_GPGPU;
 	}

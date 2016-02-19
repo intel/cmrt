@@ -1639,6 +1639,33 @@ finish:
 	return eStatus;
 }
 
+static GENOS_STATUS IntelGen_HwSendDebugCtl_g75(PGENHW_HW_INTERFACE pHw,
+					        PGENOS_COMMAND_BUFFER pCmdBuffer)
+{
+	GENOS_STATUS eStatus = GENOS_STATUS_SUCCESS;
+	GENHW_LOAD_REGISTER_IMM_PARAM lri;
+	DWORD tdCtlRegs[] = { GENHW_REG_TD_CTL_S0_SS0, GENHW_REG_TD_CTL_S0_SS1,
+			      GENHW_REG_TD_CTL_S1_SS0, GENHW_REG_TD_CTL_S1_SS1 };
+	unsigned i;
+
+	GENHW_HW_ASSERT(pHw);
+
+	for (i = 0; i < sizeof(tdCtlRegs) / sizeof(tdCtlRegs[0]); i++) {
+		// Select the right sub-slice
+		lri.dwRegisterAddress	= GENHW_REG_MBCTL;
+		lri.dwData		= i << GENHW_REG_MBCHT_RDRETSEL_OFFSET;
+		GENHW_HW_CHK_STATUS(pHw->pfnSendLoadRegImmCmd(pHw, pCmdBuffer, &lri));
+
+		lri.dwRegisterAddress	= tdCtlRegs[i];
+		lri.dwData		= GENHW_REG_TD_CTL_FORCE_BKPT_ENABLE |
+					  GENHW_REG_TD_CTL_FORCE_EXCEPTION_ENABLE;
+		GENHW_HW_CHK_STATUS(pHw->pfnSendLoadRegImmCmd(pHw, pCmdBuffer, &lri));
+	}
+
+finish:
+	return eStatus;
+}
+
 VOID IntelGen_HwInitInterface_g75(PGENHW_HW_INTERFACE pHwInterface)
 {
 	if (pHwInterface->Platform.GtType == GTTYPE_GT1) {
@@ -1707,6 +1734,7 @@ VOID IntelGen_HwInitInterface_g75(PGENHW_HW_INTERFACE pHwInterface)
 	    IntelGen_HwSendMediaStateFlush_g75;
 	pHwInterface->pfnSendMIArbCheckCmd = IntelGen_HwSendMIArbCheck_g75;
 	pHwInterface->pfnSendStateSip = IntelGen_HwSendStateSip_g75;
+	pHwInterface->pfnSendDebugCtl = IntelGen_HwSendDebugCtl_g75;
 
 	pHwInterface->pfnIs2PlaneNV12Needed = IntelGen_HwIs2PlaneNV12Needed_g75;
 }

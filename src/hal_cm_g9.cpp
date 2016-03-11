@@ -338,26 +338,11 @@ GENOS_STATUS HalCm_GetUserDefinedThreadCountPerThreadGroup_g9(PCM_HAL_STATE
 							      pThreadsPerThreadGroup)
 {
 	GENOS_STATUS hr = GENOS_STATUS_SUCCESS;
-	int threads_per_eu = 0;
-	int eu_per_subslice = 0;
-	if (pState->Platform.eProductFamily == IGFX_SKYLAKE) {
-		if (pState->pHwInterface->Platform.GtType == GTTYPE_GT2) {
-			threads_per_eu = GENHW_CM_THREADS_PER_EU_SKL_GT2;
-			eu_per_subslice = GENHW_CM_EU_PER_SUBSLICE_SKL_GT2;
-		} else if (pState->pHwInterface->Platform.GtType == GTTYPE_GT3) {
-			threads_per_eu = GENHW_CM_THREADS_PER_EU_SKL_GT3;
-			eu_per_subslice = GENHW_CM_EU_PER_SUBSLICE_SKL_GT3;
-		} else if (pState->pHwInterface->Platform.GtType == GTTYPE_GT4) {
-			threads_per_eu = GENHW_CM_THREADS_PER_EU_SKL_GT4;
-			eu_per_subslice = GENHW_CM_EU_PER_SUBSLICE_SKL_GT4;
-		} else {
-			threads_per_eu = GENHW_CM_THREADS_PER_EU_SKL_GT2;
-			eu_per_subslice = GENHW_CM_EU_PER_SUBSLICE_SKL_GT2;
-		}
-	} else {
-		hr = GENOS_STATUS_PLATFORM_NOT_SUPPORTED;
-	}
+	CM_HAL_PLATFORM_SUBSLICE_INFO platformInfo;
+	GENOS_ZeroMemory(&platformInfo, sizeof(CM_HAL_PLATFORM_SUBSLICE_INFO));
+	CM_CHK_GENOSSTATUS( pState->pfnGetPlatformInfo( pState, &platformInfo, FALSE) );
+	*pThreadsPerThreadGroup = (platformInfo.numHWThreadsPerEU) * (platformInfo.numEUsPerSubSlice);
 
-	*pThreadsPerThreadGroup = threads_per_eu * eu_per_subslice;
+finish:
 	return hr;
 }

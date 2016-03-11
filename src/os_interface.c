@@ -1950,6 +1950,66 @@ static int updatePlatformInfo(PLATFORM * pPlatform)
 					  IGFX_GEN9_CORE);
 		pPlatform->GtType = GTTYPE_GT4;
 		break;
+
+	case IBXT_GT_3x6_DEVICE_ID: 
+	case IBXT_PRO_3x6_DEVICE_ID: 
+	case IBXT_PRO_12EU_3x6_DEVICE_ID: 
+	case IBXT_P_3x6_DEVICE_ID: 
+	case IBXT_P_12EU_3x6_DEVICE_ID: 
+		platform_setTypeAndFamily(pPlatform, PLATFORM_MOBILE,
+					  IGFX_BROXTON, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GTA;
+
+        case IKBL_GT1_5_DT_DEVICE_F0_ID:
+        case IKBL_GT1_5_ULT_DEVICE_F0_ID:
+        case IKBL_GT1_5_ULX_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_ALL,
+					  IGFX_KABYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1_5;
+            break;
+
+        case  IKBL_GT2_ULT_DEVICE_F0_ID:
+        case  IKBL_GT2_ULX_DEVICE_F0_ID:
+        case  IKBL_GT2_DT_DEVICE_F0_ID:
+        case  IKBL_GT2F_ULT_DEVICE_F0_ID:
+        case  IKBL_GT2_HALO_DEVICE_F0_ID:
+        case  IKBL_GT2_SERV_DEVICE_F0_ID:
+        case  IKBL_GT2_WRK_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_ALL,
+					  IGFX_KABYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT2;
+            break;
+        case  IKBL_GT4_HALO_DEVICE_F0_ID:
+        case  IKBL_GT4_DT_DEVICE_F0_ID:
+        case  IKBL_GT4_SERV_DEVICE_F0_ID:
+        case  IKBL_GT4_WRK_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_ALL,
+					  IGFX_KABYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT4;
+            break;
+        case IKBL_GT1_ULT_DEVICE_F0_ID:
+        case IKBL_GT1_ULX_DEVICE_F0_ID:
+        case IKBL_GT1_DT_DEVICE_F0_ID:
+        case IKBL_GT1_HALO_DEVICE_F0_ID:
+        case IKBL_GT1_SERV_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_ALL,
+					  IGFX_KABYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT1;
+            break;
+        case IKBL_GT3_ULT_DEVICE_F0_ID:
+        case IKBL_GT3_HALO_DEVICE_F0_ID:
+        case IKBL_GT3_SERV_DEVICE_F0_ID:
+		platform_setTypeAndFamily(pPlatform, PLATFORM_ALL,
+					  IGFX_KABYLAKE, IGFX_GEN9_CORE,
+					  IGFX_GEN9_CORE);
+		pPlatform->GtType = GTTYPE_GT3;
+            break;
+
 	default:
 		GENOS_OS_ASSERTMESSAGE("Unrecognized device ID %04X",
 				       uDeviceID);

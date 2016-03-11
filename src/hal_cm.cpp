@@ -2167,9 +2167,90 @@ GENOS_STATUS HalCm_GetPlatformInfo(PCM_HAL_STATE pState,
 		}
 		break;
 
+       case IGFX_GEN9_CORE:
+            platformInfo->numHWThreadsPerEU = CM_GEN9_SKL_HW_THREADS_PER_EU;
+            if (pHwInterface->Platform.GtType == GTTYPE_GT4)
+            {
+                platformInfo->numEUsPerSubSlice = CM_GEN9_GT4_EUS_PER_SUBSLICE;
+                if (pState->bRequestSingleSlice == TRUE || pHwInterface->bRequestSingleSlice == TRUE || pState->PowerOption.nSlice == 1)
+                {
+                    // treat like GT2
+                    platformInfo->numSlices    = CM_GEN9_GT2_SLICE_NUM;
+                    platformInfo->numSubSlices = CM_GEN9_GT2_SUBSLICE_NUM;
+                }
+                else if (pState->PowerOption.nSlice == 2)
+                {
+                    // treat like GT3
+                    platformInfo->numSlices    = CM_GEN9_GT3_SLICE_NUM;
+                    platformInfo->numSubSlices = CM_GEN9_GT3_SUBSLICE_NUM;
+                }
+                else
+                {
+                    // GT4
+                    platformInfo->numSlices    = CM_GEN9_GT4_SLICE_NUM;
+                    platformInfo->numSubSlices = CM_GEN9_GT4_SUBSLICE_NUM;
+                }
+            }
+            else if (pHwInterface->Platform.GtType == GTTYPE_GT3)
+            {
+                platformInfo->numEUsPerSubSlice = CM_GEN9_GT3_EUS_PER_SUBSLICE;
+                if (pState->bRequestSingleSlice == TRUE || pHwInterface->bRequestSingleSlice == TRUE || pState->PowerOption.nSlice == 1)
+                {
+                    // treat like GT2
+                    platformInfo->numSlices    = CM_GEN9_GT2_SLICE_NUM;
+                    platformInfo->numSubSlices = CM_GEN9_GT2_SUBSLICE_NUM;
+                }
+                else
+                {
+                    // GT3
+                    platformInfo->numSlices    = CM_GEN9_GT3_SLICE_NUM;
+                    platformInfo->numSubSlices = CM_GEN9_GT3_SUBSLICE_NUM;
+                }
+            }
+            else if (pHwInterface->Platform.GtType == GTTYPE_GT2)
+            {
+                platformInfo->numEUsPerSubSlice = CM_GEN9_GT2_EUS_PER_SUBSLICE;
+                platformInfo->numSlices         = CM_GEN9_GT2_SLICE_NUM;
+                platformInfo->numSubSlices      = CM_GEN9_GT2_SUBSLICE_NUM;
+            }
+            else if (pHwInterface->Platform.GtType == GTTYPE_GT1_5)
+            {
+                platformInfo->numEUsPerSubSlice = CM_GEN9_GT1_5_EUS_PER_SUBSLICE;
+                platformInfo->numSlices         = CM_GEN9_GT1_5_SLICE_NUM;
+                platformInfo->numSubSlices      = CM_GEN9_GT1_5_SUBSLICE_NUM;
+            }
+            else if (pHwInterface->Platform.GtType == GTTYPE_GT1)
+            {
+                platformInfo->numEUsPerSubSlice = CM_GEN9_GT1_EUS_PER_SUBSLICE;
+                platformInfo->numSlices         = CM_GEN9_GT1_SLICE_NUM;
+                platformInfo->numSubSlices      = CM_GEN9_GT1_SUBSLICE_NUM;
+            }
+            else if (GFX_IS_PRODUCT(pHwInterface->Platform, IGFX_BROXTON))
+            {
+                platformInfo->numHWThreadsPerEU = CM_GEN9_BXT_HW_THREADS_PER_EU;
+                platformInfo->numEUsPerSubSlice = CM_GEN9_BXT_A_EUS_PER_SUBSLICE; // BXT-A and BXT-C have same EUs per sub-slice
+                platformInfo->numSlices         = CM_GEN9_BXT_SLICE_NUM;
+                if (pHwInterface->Platform.GtType == GTTYPE_GTA) // BXT-GTA, 3x6
+                {
+                    platformInfo->numSubSlices = CM_GEN9_BXT_A_SUBSLICE_NUM;
+                }
+                else if (pHwInterface->Platform.GtType == GTTYPE_GTC) // BXT-GTC, 2x6
+                {
+                    platformInfo->numSubSlices = CM_GEN9_BXT_C_SUBSLICE_NUM;
+                }
+            }
+            else
+            {
+                CM_ERROR_ASSERT("Invalid GT for Gen9");
+                hr = GENOS_STATUS_PLATFORM_NOT_SUPPORTED;
+                goto finish;
+            }
+            break;
+
 	default:
 		CM_ERROR_ASSERT
 		    ("Platform currently not supported for EnqueueWithHints");
+                hr = GENOS_STATUS_PLATFORM_NOT_SUPPORTED;
 		goto finish;
 	}
 
@@ -6028,6 +6109,7 @@ GENOS_STATUS HalCm_Create(PGENOS_CONTEXT pOsDriverContext,
 	pState->pfnSendMediaWalkerState = HalCm_SendMediaWalkerState;
 	pState->pfnSendGpGpuWalkerState = HalCm_SendGpGpuWalkerState;
 	pState->pfnSetSurfaceReadFlag = HalCm_SetSurfaceReadFlag;
+	pState->pfnGetPlatformInfo  = HalCm_GetPlatformInfo;
 
 	HalCm_OsInitInterface(pState);
 

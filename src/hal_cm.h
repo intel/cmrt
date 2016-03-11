@@ -455,6 +455,10 @@ typedef struct _CM_HAL_STATE {
 	 GENOS_STATUS(*pfnSetSurfaceReadFlag)
 	 (PCM_HAL_STATE pState, DWORD dwHandle);
 
+	 GENOS_STATUS(*pfnGetPlatformInfo)
+	 (PCM_HAL_STATE pState, PCM_HAL_PLATFORM_SUBSLICE_INFO platformInfo,
+				   PBOOL pbIsSingleSubSlice);
+
 } CM_HAL_STATE;
 
 __inline GENOS_STATUS HalCm_GetNewTaskId(PCM_HAL_STATE pState, PINT piIndex)

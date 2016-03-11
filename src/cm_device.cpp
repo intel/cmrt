@@ -914,11 +914,26 @@ INT CmDevice_RT::GetCapsInternal(PVOID pCaps, PUINT puSize)
 			   GTTYPE_GT1) {
 			pQueryCaps->genGT = PLATFORM_INTEL_GT1;
 		} else if (pCmHalState->pHwInterface->Platform.GtType ==
+			   GTTYPE_GT1_5) {
+			pQueryCaps->genGT = PLATFORM_INTEL_GT1_5;
+		} else if (pCmHalState->pHwInterface->Platform.GtType ==
 			   GTTYPE_GT2) {
 			pQueryCaps->genGT = PLATFORM_INTEL_GT2;
 		} else if (pCmHalState->pHwInterface->Platform.GtType ==
 			   GTTYPE_GT3) {
 			pQueryCaps->genGT = PLATFORM_INTEL_GT3;
+		} else if (pCmHalState->pHwInterface->Platform.GtType ==
+			   GTTYPE_GT4) {
+			pQueryCaps->genGT = PLATFORM_INTEL_GT4;
+		} else if (pCmHalState->pHwInterface->Platform.GtType ==
+			   GTTYPE_GTA) {
+			pQueryCaps->genGT = PLATFORM_INTEL_GTA;  //BXT-GTA
+		} else if (pCmHalState->pHwInterface->Platform.GtType ==
+			   GTTYPE_GTC) {
+			pQueryCaps->genGT = PLATFORM_INTEL_GTC; //BXT-GTC
+		} else if (pCmHalState->pHwInterface->Platform.GtType ==
+			   GTTYPE_GTX) {
+			pQueryCaps->genGT = PLATFORM_INTEL_GTX; //BXT-GTX
 		}
 		break;
 

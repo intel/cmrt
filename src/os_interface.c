@@ -1960,6 +1960,7 @@ static int updatePlatformInfo(PLATFORM * pPlatform)
 					  IGFX_BROXTON, IGFX_GEN9_CORE,
 					  IGFX_GEN9_CORE);
 		pPlatform->GtType = GTTYPE_GTA;
+            break;
 
         case IKBL_GT1_5_DT_DEVICE_F0_ID:
         case IKBL_GT1_5_ULT_DEVICE_F0_ID:

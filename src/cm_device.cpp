@@ -1232,7 +1232,14 @@ CM_RT_API INT
 				break;
 
 			case IGFX_GEN9_CORE:
-				platform = PLATFORM_INTEL_SKL;
+				if (GFX_IS_PRODUCT
+				    (pCmHalState->pHwInterface->Platform,
+				     IGFX_BROXTON)) {
+					//change to PLATFORM_INTEL_BXT soon...
+					platform = PLATFORM_INTEL_SKL;
+				} else {
+					platform = PLATFORM_INTEL_SKL;
+				}
 				break;
 			}
 

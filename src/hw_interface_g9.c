@@ -839,6 +839,12 @@ VOID IntelGen_HwInitInterface_g9(PGENHW_HW_INTERFACE pHwInterface)
 		pHwInterface->pHwCaps = &g_IntelGen_HwCaps_g9_gt3;
 	} else if (pHwInterface->Platform.GtType == GTTYPE_GT4) {
 		pHwInterface->pHwCaps = &g_IntelGen_HwCaps_g9_gt4;
+	} else if (pHwInterface->Platform.GtType == GTTYPE_GTA) {
+		pHwInterface->pHwCaps = &g_IntelGen_HwCaps_g9_gta;
+	} else if (pHwInterface->Platform.GtType == GTTYPE_GTC) {
+		pHwInterface->pHwCaps = &g_IntelGen_HwCaps_g9_gtc;
+	} else if (pHwInterface->Platform.GtType == GTTYPE_GTX) {
+		pHwInterface->pHwCaps = &g_IntelGen_HwCaps_g9_gtx;
 	} else {
 		GENHW_HW_ASSERTMESSAGE("Unsupported GT type.");
 	}

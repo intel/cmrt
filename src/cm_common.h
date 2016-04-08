@@ -452,6 +452,7 @@ typedef enum {
 	GENX_BDW = 3,
 	GENX_CHV = 4,
 	GENX_SKL = 5,
+	GENX_BXT = 6,
 	ALL = 8
 } CISA_GEN_ID;
 

@@ -227,8 +227,14 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 		}
 		break;
 	case IGFX_GEN9_CORE:
-		platform = "SKL";
-		CISAGenID = GENX_SKL;
+		if (GFX_IS_PRODUCT
+		    (pCmHalState->pHwInterface->Platform, IGFX_BROXTON)) {
+			platform = "BXT";
+			CISAGenID = GENX_BXT;
+		} else {
+			platform = "SKL";
+			CISAGenID = GENX_SKL;
+		}
 		break;
 	default:
 		m_IsJitterEnabled = false;
@@ -383,8 +389,8 @@ INT CmProgram_RT::Initialize(void *pCISACode, const UINT uiCISACodeSize,
 					READ_FIELD_FROM_BUF(size, UINT);
 
 					if (gen_platform == CISAGenID ||
-					    ((CISAGenID == GENX_CHV)
-					     && (gen_platform == GENX_BDW))) {
+                        ((CISAGenID == GENX_CHV) && (gen_platform == GENX_BDW)) ||
+                        ((CISAGenID == GENX_BXT) && (gen_platform == GENX_SKL))){
 						genxBinaryOffset = offset;
 						genxBinarySize = size;
 					}

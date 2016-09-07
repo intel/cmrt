@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2016 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -28,7 +28,7 @@
 # - reset minor version to zero when major version is incremented
 m4_define([cmrt_api_major_version], [0])
 m4_define([cmrt_api_minor_version], [10])
-m4_define([cmrt_api_micro_version], [0])
+m4_define([cmrt_api_micro_version], [1])
 
 m4_define([cmrt_api_version],
           [cmrt_api_major_version.cmrt_api_minor_version.cmrt_api_micro_version])

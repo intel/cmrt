@@ -1,5 +1,14 @@
-libcmrt NEWS -- summary of user visible changes.  2015-09-09
-Copyright (C) 2015 Intel Corporation
+libcmrt NEWS -- summary of user visible changes.  2016-08-10
+Copyright (C) 2016 Intel Corporation
+
+Version 1.0.6 - 2016-08-10
+* Add support for shader debugger for SKL, BDW, and HSW
+* Change package config file to libcmrt.pc
+* Export CM kernel ID type
+* Support reporting device rev id
+* Set CM_VERSION to CM_5_0 to mark SKL support
+* Add API GetRTDllVersion to query current CM version
+* Add preliminary identification for APL/KBL
 
 Version 1.0.5 - 2015-09-09
 * Fix autogen.sh license header

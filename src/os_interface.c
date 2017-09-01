@@ -438,7 +438,7 @@ HRESULT Ctx_InitContext(GENOS_OS_CONTEXT * pContext,
 		    GENOS_AllocAndZeroMemory(sizeof(GENOS_COMMAND_BUFFER));
 
 		if (NULL == pContext->OsGpuContext[i].pCB) {
-			GENOS_OS_ASSERTMESSAGE("No More Avaliable Memory");
+			GENOS_OS_ASSERTMESSAGE("No More Available Memory");
 			hr = E_OUTOFMEMORY;
 			goto finish;
 		}
